@@ -1,9 +1,49 @@
 ---
-title: "0_generating_databasestar_dummy_data"
+title: "0 - Generating a dummy SQL database - Universities data"
 author: "George Melrose"
 date: "2024-04-26"
-output: html_document
+output: 
+ html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
 ---
+
+This RMD generates the dummy data to be worked with in this project.
+
+"*There are a few hundred universities in the sample data, and 21 different ranking criteria across three different systems. The data exists for the years 2005 to 2016.It doesn't contain every world university, or data up until 2018 or 2019*."
+
+I used sqlite code from this github to generate the fake database - <https://github.com/bbrumm/databasestar/tree/main/sample_databases/sample_db_university/sqlite>
+
+***country***
+
+This is a simple list of countries that were in the data set. Not a complete list of all countries, but enough for this excercise.
+
+***university***
+
+A list of universities that were ranked in this system. Each university is related to a country.
+
+***ranking_system***
+
+This contains the three different ranking systems used: Times Higher Education World University Ranking, Shanghai Ranking, and Center for World University Rankings.
+
+***ranking_criteria***
+
+This table contains the different criteria used in each ranking system, such as Citations and Quality of Education. It also contains criteria for the Total Score for each system.
+
+***university_year***
+
+The university_year table contains values for measurements such as the number of students and the student to staff ratio for each university in several years.
+
+***university_ranking_year***
+
+This table contains the score for each year for each university and ranking criteria. It's the largest table in the database.
+
+The 'University Rankings' data is explained here, with ERD below- <https://www.databasestar.com/sample-database-university-rankings/>
+
+```{r}
+knitr::include_graphics("C:/Users/gam55/Downloads/universities_erd.png")
+```
 
 ```{r setup, include=FALSE}
 rm(list = ls())
@@ -21,6 +61,9 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
+## Generating the 6 tables {.tabset .tabset-fade}
+
+### Country 
 
 ```{sql Create country table, connection=con}
 CREATE TABLE country (
@@ -28,7 +71,6 @@ CREATE TABLE country (
   country_name TEXT DEFAULT NULL
 );
 ```
-
 
 ```{sql Populate country table with countries, connection=con}
 INSERT INTO country (id, country_name) VALUES
@@ -108,8 +150,7 @@ INSERT INTO country (id, country_name) VALUES
 (74,'Uruguay')
 ```
 
-
-```{r}
+```{r list tables currently present, warning=FALSE, message=FALSE}
 # List the tables present in the database connected through 'con'
 tables <- dbListTables(con)
 
@@ -117,16 +158,16 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
+### Ranking System 
 
-```{sql, connection=con}
+```{sql create a ranking system table, connection=con}
 CREATE TABLE ranking_system (
   id INTEGER PRIMARY KEY,
   system_name TEXT DEFAULT NULL
 );
 ```
 
-
-```{sql, connection=con}
+```{sql insert data into ranking system table, connection=con}
 INSERT INTO ranking_system (id, system_name) VALUES
 (1,'Times Higher Education World University Ranking'),
 (2,'Shanghai Ranking'),
@@ -134,7 +175,10 @@ INSERT INTO ranking_system (id, system_name) VALUES
 ```
 
 
-```{sql, connection=con}
+### Ranking Criteria 
+
+
+```{sql create a ranking criteria table, connection=con}
 CREATE TABLE ranking_criteria (
   id INTEGER PRIMARY KEY,
   ranking_system_id INTEGER DEFAULT NULL,
@@ -144,7 +188,7 @@ CREATE TABLE ranking_criteria (
 ```
 
 
-```{sql, connection=con}
+```{sql insert data into ranking criteria table, connection=con}
 INSERT INTO ranking_criteria (id, ranking_system_id, criteria_name) VALUES
 (1,1,'Teaching'),
 (2,1,'International'),
@@ -169,14 +213,13 @@ INSERT INTO ranking_criteria (id, ranking_system_id, criteria_name) VALUES
 (21,3,'Total CWUR');
 ```
 
-```{sql connection=con}
+```{sql select top 10 rows from ranking criteria table, connection=con}
 SELECT * FROM ranking_criteria LIMIT 10
 ```
 
+### University 
 
-## 02 University
-
-```{sql connection=con}
+```{sql create a University table, connection=con}
 CREATE TABLE university (
   id INTEGER PRIMARY KEY,
   country_id INTEGER DEFAULT NULL,
@@ -185,7 +228,7 @@ CREATE TABLE university (
 )
 ```
 
-```{r}
+```{r display tables currently present in con database, message=FALSE, warning=FALSE}
 # List the tables present in the database connected through 'con'
 tables <- dbListTables(con)
 
@@ -193,7 +236,7 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-```{sql connection=con}
+```{sql insert data into University table, connection=con}
 
 INSERT INTO university (id, country_id, university_name) VALUES
 (1,73,'Harvard University'),
@@ -1446,9 +1489,10 @@ INSERT INTO university (id, country_id, university_name) VALUES
 
 ```
 
-## 03 University Year
 
-```{sql connection=con}
+### University Year (Statistics about Universities per Year)
+
+```{sql creating the university year table, connection=con}
 CREATE TABLE university_year (
   university_id INTEGER DEFAULT NULL,
   year INTEGER DEFAULT NULL,
@@ -1460,7 +1504,7 @@ CREATE TABLE university_year (
 )
 ```
 
-```{r}
+```{r checking tables present at this stage, message=FALSE, warning=FALSE}
 # List the tables present in the database connected through 'con'
 tables <- dbListTables(con)
 
@@ -1468,7 +1512,7 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-```{sql connection=con}
+```{sql inserting data into university year table, connection=con}
 INSERT INTO university_year (university_id, year, num_students, student_staff_ratio, pct_international_students, pct_female_students) VALUES
 (1,2011,20152,8.90,25,NULL),
 (5,2011,2243,6.90,27,33),
@@ -2557,9 +2601,9 @@ INSERT INTO university_year (university_id, year, num_students, student_staff_ra
 (1071,2016,17940,17.90,30,54);
 ```
 
-## 04 University Year
+### University Ranking Year
 
-```{sql connection=con}
+```{sql creating the university ranking year table, connection=con}
 CREATE TABLE university_ranking_year (
   university_id INTEGER DEFAULT NULL,
   ranking_criteria_id INTEGER DEFAULT NULL,
@@ -2570,7 +2614,7 @@ CREATE TABLE university_ranking_year (
 )
 ```
 
-```{r}
+```{r seeing which tables are present currently, message=FALSE, warning=FALSE}
 # List the tables present in the database connected through 'con'
 tables <- dbListTables(con)
 
@@ -2578,7 +2622,7 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-```{sql connection=con}
+```{sql inserting data into university ranking year, connection=con}
 INSERT INTO university_ranking_year (university_id, ranking_criteria_id, year, score) VALUES
 (1,1,2011,100),
 (5,1,2011,98),
@@ -32195,6 +32239,8 @@ INSERT INTO university_ranking_year (university_id, ranking_criteria_id, year, s
 ```
 
 
+### Saving tables for future use
+
 ```{r save tables as csvs for use in other scripts, warning=FALSE, message=FALSE}
 
 # Get a list of all tables in the connection
@@ -32210,10 +32256,3 @@ for (table in tables) {
 }
 
 ```
-
-
-
-
-
-
-

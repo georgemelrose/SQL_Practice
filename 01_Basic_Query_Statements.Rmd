@@ -1,8 +1,12 @@
 ---
-title: "01_Basic_Query_Statements"
+title: "1 - Basic Query Statements"
 author: "George Melrose"
 date: "2024-05-20"
-output: html_document
+output:
+   html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
@@ -10,9 +14,14 @@ rm(list = ls())
 
 knitr::opts_chunk$set(echo = TRUE)
 
-pacman::p_load(readr, tidyverse, data.table,DBI,odbc,RSQLite)
+pacman::p_load(readr,tidyverse, data.table,DBI,odbc,RSQLite)
+
+options(max.print = 1000) 
+getOption("max.print")
 
 con <- dbConnect(SQLite(), dbname = ":memory:")
+knitr::opts_chunk$set(connection = "con")
+
 
 # List the tables present in the database connected through 'con'
 tables <- dbListTables(con)
@@ -21,7 +30,7 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-```{r}
+```{r reading in data to the pretend database, warning=FALSE, message=FALSE}
 # List of table names (should match the original table names)
 tables <- c("country", "ranking_criteria", "ranking_system",
             "university","university_ranking_year","university_year") # Replace with your actual table names
@@ -38,8 +47,7 @@ for (table in tables) {
 rm(data)
 ```
 
-
-```{r}
+```{r Print the tables currently in the database, warning=FALSE, message=FALSE}
 # List the tables present in the database connected through 'con'
 tables <- dbListTables(con)
 
@@ -47,12 +55,98 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-```{sql connection=con}
+```{sql list all the tables from the database}
 SELECT name FROM sqlite_master WHERE type='table';
 ```
 
+## Single Table 'Select' Statements {.tabset .tabset-fade}
 
-```{sql connection=con}
+### All Columns
+
+Gathering all columns from a table
+
+```{sql, max.print = 5}
+
+SELECT * FROM university ;
+
+```
+
+### Some Columns
+
+```{sql, max.print = 5}
+
+SELECT university_id, year, num_students FROM university_year;
+
+```
+
+### Selecting the top results
+
+```{sql, max.print = 5}
+
+SELECT university_id, year, num_students
+FROM university_year
+ORDER BY num_students DESC
+LIMIT 3;
+
+
+```
+
+### Changing results' column headers
+
+```{sql, max.print = 5}
+
+SELECT university_id[University ID], year[Year], num_students[No.Students]
+FROM university_year
+ORDER BY num_students DESC
+LIMIT 3;
+
+
+```
+
+## Filtering on Single Conditions {.tabset .tabset-fade}
+
+### Finding rows fulfilling a condition
+
+```{sql, max.print = 5}
+
+SELECT university_id[University ID], year[Year], num_students[No.Students]
+FROM university_year
+WHERE year = '2014';
+
+```
+
+```{sql, max.print = 5}
+
+SELECT university_id[University ID], year[Year], num_students[No.Students]
+FROM university_year
+WHERE year != '2014';
+
+```
+
+Note that != & \<\> are synonymous they both mean - not equal to.
+
+```{sql, max.print = 5}
+
+SELECT university_id[University ID], year[Year], num_students[No.Students]
+FROM university_year
+WHERE year <> '2014';
+
+```
+
+### Finding rows fufilling a list
+
+```{sql, max.print = 5}
+
+SELECT country_name[Country]
+FROM country
+WHERE country_name IN ('Belarus','Ukraine','Russia');
+
+```
+
+
+
+
+```{sql, looking at UoC score for 2015 and 2016}
 SELECT
 u.university_name,
 c.country_name,
