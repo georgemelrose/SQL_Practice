@@ -1,0 +1,74 @@
+---
+title: "01_Basic_Query_Statements"
+author: "George Melrose"
+date: "2024-05-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+rm(list = ls())
+
+knitr::opts_chunk$set(echo = TRUE)
+
+pacman::p_load(readr, tidyverse, data.table,DBI,odbc,RSQLite)
+
+con <- dbConnect(SQLite(), dbname = ":memory:")
+
+# List the tables present in the database connected through 'con'
+tables <- dbListTables(con)
+
+# Print the list of tables
+print(tables)
+```
+
+```{r}
+# List of table names (should match the original table names)
+tables <- c("country", "ranking_criteria", "ranking_system",
+            "university","university_ranking_year","university_year") # Replace with your actual table names
+
+# Loop through each table and read it from the CSV file
+for (table in tables) {
+  # Read the table from the CSV file
+  data <- read_csv(paste0(table, ".csv"))
+  
+  # Write the table to the new SQL connection
+  dbWriteTable(con, table, data, overwrite = TRUE)
+}
+
+rm(data)
+```
+
+
+```{r}
+# List the tables present in the database connected through 'con'
+tables <- dbListTables(con)
+
+# Print the list of tables
+print(tables)
+```
+
+```{sql connection=con}
+SELECT name FROM sqlite_master WHERE type='table';
+```
+
+
+```{sql connection=con}
+SELECT
+u.university_name,
+c.country_name,
+rc.criteria_name,
+ry.year,
+ry.score
+FROM university u
+INNER JOIN country c ON u.country_id = c.id
+INNER JOIN university_ranking_year ry ON ry.university_id = u.id
+INNER JOIN ranking_criteria rc ON ry.ranking_criteria_id = rc.id
+WHERE rc.criteria_name IN (
+'Total Times',
+'Total Shanghai',
+'Total CWUR'
+)
+AND ry.year IN (2015, 2016)
+AND u.university_name = 'University of Cambridge'
+ORDER BY ry.score DESC;
+```
