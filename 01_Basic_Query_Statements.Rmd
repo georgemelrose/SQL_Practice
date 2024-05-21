@@ -9,6 +9,8 @@ output:
     code_folding: hide
 ---
 
+The concepts outlined by the SQL code below are taken from this LinkedIn learning course, ***"SQL Server Fundamentals: Master Basic Query Techniques"*** - www.linkedin.com/learning/sql-server-fundamentals-master-basic-query-techniques
+
 ```{r setup, include=FALSE}
 rm(list = ls())
 
@@ -30,7 +32,7 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-```{r reading in data to the pretend database, warning=FALSE, message=FALSE}
+```{r reading in data to the pretend database, warning=FALSE, message=FALSE, include=FALSE}
 # List of table names (should match the original table names)
 tables <- c("country", "ranking_criteria", "ranking_system",
             "university","university_ranking_year","university_year") # Replace with your actual table names
@@ -47,7 +49,7 @@ for (table in tables) {
 rm(data)
 ```
 
-```{r Print the tables currently in the database, warning=FALSE, message=FALSE}
+```{r Print the tables currently in the database, warning=FALSE, message=FALSE, include=FALSE}
 # List the tables present in the database connected through 'con'
 tables <- dbListTables(con)
 
@@ -55,15 +57,15 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-```{sql list all the tables from the database}
+```{sql list all the tables from the database, include=FALSE}
 SELECT name FROM sqlite_master WHERE type='table';
 ```
 
-## Single Table 'Select' Statements {.tabset .tabset-fade}
+## Single Table 'Select' Statements {.tabset .tabset-fade .tabset-pills}
 
 ### All Columns
 
-Gathering all columns from a table
+Gathering all columns from a table.
 
 ```{sql, max.print = 5}
 
@@ -72,6 +74,8 @@ SELECT * FROM university ;
 ```
 
 ### Some Columns
+
+Gathering selected columns from a table.
 
 ```{sql, max.print = 5}
 
@@ -103,7 +107,7 @@ LIMIT 3;
 
 ```
 
-## Filtering on Single Conditions {.tabset .tabset-fade}
+## Filtering on Single Conditions {.tabset .tabset-fade .tabset-pills}
 
 ### Finding rows fulfilling a condition
 
@@ -143,7 +147,6 @@ WHERE country_name IN ('Belarus','Ukraine','Russia');
 
 ```
 
-
 ### Finding rows not fufilling a list
 
 ```{sql, max.print = 5}
@@ -172,7 +175,6 @@ WHERE country_name NOT LIKE 'Un%';
 
 ```
 
-
 ```{sql, max.print = 5}
 
 SELECT country_name[Country]
@@ -199,7 +201,6 @@ WHERE country_name LIKE '%United%';
 
 ```
 
-
 ### Finding rows based off of numerical parameters
 
 ```{sql, max.print = 5}
@@ -210,7 +211,6 @@ WHERE pct_female_students between 50 and 60
 
 ```
 
-
 ```{sql, max.print = 5}
 
 SELECT *
@@ -218,7 +218,6 @@ FROM university_year
 WHERE pct_international_students <50
 
 ```
-
 
 ```{sql, max.print = 5}
 
@@ -236,7 +235,6 @@ WHERE pct_international_students > 50
 
 ```
 
-
 ```{sql, max.print = 10}
 
 SELECT *
@@ -244,6 +242,7 @@ FROM university_year
 WHERE pct_international_students IS NULL
 
 ```
+
 ```{sql, max.print = 5}
 
 SELECT *
@@ -251,8 +250,6 @@ FROM university_year
 WHERE pct_international_students IS NOT NULL
 
 ```
-
-
 
 ## Filtering on Multiple Conditions {.tabset .tabset-fade}
 
@@ -280,8 +277,9 @@ WHERE university_name LIKE '%London%' or university_name LIKE '%Paris%' OR unive
 
 ```
 
+## Inner Joins {.tabset .tabset-fade .tabset-pills}
 
-## Inner Joins {.tabset .tabset-fade}
+Necessary, compared to a subquery, if you need to reference columns needed from filtering, like the name of a University below.
 
 ```{r}
 knitr::include_graphics("C:/Users/gam55/Downloads/universities_erd.png")
@@ -291,6 +289,7 @@ knitr::include_graphics("C:/Users/gam55/Downloads/universities_erd.png")
 knitr::include_graphics("C:/Users/gam55/Downloads/joins.png")
 ```
 
+### Single Join
 
 ```{sql, max.print = 10}
 
@@ -302,6 +301,7 @@ WHERE university_name = 'Imperial College London' OR university_name = 'Universi
 
 ```
 
+### Multiple Joins
 
 ```{sql}
 
@@ -315,7 +315,112 @@ WHERE c.country_name = 'United Kingdom' AND u.university_name = 'University of C
 
 ```
 
-```{sql, looking at UoC score for 2015 and 2016}
+## Outer Joins {.tabset .tabset-fade .tabset-pills}
+
+### Left Outer Join
+
+```{sql}
+
+SELECT u.university_name, y.year, y.num_students, y.pct_international_students
+FROM university_year y
+LEFT OUTER JOIN university u
+ON u.id = y.university_id
+WHERE university_name = 'University of St Andrews'
+
+```
+
+```{sql}
+
+SELECT u.university_name, y.year, y.num_students, y.pct_international_students
+FROM university_year y
+LEFT OUTER JOIN university u
+ON u.id = y.university_id
+WHERE y.num_students < 10000
+
+```
+
+## Subqueries {.tabset .tabset-fade .tabset-pills}
+
+Can only be used when you don't need to return columns from the subquery tables - we don't need to see the number of students below.
+
+Can sometimes be better for filtering than INNER JOINs.
+
+```{sql}
+SELECT score, ranking_criteria_id, university_id
+FROM university_ranking_year
+WHERE university_id
+IN (SELECT university_id
+FROM university_year WHERE num_students < 10000
+)
+ORDER BY score DESC
+```
+
+## Case Statements {.tabset .tabset-fade .tabset-pills}
+
+There are times when you want to present the data differently than in the way it's available to you in your table, or you might want to show different texts depending on the data state. And that's where case statements come in.
+
+First is a scalar variable, which is declared and then named with the \@ symbol at the front. Then SQL server is told, what kind of data is going to be held in this variable. In this case it is an *integer* type. A variable can be assigned to this variable.Divisible is a column alias.
+
+A case statement is a conditional statement.
+
+First, we declare that this is a case.
+
+Then, when @number is divided by 2, the remainder is 0 - an even number.
+
+When @number is divided by 3, the remainder is 0 - divisible by 3.
+
+The percent sign here is called modulo - *"The modulo operator in SQL is typically represented by the % symbol, and it is used to return the remainder of a division operation."*
+
+The *else* isn't strictly required but it's good practice as otherwise the statement will return NULL.
+
+The SQL code below from the LinkedIn learning course doesn't work in RStudio - SQLite doesn't support support variable declarations
+
+
+"declare @number int = 5
+
+SELECT divisible = case 
+when @number % 2 = 0 then 'divisible by 2'
+when @number % 3 = 0 then 'divisible by 3'
+else 'does not meet criteria'
+end" 
+
+
+A more basic query is needed - 
+
+```{sql}
+SELECT 
+    CASE 
+    WHEN 5 % 2 = 0 THEN 'divisible by 2'
+    WHEN 5 % 3 = 0 THEN 'divisible by 3'
+    ELSE 'does not meet criteria'
+    END AS divisible
+
+```
+
+```{sql}
+SELECT 
+    u.university_name AS University,
+    y.student_staff_ratio AS "Students:Staff",
+    y.num_students AS "No.Students",
+    y.pct_international_students AS "% International Students",
+    y.pct_female_students AS "% Female Students",
+    CASE 
+        WHEN y.num_students < 10000 THEN 'Small'
+        WHEN y.num_students BETWEEN 10000 AND 20000 THEN 'Medium'
+        WHEN y.num_students > 20000 THEN 'Large'
+        ELSE 'NA' 
+    END AS Size
+FROM 
+    university u
+INNER JOIN 
+    university_year y
+ON 
+    u.id = y.university_id;
+
+
+```
+
+```{sql, looking at UoC score for 2015 and 2016, include=FALSE}
 SELECT
 u.university_name,
 c.country_name,

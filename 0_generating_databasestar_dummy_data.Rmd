@@ -61,7 +61,7 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-## Generating the 6 tables {.tabset .tabset-fade}
+## Generating the 6 tables {.tabset .tabset-fade .tabset-pills}
 
 ### Country 
 
