@@ -398,7 +398,7 @@ SELECT
 ```
 
 ```{sql}
-SELECT 
+SELECT DISTINCT
     u.university_name AS University,
     y.student_staff_ratio AS "Students:Staff",
     y.num_students AS "No.Students",
@@ -415,7 +415,8 @@ FROM
 INNER JOIN 
     university_year y
 ON 
-    u.id = y.university_id;
+    u.id = y.university_id
+ORDER BY y.pct_international_students DESC;
 
 
 ```
