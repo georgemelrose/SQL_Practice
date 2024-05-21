@@ -144,7 +144,176 @@ WHERE country_name IN ('Belarus','Ukraine','Russia');
 ```
 
 
+### Finding rows not fufilling a list
 
+```{sql, max.print = 5}
+
+SELECT country_name[Country]
+FROM country
+WHERE country_name NOT IN ('Belarus','Ukraine','Russia');
+
+```
+
+### Finding rows starting and ending with certain characters/a string
+
+```{sql, max.print = 5}
+
+SELECT country_name[Country]
+FROM country
+WHERE country_name LIKE 'Un%';
+
+```
+
+```{sql, max.print = 5}
+
+SELECT country_name[Country]
+FROM country
+WHERE country_name NOT LIKE 'Un%';
+
+```
+
+
+```{sql, max.print = 5}
+
+SELECT country_name[Country]
+FROM country
+WHERE country_name LIKE '%land';
+
+```
+
+```{sql, max.print = 5}
+
+SELECT country_name[Country]
+FROM country
+WHERE country_name NOT LIKE '%sia';
+
+```
+
+### Finding rows containing a string
+
+```{sql, max.print = 5}
+
+SELECT country_name[Country]
+FROM country
+WHERE country_name LIKE '%United%';
+
+```
+
+
+### Finding rows based off of numerical parameters
+
+```{sql, max.print = 5}
+
+SELECT *
+FROM university_year
+WHERE pct_female_students between 50 and 60
+
+```
+
+
+```{sql, max.print = 5}
+
+SELECT *
+FROM university_year
+WHERE pct_international_students <50
+
+```
+
+
+```{sql, max.print = 5}
+
+SELECT *
+FROM university_year
+WHERE pct_international_students >= 50
+
+```
+
+```{sql, max.print = 5}
+
+SELECT *
+FROM university_year
+WHERE pct_international_students > 50
+
+```
+
+
+```{sql, max.print = 10}
+
+SELECT *
+FROM university_year
+WHERE pct_international_students IS NULL
+
+```
+```{sql, max.print = 5}
+
+SELECT *
+FROM university_year
+WHERE pct_international_students IS NOT NULL
+
+```
+
+
+
+## Filtering on Multiple Conditions {.tabset .tabset-fade}
+
+```{sql, max.print = 5}
+
+SELECT *
+FROM university_year
+WHERE pct_international_students >30 AND pct_female_students >50 AND year = 2012
+
+```
+
+```{sql, max.print = 5}
+
+SELECT *
+FROM university_year
+WHERE pct_international_students >30 AND pct_female_students >50 AND year = 2012
+
+```
+
+```{sql, max.print = 5}
+
+SELECT *
+FROM university
+WHERE university_name LIKE '%London%' or university_name LIKE '%Paris%' OR university_name LIKE '%Glasgow'
+
+```
+
+
+## Inner Joins {.tabset .tabset-fade}
+
+```{r}
+knitr::include_graphics("C:/Users/gam55/Downloads/universities_erd.png")
+```
+
+```{r}
+knitr::include_graphics("C:/Users/gam55/Downloads/joins.png")
+```
+
+
+```{sql, max.print = 10}
+
+SELECT *
+FROM university u
+INNER JOIN university_year y
+ON u.id = y.university_id
+WHERE university_name = 'Imperial College London' OR university_name = 'University of Glasgow'
+
+```
+
+
+```{sql}
+
+SELECT *
+FROM university u
+INNER JOIN university_year y
+ON u.id = y.university_id
+INNER JOIN country c
+ON u.country_id = c.id
+WHERE c.country_name = 'United Kingdom' AND u.university_name = 'University of Cambridge'
+
+```
 
 ```{sql, looking at UoC score for 2015 and 2016}
 SELECT
