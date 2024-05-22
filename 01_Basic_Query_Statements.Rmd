@@ -387,7 +387,7 @@ end"
 
 A more basic query is needed - 
 
-```{sql}
+```{sql simple case when}
 SELECT 
     CASE 
     WHEN 5 % 2 = 0 THEN 'divisible by 2'
@@ -397,7 +397,7 @@ SELECT
 
 ```
 
-```{sql}
+```{sql case when statement for new variable size}
 SELECT DISTINCT
     u.university_name AS University,
     y.student_staff_ratio AS "Students:Staff",
@@ -421,7 +421,40 @@ ORDER BY y.pct_international_students DESC;
 
 ```
 
-```{sql, looking at UoC score for 2015 and 2016, include=FALSE}
+
+## Built-in Functions {.tabset .tabset-fade .tabset-pills}
+
+We can use CAST() to change the 'data type' of a column into something else, like numeric to integer. This is the same as using as.numeric() or as.factor() in R. Unfortunately, SQLite in RStudio doesn't support the CONVERT() function.However, there is no direct support for specifying decimal precision in the CAST function. SQLite stores numeric values as REAL (floating-point) internally when they're cast to numeric types.
+
+```{sql modifying previous case when to have integer students staff ratio}
+SELECT DISTINCT
+    u.university_name AS University,
+    y.student_staff_ratio AS "Students:Staff",
+    CAST(y.student_staff_ratio AS INT) AS "Students:Staff INT Cast",
+    CAST(y.student_staff_ratio AS REAL) AS "Students:Staff Decimal Conversion",
+    y.num_students AS "No.Students",
+    y.pct_international_students AS "% International Students",
+    y.pct_female_students AS "% Female Students",
+    CASE 
+        WHEN y.num_students < 10000 THEN 'Small'
+        WHEN y.num_students BETWEEN 10000 AND 20000 THEN 'Medium'
+        WHEN y.num_students > 20000 THEN 'Large'
+        ELSE 'NA' 
+    END AS Size
+FROM 
+    university u
+INNER JOIN 
+    university_year y
+ON 
+    u.id = y.university_id
+ORDER BY 
+    y.pct_international_students DESC;
+
+
+```
+
+
+```{sql looking at UoC score for 2015 and 2016, include=FALSE}
 SELECT
 u.university_name,
 c.country_name,
