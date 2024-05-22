@@ -375,17 +375,11 @@ The *else* isn't strictly required but it's good practice as otherwise the state
 
 The SQL code below from the LinkedIn learning course doesn't work in RStudio - SQLite doesn't support support variable declarations
 
-
 "declare @number int = 5
 
-SELECT divisible = case 
-when @number % 2 = 0 then 'divisible by 2'
-when @number % 3 = 0 then 'divisible by 3'
-else 'does not meet criteria'
-end" 
+SELECT divisible = case when @number % 2 = 0 then 'divisible by 2' when @number % 3 = 0 then 'divisible by 3' else 'does not meet criteria' end"
 
-
-A more basic query is needed - 
+A more basic query is needed -
 
 ```{sql simple case when}
 SELECT 
@@ -424,9 +418,14 @@ ORDER BY y.pct_international_students DESC;
 
 ## Built-in Functions {.tabset .tabset-fade .tabset-pills}
 
+The functions in this section just scratch the surface of the vast array of possible built-in SQL functions. More are found here - https://learn.microsoft.com/en-us/sql/t-sql/functions/functions?view=sql-server-ver15#scalar-functions
+
+### CAST()
+
 We can use CAST() to change the 'data type' of a column into something else, like numeric to integer. This is the same as using as.numeric() or as.factor() in R. Unfortunately, SQLite in RStudio doesn't support the CONVERT() function.However, there is no direct support for specifying decimal precision in the CAST function. SQLite stores numeric values as REAL (floating-point) internally when they're cast to numeric types.
 
 ```{sql modifying previous case when to have integer students staff ratio}
+
 SELECT DISTINCT
     u.university_name AS University,
     y.student_staff_ratio AS "Students:Staff",
@@ -450,8 +449,146 @@ ON
 ORDER BY 
     y.pct_international_students DESC;
 
+```
+
+### CONCAT()
+
+Below, the university name is concatenated with the number of students. CONCAT() usefully, can handle mixed data types.
+
+```{sql}
+SELECT DISTINCT
+    u.university_name AS University,
+    y.student_staff_ratio AS "Students:Staff",
+    CAST(y.student_staff_ratio AS INT) AS "Students:Staff INT Cast",
+    CAST(y.student_staff_ratio AS REAL) AS "Students:Staff Decimal Conversion",
+    y.num_students AS "No.Students",
+    y.pct_international_students AS "% International Students",
+    y.pct_female_students AS "% Female Students",
+    CASE 
+        WHEN y.num_students < 10000 THEN 'Small'
+        WHEN y.num_students BETWEEN 10000 AND 20000 THEN 'Medium'
+        WHEN y.num_students > 20000 THEN 'Large'
+        ELSE 'NA' 
+    END AS Size,
+    CONCAT(u.university_name, ' - ', y.num_students) AS "University and Students"
+FROM 
+    university u
+INNER JOIN 
+    university_year y
+ON 
+    u.id = y.university_id
+ORDER BY 
+    y.pct_international_students DESC;
 
 ```
+
+### FORMAT()/ printf()
+
+FORMAT() can be used to format information likes dates and currencies.
+
+SQLite does not have a built-in FORMAT() function like some other SQL databases (e.g. SQL Server). However, similar formatting can be achieved using other SQLite functions. For instance, the printf() function can be used to format numbers or strings.
+
+```{sql}
+SELECT DISTINCT
+    u.university_name AS University,
+    y.student_staff_ratio AS "Students:Staff",
+    CAST(y.student_staff_ratio AS INT) AS "Students:Staff INT Cast",
+    CAST(y.student_staff_ratio AS REAL) AS "Students:Staff Decimal Conversion",
+    y.num_students AS "No.Students",
+    y.pct_international_students AS "% International Students",
+    y.pct_female_students AS "% Female Students",
+    CASE 
+        WHEN y.num_students < 10000 THEN 'Small'
+        WHEN y.num_students BETWEEN 10000 AND 20000 THEN 'Medium'
+        WHEN y.num_students > 20000 THEN 'Large'
+        ELSE 'NA' 
+    END AS Size,
+    u.university_name || ' - ' || y.num_students AS "University and Students",
+    printf('%.2f', y.student_staff_ratio) AS "Formatted Students:Staff"
+FROM 
+    university u
+INNER JOIN 
+    university_year y
+ON 
+    u.id = y.university_id
+ORDER BY 
+    y.pct_international_students DESC;
+
+```
+
+### datetime(), date(), and strftime()
+
+SQLite does not have a built-in DATEADD() function.. However, similar functionality can be achieved using SQLite's date and time functions. Specifically, using the datetime(), date(), and strftime() functions with modifiers to add or subtract time intervals.
+
+Adding Days - To add a certain number of days to a date, one can use the date() function with the '+N days' modifier, where N is the number of days to be added:
+
+**Adding Days**
+
+```{sql}
+SELECT date('now', '+7 days') AS "Date Plus 7 Days";
+```
+
+
+**Adding Months**
+```{sql}
+SELECT date('now', '+1 month') AS "Date Plus 1 Month";
+```
+
+**Adding Years**
+
+```{sql}
+SELECT date('now', '+1 year') AS "Date Plus 1 Year";
+```
+
+**Adding Hours, Minutes, or Seconds**
+
+This can be done using datetime()
+
+```{sql}
+SELECT datetime('now', '+2 hours') AS "Date Plus 2 Hours";
+```
+```{sql}
+SELECT datetime('now', '+30 minutes') AS "Date Plus 30 Minutes";
+```
+```{sql}
+SELECT datetime('now', '+45 seconds') AS "Date Plus 45 Seconds";
+```
+
+## Aggregate Functions {.tabset .tabset-fade .tabset-pills}
+
+SQL provides aggregate functions to do calculations across multiple rows to find a sum or an average.
+
+
+Counting all the rows in a table.
+
+```{sql counting all rows}
+select count(*)
+from university
+```
+
+Grouping variables together.
+
+```{sql counting how many top universities there are per country}
+
+SELECT COUNT(*) AS "No.Universities", c.country_name AS "Country"
+FROM country c 
+INNER JOIN university u ON u.country_id = c.id
+GROUP BY c.country_name;
+
+```
+
+
+
+```{sql counting how many top universities there are per country}
+
+SELECT COUNT(*) AS "No.Universities", c.country_name AS "Country"
+FROM country c 
+INNER JOIN university u ON u.country_id = c.id
+GROUP BY c.country_name;
+
+```
+
+
 
 
 ```{sql looking at UoC score for 2015 and 2016, include=FALSE}
