@@ -53,6 +53,7 @@ knitr::opts_chunk$set(echo = TRUE)
 pacman::p_load(readr, tidyverse, data.table,DBI,odbc,RSQLite)
 
 con <- dbConnect(SQLite(), dbname = ":memory:")
+knitr::opts_chunk$set(connection = "con")
 
 # List the tables present in the database connected through 'con'
 tables <- dbListTables(con)
@@ -65,14 +66,14 @@ print(tables)
 
 ### Country 
 
-```{sql Create country table, connection=con}
+```{sql Create country table}
 CREATE TABLE country (
   id INTEGER PRIMARY KEY,
   country_name TEXT DEFAULT NULL
 );
 ```
 
-```{sql Populate country table with countries, connection=con}
+```{sql Populate country table with countries}
 INSERT INTO country (id, country_name) VALUES
 (1,'Argentina'),
 (2,'Australia'),
@@ -158,16 +159,19 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
+
+
+
 ### Ranking System 
 
-```{sql create a ranking system table, connection=con}
+```{sql create a ranking system table}
 CREATE TABLE ranking_system (
   id INTEGER PRIMARY KEY,
   system_name TEXT DEFAULT NULL
 );
 ```
 
-```{sql insert data into ranking system table, connection=con}
+```{sql insert data into ranking system table}
 INSERT INTO ranking_system (id, system_name) VALUES
 (1,'Times Higher Education World University Ranking'),
 (2,'Shanghai Ranking'),
@@ -178,7 +182,7 @@ INSERT INTO ranking_system (id, system_name) VALUES
 ### Ranking Criteria 
 
 
-```{sql create a ranking criteria table, connection=con}
+```{sql create a ranking criteria table}
 CREATE TABLE ranking_criteria (
   id INTEGER PRIMARY KEY,
   ranking_system_id INTEGER DEFAULT NULL,
@@ -188,7 +192,7 @@ CREATE TABLE ranking_criteria (
 ```
 
 
-```{sql insert data into ranking criteria table, connection=con}
+```{sql insert data into ranking criteria table}
 INSERT INTO ranking_criteria (id, ranking_system_id, criteria_name) VALUES
 (1,1,'Teaching'),
 (2,1,'International'),
@@ -213,13 +217,13 @@ INSERT INTO ranking_criteria (id, ranking_system_id, criteria_name) VALUES
 (21,3,'Total CWUR');
 ```
 
-```{sql select top 10 rows from ranking criteria table, connection=con}
+```{sql select top 10 rows from ranking criteria table}
 SELECT * FROM ranking_criteria LIMIT 10
 ```
 
 ### University 
 
-```{sql create a University table, connection=con}
+```{sql create a University table}
 CREATE TABLE university (
   id INTEGER PRIMARY KEY,
   country_id INTEGER DEFAULT NULL,
@@ -236,7 +240,7 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-```{sql insert data into University table, connection=con}
+```{sql insert data into University table}
 
 INSERT INTO university (id, country_id, university_name) VALUES
 (1,73,'Harvard University'),
@@ -1492,7 +1496,7 @@ INSERT INTO university (id, country_id, university_name) VALUES
 
 ### University Year (Statistics about Universities per Year)
 
-```{sql creating the university year table, connection=con}
+```{sql creating the university year table}
 CREATE TABLE university_year (
   university_id INTEGER DEFAULT NULL,
   year INTEGER DEFAULT NULL,
@@ -1512,7 +1516,7 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-```{sql inserting data into university year table, connection=con}
+```{sql inserting data into university year table}
 INSERT INTO university_year (university_id, year, num_students, student_staff_ratio, pct_international_students, pct_female_students) VALUES
 (1,2011,20152,8.90,25,NULL),
 (5,2011,2243,6.90,27,33),
@@ -2603,7 +2607,7 @@ INSERT INTO university_year (university_id, year, num_students, student_staff_ra
 
 ### University Ranking Year
 
-```{sql creating the university ranking year table, connection=con}
+```{sql creating the university ranking year table}
 CREATE TABLE university_ranking_year (
   university_id INTEGER DEFAULT NULL,
   ranking_criteria_id INTEGER DEFAULT NULL,
@@ -2622,7 +2626,7 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-```{sql inserting data into university ranking year, connection=con}
+```{sql inserting data into university ranking year}
 INSERT INTO university_ranking_year (university_id, ranking_criteria_id, year, score) VALUES
 (1,1,2011,100),
 (5,1,2011,98),
