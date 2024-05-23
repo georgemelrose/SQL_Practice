@@ -417,6 +417,10 @@ ORDER BY y.pct_international_students DESC;
 
 ## 8.Built-in Functions {.tabset .tabset-fade .tabset-pills}
 
+```{r}
+knitr::include_graphics("C:/Users/gam55/Downloads/universities_erd.png")
+```
+
 The functions in this section just scratch the surface of the vast array of possible built-in SQL functions. More are found here - <https://learn.microsoft.com/en-us/sql/t-sql/functions/functions?view=sql-server-ver15#scalar-functions>
 
 ### CAST()
@@ -557,6 +561,10 @@ SELECT datetime('now', '+45 seconds') AS "Date Plus 45 Seconds";
 
 ## 9.Aggregate Functions {.tabset .tabset-fade .tabset-pills}
 
+```{r}
+knitr::include_graphics("C:/Users/gam55/Downloads/universities_erd.png")
+```
+
 SQL provides aggregate functions to do calculations across multiple rows to find a sum or an average.
 
 Counting all the rows in a table.
@@ -666,6 +674,8 @@ ORDER BY max_score DESC
 LIMIT 5 OFFSET 4;
 
 ```
+
+
 
 
 ```{sql looking at UoC score for 2015 and 2016, include=FALSE}
