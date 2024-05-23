@@ -61,7 +61,7 @@ print(tables)
 SELECT name FROM sqlite_master WHERE type='table';
 ```
 
-## Single Table 'Select' Statements {.tabset .tabset-fade .tabset-pills}
+## 1.Single Table 'Select' Statements {.tabset .tabset-fade .tabset-pills}
 
 ### All Columns
 
@@ -107,7 +107,7 @@ LIMIT 3;
 
 ```
 
-## Filtering on Single Conditions {.tabset .tabset-fade .tabset-pills}
+## 2.Filtering on Single Conditions {.tabset .tabset-fade .tabset-pills}
 
 ### Finding rows fulfilling a condition
 
@@ -251,7 +251,7 @@ WHERE pct_international_students IS NOT NULL
 
 ```
 
-## Filtering on Multiple Conditions {.tabset .tabset-fade}
+## 3.Filtering on Multiple Conditions {.tabset .tabset-fade}
 
 ```{sql, max.print = 5}
 
@@ -277,7 +277,7 @@ WHERE university_name LIKE '%London%' or university_name LIKE '%Paris%' OR unive
 
 ```
 
-## Inner Joins {.tabset .tabset-fade .tabset-pills}
+## 4.Inner Joins {.tabset .tabset-fade .tabset-pills}
 
 Necessary, compared to a subquery, if you need to reference columns needed from filtering, like the name of a University below.
 
@@ -315,7 +315,7 @@ WHERE c.country_name = 'United Kingdom' AND u.university_name = 'University of C
 
 ```
 
-## Outer Joins {.tabset .tabset-fade .tabset-pills}
+## 5.Outer Joins {.tabset .tabset-fade .tabset-pills}
 
 ### Left Outer Join
 
@@ -339,7 +339,7 @@ WHERE y.num_students < 10000
 
 ```
 
-## Subqueries {.tabset .tabset-fade .tabset-pills}
+## 6.Subqueries {.tabset .tabset-fade .tabset-pills}
 
 Can only be used when you don't need to return columns from the subquery tables - we don't need to see the number of students below.
 
@@ -355,7 +355,7 @@ FROM university_year WHERE num_students < 10000
 ORDER BY score DESC
 ```
 
-## Case Statements {.tabset .tabset-fade .tabset-pills}
+## 7.Case Statements {.tabset .tabset-fade .tabset-pills}
 
 There are times when you want to present the data differently than in the way it's available to you in your table, or you might want to show different texts depending on the data state. And that's where case statements come in.
 
@@ -415,10 +415,9 @@ ORDER BY y.pct_international_students DESC;
 
 ```
 
+## 8.Built-in Functions {.tabset .tabset-fade .tabset-pills}
 
-## Built-in Functions {.tabset .tabset-fade .tabset-pills}
-
-The functions in this section just scratch the surface of the vast array of possible built-in SQL functions. More are found here - https://learn.microsoft.com/en-us/sql/t-sql/functions/functions?view=sql-server-ver15#scalar-functions
+The functions in this section just scratch the surface of the vast array of possible built-in SQL functions. More are found here - <https://learn.microsoft.com/en-us/sql/t-sql/functions/functions?view=sql-server-ver15#scalar-functions>
 
 ### CAST()
 
@@ -528,8 +527,8 @@ Adding Days - To add a certain number of days to a date, one can use the date() 
 SELECT date('now', '+7 days') AS "Date Plus 7 Days";
 ```
 
-
 **Adding Months**
+
 ```{sql}
 SELECT date('now', '+1 month') AS "Date Plus 1 Month";
 ```
@@ -547,17 +546,18 @@ This can be done using datetime()
 ```{sql}
 SELECT datetime('now', '+2 hours') AS "Date Plus 2 Hours";
 ```
+
 ```{sql}
 SELECT datetime('now', '+30 minutes') AS "Date Plus 30 Minutes";
 ```
+
 ```{sql}
 SELECT datetime('now', '+45 seconds') AS "Date Plus 45 Seconds";
 ```
 
-## Aggregate Functions {.tabset .tabset-fade .tabset-pills}
+## 9.Aggregate Functions {.tabset .tabset-fade .tabset-pills}
 
 SQL provides aggregate functions to do calculations across multiple rows to find a sum or an average.
-
 
 Counting all the rows in a table.
 
@@ -577,18 +577,95 @@ GROUP BY c.country_name;
 
 ```
 
+Having a look at the rankings systems available.
 
-
-```{sql counting how many top universities there are per country}
-
-SELECT COUNT(*) AS "No.Universities", c.country_name AS "Country"
-FROM country c 
-INNER JOIN university u ON u.country_id = c.id
-GROUP BY c.country_name;
+```{sql summarising the rankings systems}
+SELECT rc.criteria_name AS "Criteria Name", COUNT(DISTINCT u.id) AS "No.Universities"
+FROM university u
+INNER JOIN university_ranking_year ry ON ry.university_id = u.id
+INNER JOIN ranking_criteria rc ON ry.ranking_criteria_id = rc.id
+GROUP BY rc.criteria_name
+ORDER BY "No.Universities" DESC;
 
 ```
 
+Using the MAX() function to order Universities by their Times ranking.
 
+```{sql Summarising the total number of universities,  max.print = 20}
+
+SELECT u.university_name AS "University", MAX(ry.score) AS "Maximum Score"
+FROM university u
+INNER JOIN university_ranking_year ry ON ry.university_id = u.id
+INNER JOIN ranking_criteria rc ON ry.ranking_criteria_id = rc.id
+WHERE rc.criteria_name = 'Total Times'
+GROUP BY u.university_name
+ORDER BY "Maximum Score" DESC;
+
+
+```
+
+## 10.Query Processing Order {.tabset .tabset-fade .tabset-pills}
+
+Query processing order in SQLite, and SQL in general, follows a sequence of steps for the correct execution of a query -
+
+1.  **FROM Clause**
+
+    The query starts by identifying the tables from which data will be retrieved. If there are any JOIN operations, they are also processed at this stage to create the base dataset.
+
+FROM university u
+
+INNER JOIN university_ranking_year ry ON ry.university_id = u.id
+
+INNER JOIN ranking_criteria rc ON ry.ranking_criteria_id = rc.id
+
+2.  **WHERE Clause**
+
+    After forming the initial dataset from the `FROM` clause, the `WHERE` clause is applied to filter rows based on specified conditions.
+
+WHERE rc.criteria_name = 'Total Times'
+
+3. **GROUP BY Clause**
+
+    The data is then grouped according to the columns specified in the `GROUP BY` clause.
+
+GROUP BY u.university_name 
+
+4. **HAVING Clause**
+
+    The HAVING clause is applied next, which allows filtering groups created by the GROUP BY clause based on aggregate conditions.
+    
+HAVING MAX(ry.score) > 90
+
+5. **SELECT  Clause**
+
+    The SELECT clause is then processed to determine which columns or expressions should be included in the final result.
+    
+SELECT u.university_name AS "University", MAX(ry.score) AS "Maximum Score"
+
+6. **ORDER BY  Clause**
+
+    The ORDER BY clause sorts the result set based on the specified columns or expressions.
+
+ORDER BY max_score DESC
+
+7. **LIMIT / OFFSET Clauses**
+
+    If present, the LIMIT and OFFSET clauses are applied to restrict the number of rows returned by the query, and to skip a specified     number of rows, respectively.
+
+LIMIT 5 OFFSET 2
+
+```{sql repeating summarising the total number of universities}
+SELECT u.university_name, MAX(ry.score) AS max_score
+FROM university u
+INNER JOIN university_ranking_year ry ON ry.university_id = u.id
+INNER JOIN ranking_criteria rc ON ry.ranking_criteria_id = rc.id
+WHERE rc.criteria_name = 'Total Times'
+GROUP BY u.university_name
+HAVING MAX(ry.score) > 90
+ORDER BY max_score DESC
+LIMIT 5 OFFSET 4;
+
+```
 
 
 ```{sql looking at UoC score for 2015 and 2016, include=FALSE}
