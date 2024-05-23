@@ -1,0 +1,61 @@
+---
+title: "02 SQL for Data Analysis"
+author: "George Melrose"
+date: "23/05/2024"
+output:
+   html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+rm(list = ls())
+
+knitr::opts_chunk$set(echo = TRUE)
+
+pacman::p_load(readr,tidyverse, data.table,DBI,odbc,RSQLite)
+
+options(max.print = 1000) 
+getOption("max.print")
+
+con <- dbConnect(SQLite(), dbname = ":memory:")
+knitr::opts_chunk$set(connection = "con")
+
+
+# List the tables present in the database connected through 'con'
+tables <- dbListTables(con)
+
+# Print the list of tables
+print(tables)
+```
+
+
+```{r reading in data to the pretend database, warning=FALSE, message=FALSE, include=FALSE}
+# List of table names (should match the original table names)
+tables <- c("country", "ranking_criteria", "ranking_system",
+            "university","university_ranking_year","university_year") # Replace with your actual table names
+
+# Loop through each table and read it from the CSV file
+for (table in tables) {
+  # Read the table from the CSV file
+  data <- read_csv(paste0(table, ".csv"))
+  
+  # Write the table to the new SQL connection
+  dbWriteTable(con, table, data, overwrite = TRUE)
+}
+
+rm(data)
+```
+
+```{r Print the tables currently in the database, warning=FALSE, message=FALSE, include=FALSE}
+# List the tables present in the database connected through 'con'
+tables <- dbListTables(con)
+
+# Print the list of tables
+print(tables)
+```
+
+```{sql list all the tables from the database, include=FALSE}
+SELECT name FROM sqlite_master WHERE type='table';
+```
