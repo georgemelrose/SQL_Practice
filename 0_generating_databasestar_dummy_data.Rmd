@@ -11,6 +11,26 @@ output:
 
 This RMD generates the dummy data to be worked with in this project.
 
+
+```{r setup, include=FALSE}
+rm(list = ls())
+
+knitr::opts_chunk$set(echo = TRUE)
+
+pacman::p_load(readr, tidyverse, data.table,DBI,odbc,RSQLite)
+
+con <- dbConnect(SQLite(), dbname = ":memory:")
+knitr::opts_chunk$set(connection = "con")
+
+# List the tables present in the database connected through 'con'
+tables <- dbListTables(con)
+
+# Print the list of tables
+print(tables)
+```
+
+## 1.Generating the 6 tables for the 'University Rankings' Dataset {.tabset .tabset-fade .tabset-pills}
+
 "*There are a few hundred universities in the sample data, and 21 different ranking criteria across three different systems. The data exists for the years 2005 to 2016.It doesn't contain every world university, or data up until 2018 or 2019*."
 
 I used sqlite code from this github to generate the fake database - <https://github.com/bbrumm/databasestar/tree/main/sample_databases/sample_db_university/sqlite>
@@ -41,30 +61,13 @@ This table contains the score for each year for each university and ranking crit
 
 The 'University Rankings' data is explained here, with ERD below- <https://www.databasestar.com/sample-database-university-rankings/>
 
+[**Remember, keys joined together need to be of the same data type!**]{.ul}
+
 ```{r}
 knitr::include_graphics("C:/Users/gam55/Downloads/universities_erd.png")
 ```
 
-```{r setup, include=FALSE}
-rm(list = ls())
-
-knitr::opts_chunk$set(echo = TRUE)
-
-pacman::p_load(readr, tidyverse, data.table,DBI,odbc,RSQLite)
-
-con <- dbConnect(SQLite(), dbname = ":memory:")
-knitr::opts_chunk$set(connection = "con")
-
-# List the tables present in the database connected through 'con'
-tables <- dbListTables(con)
-
-# Print the list of tables
-print(tables)
-```
-
-## Generating the 6 tables {.tabset .tabset-fade .tabset-pills}
-
-### Country 
+### Country
 
 ```{sql Create country table}
 CREATE TABLE country (
@@ -159,10 +162,7 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-
-
-
-### Ranking System 
+### Ranking System
 
 ```{sql create a ranking system table}
 CREATE TABLE ranking_system (
@@ -178,9 +178,7 @@ INSERT INTO ranking_system (id, system_name) VALUES
 (3,'Center for World University Rankings');
 ```
 
-
-### Ranking Criteria 
-
+### Ranking Criteria
 
 ```{sql create a ranking criteria table}
 CREATE TABLE ranking_criteria (
@@ -190,7 +188,6 @@ CREATE TABLE ranking_criteria (
   CONSTRAINT fk_rc_rs FOREIGN KEY (ranking_system_id) REFERENCES ranking_system (id)
 );
 ```
-
 
 ```{sql insert data into ranking criteria table}
 INSERT INTO ranking_criteria (id, ranking_system_id, criteria_name) VALUES
@@ -221,7 +218,7 @@ INSERT INTO ranking_criteria (id, ranking_system_id, criteria_name) VALUES
 SELECT * FROM ranking_criteria LIMIT 10
 ```
 
-### University 
+### University
 
 ```{sql create a University table}
 CREATE TABLE university (
@@ -1492,7 +1489,6 @@ INSERT INTO university (id, country_id, university_name) VALUES
 (1247,68,'Yıldız Technical University');
 
 ```
-
 
 ### University Year (Statistics about Universities per Year)
 
@@ -32242,7 +32238,6 @@ INSERT INTO university_ranking_year (university_id, ranking_criteria_id, year, s
 (976,21,2015,44);
 ```
 
-
 ### Saving tables for future use
 
 ```{r save tables as csvs for use in other scripts, warning=FALSE, message=FALSE}
@@ -32260,3 +32255,8 @@ for (table in tables) {
 }
 
 ```
+
+
+## 2.Generating the 15 tables for the 'University Rankings' Dataset {.tabset .tabset-fade .tabset-pills}
+
+
