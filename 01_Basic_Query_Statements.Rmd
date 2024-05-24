@@ -359,6 +359,18 @@ ORDER BY score DESC
 
 There are times when you want to present the data differently than in the way it's available to you in your table, or you might want to show different texts depending on the data state. And that's where case statements come in.
 
+A quick note, the following are the arithmetic operators in SQL -
+
+-   Addition +
+
+-   Subtraction -
+
+-   Multiplication \*
+
+-   Division /
+
+-   Modulo (mathematical operation that finds the remainder when one integer is divided by another) %
+
 First is a scalar variable, which is declared and then named with the \@ symbol at the front. Then SQL server is told, what kind of data is going to be held in this variable. In this case it is an *integer* type. A variable can be assigned to this variable.Divisible is a column alias.
 
 A case statement is a conditional statement.
@@ -632,33 +644,33 @@ INNER JOIN ranking_criteria rc ON ry.ranking_criteria_id = rc.id
 
 WHERE rc.criteria_name = 'Total Times'
 
-3. **GROUP BY Clause**
+3.  **GROUP BY Clause**
 
     The data is then grouped according to the columns specified in the `GROUP BY` clause.
 
-GROUP BY u.university_name 
+GROUP BY u.university_name
 
-4. **HAVING Clause**
+4.  **HAVING Clause**
 
     The HAVING clause is applied next, which allows filtering groups created by the GROUP BY clause based on aggregate conditions.
-    
-HAVING MAX(ry.score) > 90
 
-5. **SELECT  Clause**
+HAVING MAX(ry.score) \> 90
+
+5.  **SELECT Clause**
 
     The SELECT clause is then processed to determine which columns or expressions should be included in the final result.
-    
+
 SELECT u.university_name AS "University", MAX(ry.score) AS "Maximum Score"
 
-6. **ORDER BY  Clause**
+6.  **ORDER BY Clause**
 
     The ORDER BY clause sorts the result set based on the specified columns or expressions.
 
 ORDER BY max_score DESC
 
-7. **LIMIT / OFFSET Clauses**
+7.  **LIMIT / OFFSET Clauses**
 
-    If present, the LIMIT and OFFSET clauses are applied to restrict the number of rows returned by the query, and to skip a specified     number of rows, respectively.
+    If present, the LIMIT and OFFSET clauses are applied to restrict the number of rows returned by the query, and to skip a specified number of rows, respectively.
 
 LIMIT 5 OFFSET 2
 
@@ -675,6 +687,18 @@ LIMIT 5 OFFSET 4;
 
 ```
 
+
+```{sql getting countries where there are over 10 unis}
+
+SELECT COUNT(*) AS "No.Universities", c.country_name AS "Country"
+FROM country c 
+INNER JOIN university u ON u.country_id = c.id
+GROUP BY c.country_name
+HAVING COUNT(*) > 10 
+ORDER BY COUNT(*) DESC;
+
+
+```
 
 
 
