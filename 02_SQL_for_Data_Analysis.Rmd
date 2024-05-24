@@ -9,6 +9,9 @@ output:
     code_folding: hide
 ---
 
+The concepts outlined by the SQL code below are taken from this LinkedIn learning course, ***"SQL for Data Analysis"*** - https://www.linkedin.com/learning/sql-for-data-analysis
+
+
 ```{r setup, include=FALSE}
 rm(list = ls())
 
@@ -59,3 +62,15 @@ print(tables)
 ```{sql list all the tables from the database, include=FALSE}
 SELECT name FROM sqlite_master WHERE type='table';
 ```
+
+
+## 1 Working with Dates
+
+```{sql}
+
+
+
+
+
+```
+
