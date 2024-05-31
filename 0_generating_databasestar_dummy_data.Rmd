@@ -32257,6 +32257,5 @@ for (table in tables) {
 ```
 
 
-## 2.Generating the 15 tables for the 'University Rankings' Dataset {.tabset .tabset-fade .tabset-pills}
 
 
