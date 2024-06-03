@@ -10,7 +10,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
 
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -82,7 +82,7 @@ CREATE TABLE publisher (
 );
 ```
 
-```{sql}
+```{sql create book_language table}
 CREATE TABLE book_language (
     language_id INTEGER PRIMARY KEY,
     language_code TEXT,
@@ -91,7 +91,7 @@ CREATE TABLE book_language (
 ```
 
 
-```{sql}
+```{sql create book table}
 CREATE TABLE book (
     book_id INTEGER PRIMARY KEY,
     title TEXT,
@@ -106,7 +106,7 @@ CREATE TABLE book (
 ```
 
 
-```{sql}
+```{sql create book_author table}
 CREATE TABLE book_author (
     book_id INTEGER NOT NULL,
     author_id INTEGER NOT NULL,
@@ -117,7 +117,7 @@ CREATE TABLE book_author (
 ```
 
 
-```{sql}
+```{sql create address_status table}
 CREATE TABLE address_status (
     status_id INTEGER PRIMARY KEY,
     address_status TEXT
@@ -125,7 +125,7 @@ CREATE TABLE address_status (
 ```
 
 
-```{sql}
+```{sql create country table}
 CREATE TABLE country (
     country_id INTEGER PRIMARY KEY,
     country_name TEXT
@@ -133,7 +133,7 @@ CREATE TABLE country (
 ```
 
 
-```{sql}
+```{sql create address table}
 CREATE TABLE address (
     address_id INTEGER PRIMARY KEY,
     street_number TEXT,
@@ -145,7 +145,7 @@ CREATE TABLE address (
 ```
 
 
-```{sql}
+```{sql create customer table}
 CREATE TABLE customer (
     customer_id INTEGER PRIMARY KEY,
     first_name TEXT,
@@ -155,7 +155,7 @@ CREATE TABLE customer (
 ```
 
 
-```{sql}
+```{sql create customer_address table}
 CREATE TABLE customer_address (
     customer_id INTEGER NOT NULL,
     address_id INTEGER NOT NULL,
@@ -167,7 +167,7 @@ CREATE TABLE customer_address (
 ```
 
 
-```{sql}
+```{sql create shipping_method table}
 CREATE TABLE shipping_method (
     method_id INTEGER PRIMARY KEY,
     method_name TEXT,
@@ -176,7 +176,7 @@ CREATE TABLE shipping_method (
 ```
 
 
-```{sql}
+```{sql create customer order table}
 CREATE TABLE cust_order (
     order_id INTEGER PRIMARY KEY,
     order_date DATETIME,
@@ -190,7 +190,7 @@ CREATE TABLE cust_order (
 ```
 
 
-```{sql}
+```{sql create order status table}
 CREATE TABLE order_status (
     status_id INTEGER PRIMARY KEY,
     status_value TEXT
@@ -198,7 +198,7 @@ CREATE TABLE order_status (
 ```
 
 
-```{sql}
+```{sql create order line table}
 CREATE TABLE order_line (
     line_id INTEGER PRIMARY KEY,
     order_id INTEGER,
@@ -210,7 +210,7 @@ CREATE TABLE order_line (
 ```
 
 
-```{sql}
+```{sql create order history table}
 CREATE TABLE order_history (
     history_id INTEGER PRIMARY KEY,
     order_id INTEGER,
@@ -232,7 +232,6 @@ print(tables)
 ### Populating Author Table
 
 ```{sql populating author table}
-
 INSERT INTO author (author_name, author_id) VALUES
 ('A. Bartlett Giamatti', 1),
 ('A. Elizabeth Delany', 2),
@@ -1222,8 +1221,10 @@ INSERT INTO author (author_name, author_id) VALUES
 ('Buchi Emecheta', 986),
 ('Buck Schirner', 987),
 ('Burt Reynolds', 988);
+```
 
 
+```{sql populating author table part 2}
 INSERT INTO author (author_name, author_id) VALUES
 ('Burton G. Malkiel', 989),
 ('Burton Pike', 990),
@@ -2187,7 +2188,10 @@ INSERT INTO author (author_name, author_id) VALUES
 ('Denise Dersin', 1948),
 ('Denise Grollmus', 1949),
 ('Denise Hamilton', 1950);
+```
 
+
+```{sql populating author table part 3}
 INSERT INTO author (author_name, author_id) VALUES
 ('Denise J. Wedel', 1951),
 ('Denise Levertov', 1952),
@@ -3187,7 +3191,10 @@ INSERT INTO author (author_name, author_id) VALUES
 ('George Rawlinson', 2946),
 ('George Reavy', 2947),
 ('George Ritzer', 2948);
+```
 
+
+```{sql populating author table part 4}
 INSERT INTO author (author_name, author_id) VALUES
 ('George S. Clason', 2949),
 ('George Saintsbury', 2950),
@@ -4186,7 +4193,10 @@ INSERT INTO author (author_name, author_id) VALUES
 ('Jean-Luc Piningre', 3943),
 ('Jean-Michel Basquiat', 3944),
 ('Jean-Noël Schifano', 3945);
+```
 
+
+```{sql populating author table part 5}
 INSERT INTO author (author_name, author_id) VALUES
 ('Jean-Paul Marat', 3946),
 ('Jean-Paul Orpinas', 3947),
@@ -5183,7 +5193,10 @@ INSERT INTO author (author_name, author_id) VALUES
 ('Kevin Hawkes', 4938),
 ('Kevin Henkes', 4939),
 ('Kevin J. Anderson', 4940);
+```
 
+
+```{sql populating author table part 6}
 INSERT INTO author (author_name, author_id) VALUES
 ('Kevin Miller', 4941),
 ('Kevin O''Malley', 4942),
@@ -6179,7 +6192,10 @@ INSERT INTO author (author_name, author_id) VALUES
 ('Mauricio Molina', 5932),
 ('Mavis Applewater', 5933),
 ('Max Allan Collins', 5934);
+```
 
+
+```{sql populating author table part 7}
 INSERT INTO author (author_name, author_id) VALUES
 ('Max Barry', 5935),
 ('Max Beerbohm', 5936),
@@ -7175,7 +7191,10 @@ INSERT INTO author (author_name, author_id) VALUES
 ('Peter Washington', 6926),
 ('Peter Watson', 6927),
 ('Peter Woit', 6928);
+```
 
+
+```{sql populating author table part 8}
 INSERT INTO author (author_name, author_id) VALUES
 ('Peter Woodthorpe', 6929),
 ('Petrina Tinslay', 6930),
@@ -8172,7 +8191,10 @@ INSERT INTO author (author_name, author_id) VALUES
 ('Sarah Shankman', 7921),
 ('Sarah Susanka', 7922),
 ('Sarah Vowell', 7923);
+```
 
+
+```{sql populating author table part 9}
 INSERT INTO author (author_name, author_id) VALUES
 ('Sarah Webb', 7924),
 ('Sarvepalli Radhakrishnan', 7925),
@@ -9151,7 +9173,10 @@ INSERT INTO author (author_name, author_id) VALUES
 ('Vsevolod Garshin', 8898),
 ('W. Chan Kim', 8899),
 ('W. Frederick Zimmerman', 8900);
+```
 
+
+```{sql populating author table part 9}
 INSERT INTO author (author_name, author_id) VALUES
 ('W. Haden Blackman', 8901),
 ('W. Heath Robinson', 8902),
@@ -9502,8 +9527,7 @@ SELECT * FROM author ;
 
 ### Populating Publisher Table
 
-```{sql Populating Publisher Table}
-
+```{sql Populating Publisher Table part1}
 INSERT INTO publisher (publisher_name, publisher_id) VALUES
 ('10/18', 1),
 ('1st Book Library', 2),
@@ -10495,7 +10519,10 @@ INSERT INTO publisher (publisher_name, publisher_id) VALUES
 ('Houghton Mifflin Harcourt P', 988),
 ('Houghton Mifflin/Seymour Lawrence', 989),
 ('House of Anansi Press', 990);
+```
 
+
+```{sql Populating Publisher Table part 2}
 INSERT INTO publisher (publisher_name, publisher_id) VALUES
 ('House of Stratus', 991),
 ('Hovel Audio', 992),
@@ -11479,7 +11506,10 @@ INSERT INTO publisher (publisher_name, publisher_id) VALUES
 ('Thomas Y. Crowell Company', 1970),
 ('Thorndike Press', 1971),
 ('Thorndike Press Large Print', 1972);
+```
 
+
+```{sql Populating Publisher Table part 3}
 INSERT INTO publisher (publisher_name, publisher_id) VALUES
 ('Three Rivers Press', 1973),
 ('Three Rivers Press (CA)', 1974),
@@ -11868,8 +11898,7 @@ SELECT * FROM order_status ;
 
 ### Populating book table
 
-```{sql populating book table}
-
+```{sql populating book table part 1}
 INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) VALUES
 ('The World''s First Love: Mary  Mother of God', 1, '8987059752', 2, 276, '1996-09-01', 1010),
 ('The Illuminati', 2, '20049130001', 1, 352, '2004-10-04', 1967),
@@ -12843,7 +12872,10 @@ INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_da
 ('The Nice and the Good', 970, '9780140030341', 1, 362, '1978-12-14', 1476),
 ('Bruno''s Dream', 971, '9780140031768', 1, 320, '1976-11-18', 1476),
 ('The Pearl/The Red Pony', 972, '9780140042320', 1, 181, '1976-09-30', 1476);
+```
 
+
+```{sql populating book table part 2}
 INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) VALUES
 ('Montaillou: Cathars and Catholics in a French Village  1294-1324', 973, '9780140054712', 5, 400, '1980-05-29', 1488),
 ('My Uncle Oswald', 974, '9780140055771', 1, 208, '1986-05-01', 1472),
@@ -13800,7 +13832,10 @@ INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_da
 ('The Design and Implementation of the 4.3BSD UNIX Operating System', 1925, '9780201061963', 1, 471, '1989-06-01', 33),
 ('Six Easy Pieces: Essentials of Physics Explained by Its Most Brilliant Teacher (Helix)', 1926, '9780201408256', 2, 176, '1996-04-10', 214),
 ('Refactoring: Improving the Design of Existing Code', 1927, '9780201485677', 1, 431, '1999-07-08', 34);
+```
 
+
+```{sql populating book table part 3}
 INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) VALUES
 ('Data Structures and Algorithm Analysis in C', 1928, '9780201498400', 1, 528, '1996-09-19', 1462),
 ('The Feynman Lectures on Physics  3 Vols', 1929, '9780201500646', 2, 3, '1989-01-01', 33),
@@ -14795,7 +14830,10 @@ INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_da
 ('Flirting with Danger', 2918, '9780373073160', 1, 253, '1989-12-01', 1818),
 ('Long Gone Lonesome Blues (The Texas Brands  #4)', 2919, '9780373078547', 1, 251, '1998-04-01', 1816),
 ('Stranger from the Past', 2920, '9780373115990', 1, 224, '1993-09-24', 857);
+```
 
+
+```{sql populating book table part 4}
 INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) VALUES
 ('A Matter of Trust', 2921, '9780373117192', 1, 224, '1994-12-23', 857),
 ('Flirting With Danger', 2922, '9780373118182', 1, 188, '1996-06-01', 851),
@@ -15794,7 +15832,10 @@ INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_da
 ('Practical Magic (Practical Magic #1)', 3915, '9780425190371', 1, 286, '2003-08-05', 1470),
 ('All Tomorrow''s Parties (Bridge  #3)', 3916, '9780425190449', 1, 339, '2003-02-04', 243),
 ('Idoru (Bridge #2)', 3917, '9780425190456', 1, 308, '2003-01-07', 252);
+```
 
+
+```{sql populating book table part 5}
 INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) VALUES
 ('Sea of Fire (Tom Clancy''s Op-Center  #10)', 3918, '9780425190913', 1, 400, '2003-06-24', 243),
 ('McNally''s Alibi (Archy McNally Novels)', 3919, '9780425191194', 1, 304, '2003-08-05', 242),
@@ -16783,7 +16824,10 @@ INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_da
 ('Gorgias/Timaeus', 4902, '9780486427591', 1, 256, '2003-07-15', 582),
 ('The Burgess Bird Book for Children', 4903, '9780486428406', 1, 260, '2003-04-23', 582),
 ('Great Russian Short Stories', 4904, '9780486429922', 1, 208, '2003-07-29', 582);
+```
 
+
+```{sql populating book table part 6}
 INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) VALUES
 ('Babbitt', 4905, '9780486431673', 2, 320, '2003-09-22', 582),
 ('Hunger', 4906, '9780486431680', 1, 134, '2003-11-17', 582),
@@ -17780,7 +17824,10 @@ INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_da
 ('Journey to Ixtlan', 5897, '9780671732462', 1, 272, '1991-02-01', 2171),
 ('Second Ring of Power', 5898, '9780671732479', 2, 328, '1991-04-01', 2171),
 ('Power of Silence', 5899, '9780671732486', 1, 288, '1991-06-01', 2171);
+```
 
+
+```{sql populating book table part 7}
 INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) VALUES
 ('Fire from Within', 5900, '9780671732509', 2, 304, '1991-01-01', 2171),
 ('Tales of Power', 5901, '9780671732523', 2, 304, '1991-01-01', 2171),
@@ -18780,7 +18827,10 @@ INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_da
 ('Dragon Quest VIII: Journey of the Cursed King Official Strategy Guide', 6895, '9780744005837', 1, 240, '2005-11-08', 313),
 ('Castlevania: Curse of Darkness Official Strategy Guide', 6896, '9780744006452', 1, 176, '2005-10-28', 313),
 ('Sir Gawain and the Green Knight', 6897, '9780744520057', 1, 29, '1991-06-27', 2159);
+```
 
+
+```{sql populating book table part 8}
 INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) VALUES
 ('Sir Gawain And The Green Knight', 6898, '9780744586466', 1, 120, '2004-11-01', 2156),
 ('Dracula', 6899, '9780744586534', 1, 336, '2004-10-04', 2159),
@@ -19771,7 +19821,10 @@ INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_da
 ('The Captain''s Verses', 7884, '9780811215800', 6, 151, '2004-07-19', 1331),
 ('Borges and The Eternal Orangutans', 7885, '9780811215923', 1, 135, '2005-05-17', 1329),
 ('A Streetcar Named Desire', 7886, '9780811216029', 2, 192, '2004-09-17', 1329);
+```
 
+
+```{sql populating book table part 9}
 INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) VALUES
 ('October Light', 7887, '9780811216371', 1, 399, '2005-10-17', 1329),
 ('Journey to the End of the Night', 7888, '9780811216548', 1, 453, '2006-05-17', 1329),
@@ -20770,7 +20823,10 @@ INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_da
 ('The Best of the Spirit', 8881, '9781401207557', 1, 187, '2005-11-01', 506),
 ('V for Vendetta', 8882, '9781401207922', 1, 296, '2005-11-01', 2096),
 ('Seven Soldiers of Victory  Volume 1', 8883, '9781401209254', 1, 224, '2006-01-04', 506);
+```
 
+
+```{sql populating book table part 10}
 INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) VALUES
 ('Kid Eternity', 8884, '9781401209339', 1, 144, '2006-02-01', 2096),
 ('Challengers of the Unknown: Stolen Moments  Borrowed Time', 8885, '9781401209414', 1, 144, '2006-03-29', 506),
@@ -21721,7 +21777,10 @@ INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_da
 ('Monte Cook Presents The Year''s Best D20 (Volume One)', 9830, '9781588467980', 1, 96, '2005-08-15', 1206),
 ('Tomie 1  富江', 9831, '9781588990846', 1, 248, '2005-04-04', 433),
 ('Tomie 2  富江 Part 2', 9832, '9781588990853', 1, 247, '2005-04-04', 433);
+```
 
+
+```{sql populating book table part 11}
 INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) VALUES
 ('Category: Freaks  Vol. 1 (Category: Freaks  #1)', 9833, '9781588993007', 1, 184, '2005-07-01', 587),
 ('Louisa May Alcott''s Christmas Treasury', 9834, '9781589199507', 1, 282, '2002-06-01', 495),
@@ -22706,7 +22765,10 @@ INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_da
 ('Auszeit für Engel Walsh Family  #3)', 10813, '9783453868571', 10, 477, '2003-02-01', 956),
 ('April  May und June', 10814, '9783458334224', 10, 88, '1995-04-01', 1024),
 ('Homo faber: Ein Bericht.', 10815, '9783458340447', 10, 298, '1995-01-01', 1023);
+```
 
+
+```{sql populating book table part 12}
 INSERT INTO book (title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) VALUES
 ('Chronik eines angekündigten Todes', 10816, '9783462031959', 10, 119, '2002-08-01', 1079),
 ('Alles ist erleuchtet', 10817, '9783462032178', 10, 384, '2003-02-20', 1079),
@@ -23029,7 +23091,7 @@ SELECT * FROM book ;
 
 ### Populating book author table
 
-```{sql populating book author table }
+```{sql populating book author table part 1}
 INSERT INTO book_author (book_id, author_id) VALUES
 (1570, 2823),
 (10539, 6439),
@@ -24029,7 +24091,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (8529, 4163),
 (8537, 5878),
 (8543, 6432);
+```
 
+
+```{sql populating book author table 2}
 INSERT INTO book_author (book_id, author_id) VALUES
 (8545, 7011),
 (8550, 874),
@@ -25027,7 +25092,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (3248, 6538),
 (3249, 5333),
 (3252, 7683);
+```
 
+
+```{sql populating book author table 3}
 INSERT INTO book_author (book_id, author_id) VALUES
 (3259, 7388),
 (3261, 664),
@@ -26028,7 +26096,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (7767, 5810),
 (7770, 3879),
 (7771, 6572);
+```
 
+
+```{sql populating book author table 4}
 INSERT INTO book_author (book_id, author_id) VALUES
 (7774, 4464),
 (7775, 6572),
@@ -27028,7 +27099,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (113, 8373),
 (115, 2555),
 (120, 6949);
+```
 
+
+```{sql populating book author table 5}
 INSERT INTO book_author (book_id, author_id) VALUES
 (124, 143),
 (127, 148),
@@ -28028,7 +28102,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (2213, 3755),
 (2214, 5469),
 (2215, 4896);
+```
 
+
+```{sql populating book author table 6}
 INSERT INTO book_author (book_id, author_id) VALUES
 (2219, 7269),
 (2220, 4639),
@@ -29028,7 +29105,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (3721, 8040),
 (3722, 8085),
 (3724, 494);
+```
 
+
+```{sql populating book author table 7}
 INSERT INTO book_author (book_id, author_id) VALUES
 (3725, 4336),
 (3726, 7145),
@@ -30028,7 +30108,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (5399, 7609),
 (5400, 4587),
 (5401, 7875);
+```
 
+
+```{sql populating book author table 8}
 INSERT INTO book_author (book_id, author_id) VALUES
 (5402, 7875),
 (5403, 7875),
@@ -31028,7 +31111,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (7055, 5995),
 (7056, 8461),
 (7057, 8461);
+```
 
+
+```{sql populating book author table 9}
 INSERT INTO book_author (book_id, author_id) VALUES
 (7058, 1018),
 (7059, 1018),
@@ -32028,7 +32114,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (9119, 8669),
 (9122, 7761),
 (9129, 8669);
+```
 
+
+```{sql populating book author table 10}
 INSERT INTO book_author (book_id, author_id) VALUES
 (9130, 7761),
 (9131, 5880),
@@ -33028,7 +33117,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (9677, 7091),
 (9973, 5889),
 (10442, 8026);
+```
 
+
+```{sql populating book author table 11}
 INSERT INTO book_author (book_id, author_id) VALUES
 (1577, 1829),
 (7911, 1849),
@@ -34028,7 +34120,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (8179, 1605),
 (8255, 7312),
 (8262, 6513);
+```
 
+
+```{sql populating book author table 12}
 INSERT INTO book_author (book_id, author_id) VALUES
 (8272, 4799),
 (8291, 2406),
@@ -35028,7 +35123,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (2559, 3357),
 (2560, 5053),
 (2561, 5053);
+```
 
+
+```{sql populating book author table 13}
 INSERT INTO book_author (book_id, author_id) VALUES
 (2562, 8383),
 (1795, 336),
@@ -36028,7 +36126,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (6966, 4013),
 (6967, 5471),
 (6986, 4835);
+```
 
+
+```{sql populating book author table 14}
 INSERT INTO book_author (book_id, author_id) VALUES
 (6999, 434),
 (7026, 3663),
@@ -37028,7 +37129,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (10483, 6458),
 (10486, 4176),
 (10489, 7039);
+```
 
+
+```{sql populating book author table 15}
 INSERT INTO book_author (book_id, author_id) VALUES
 (10491, 1596),
 (5099, 1227),
@@ -38028,7 +38132,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (3889, 8292),
 (3890, 8292),
 (3891, 8292);
+```
 
+
+```{sql populating book author table 16}
 INSERT INTO book_author (book_id, author_id) VALUES
 (3894, 8292),
 (3901, 8292),
@@ -39028,7 +39135,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (6393, 4722),
 (6439, 1737),
 (6460, 4588);
+```
 
+
+```{sql populating book author table 17}
 INSERT INTO book_author (book_id, author_id) VALUES
 (6569, 1551),
 (6588, 834),
@@ -40028,7 +40138,10 @@ INSERT INTO book_author (book_id, author_id) VALUES
 (3669, 7105),
 (7968, 1830),
 (8351, 4307);
+```
 
+
+```{sql populating book author table 18}
 INSERT INTO book_author (book_id, author_id) VALUES
 (9361, 3192),
 (9364, 8681),
@@ -41973,7 +42086,7 @@ SELECT * FROM address ;
 
 ### Populating customers table
 
-```{sql populating customers table}
+```{sql populating customers table part 1}
 INSERT INTO customer (customer_id, first_name, last_name, email) VALUES
 (1, 'Ursola', 'Purdy', 'upurdy0@cdbaby.com'),
 (2, 'Ruthanne', 'Vatini', 'rvatini1@fema.gov'),
@@ -42975,7 +43088,10 @@ INSERT INTO customer (customer_id, first_name, last_name, email) VALUES
 (998, 'Forbes', 'Rattrie', 'frattrierp@foxnews.com'),
 (999, 'Gus', 'Willavoys', 'gwillavoysrq@deliciousdays.com'),
 (1000, 'Fanechka', 'Bartomeu', 'fbartomeurr@washington.edu');
+```
 
+
+```{sql populating customers table part 2}
 INSERT INTO customer (customer_id, first_name, last_name, email) VALUES
 (1001, 'Ricky', 'Lafranconi', 'rlafranconi0@rakuten.co.jp'),
 (1002, 'Elva', 'Shearme', 'eshearme1@unblog.fr'),
@@ -43988,7 +44104,7 @@ SELECT * FROM customers ;
 ### Populate others table
 
 
-```{sql populate others table}
+```{sql populate customer addresses table}
 /* Generate customer_address data */
 -- WITH customer_rows AS (
 --     SELECT c.customer_id,
@@ -44024,7 +44140,10 @@ a.address_id,
 FROM customer_rows c
 INNER JOIN address_rows a
 ON a.rn = c.rn;
+```
 
+
+```{sql populate customer addresses table part 2 }
 /* Insert next 1000 customers */
 INSERT INTO customer_address (customer_id, address_id, status_id)
 WITH customer_rows AS (
@@ -44048,6 +44167,10 @@ WHERE NOT EXISTS (
     FROM customer_address ca
     WHERE ca.customer_id = c.customer_id
     AND ca.address_id = a.address_id
+```
+
+
+```{sql populate customer addresses table part 3}
 );
 
 /* Add a second active address for 750 of those customers */
@@ -44075,7 +44198,10 @@ WHERE NOT EXISTS (
     AND ca.address_id = a.address_id
 )
 LIMIT 750;
+```
 
+
+```{sql populate customer addresses table part 4}
 /* Add an inactive address for customers */
 INSERT INTO customer_address (customer_id, address_id, status_id)
 WITH customer_rows AS (
@@ -44101,8 +44227,10 @@ WHERE NOT EXISTS (
     AND ca.address_id = a.address_id
 )
 LIMIT 400;
+```
 
 
+```{sql populate customer addresses table part 5}
 /* Add an active address for 200 customers */
 INSERT INTO customer_address (customer_id, address_id, status_id)
 WITH customer_rows AS (
@@ -44140,9 +44268,12 @@ SELECT * FROM others ;
 
 ### Populate orders table
 
-```{sql populate orders table}
+```{sql DELETE FROM cust_order table}
 DELETE FROM cust_order;
+```
 
+
+```{sql populate customer orders table}
 /* Add 2500 orders */
 INSERT INTO cust_order (order_date, customer_id, shipping_method_id, dest_address_id)
 SELECT
@@ -44161,7 +44292,10 @@ SELECT
 FROM customer c
 INNER JOIN customer_address ca ON c.customer_id = ca.customer_id
 LIMIT 2500;
+```
 
+
+```{sql populate customer orders table part 2}
 /* Add more orders */
 INSERT INTO cust_order (order_date, customer_id, shipping_method_id, dest_address_id)
 SELECT
@@ -44180,7 +44314,10 @@ SELECT
 FROM customer c
 INNER JOIN customer_address ca ON c.customer_id = ca.customer_id
 LIMIT 1500;
+```
 
+
+```{sql populate customer orders table part 3}
 INSERT INTO cust_order (order_date, customer_id, shipping_method_id, dest_address_id)
 SELECT
 	DATETIME(
@@ -44198,7 +44335,10 @@ SELECT
 FROM customer c
 INNER JOIN customer_address ca ON c.customer_id = ca.customer_id
 LIMIT 1200;
+```
 
+
+```{sql populate customer orders table part 4}
 INSERT INTO cust_order (order_date, customer_id, shipping_method_id, dest_address_id)
 SELECT
 	DATETIME(
@@ -44216,7 +44356,10 @@ SELECT
 FROM customer c
 INNER JOIN customer_address ca ON c.customer_id = ca.customer_id
 LIMIT 900;
+```
 
+
+```{sql populate customer orders table part 5}
 INSERT INTO cust_order (order_date, customer_id, shipping_method_id, dest_address_id)
 SELECT
 	DATETIME(
@@ -44234,7 +44377,10 @@ SELECT
 FROM customer c
 INNER JOIN customer_address ca ON c.customer_id = ca.customer_id
 LIMIT 600;
+```
 
+
+```{sql populate customer orders table part 6}
 INSERT INTO cust_order (order_date, customer_id, shipping_method_id, dest_address_id)
 SELECT
 	DATETIME(
@@ -44252,7 +44398,10 @@ SELECT
 FROM customer c
 INNER JOIN customer_address ca ON c.customer_id = ca.customer_id
 LIMIT 400;
+```
 
+
+```{sql populate customer orders table part 7}
 INSERT INTO cust_order (order_date, customer_id, shipping_method_id, dest_address_id)
 SELECT
 	DATETIME(
@@ -44270,7 +44419,10 @@ SELECT
 FROM customer c
 INNER JOIN customer_address ca ON c.customer_id = ca.customer_id
 LIMIT 300;
+```
 
+
+```{sql populate customer orders table part 8}
 INSERT INTO cust_order (order_date, customer_id, shipping_method_id, dest_address_id)
 SELECT
 	DATETIME(
@@ -44288,7 +44440,10 @@ SELECT
 FROM customer c
 INNER JOIN customer_address ca ON c.customer_id = ca.customer_id
 LIMIT 100;
+```
 
+
+```{sql populate customer orders table part 9}
 INSERT INTO cust_order (order_date, customer_id, shipping_method_id, dest_address_id)
 SELECT
 	DATETIME(
@@ -44311,8 +44466,7 @@ LIMIT 50;
 
 ### Populate order_line table
 
-```{sql Populate order_line table}
-
+```{sql Populate order_line table part 1}
 /* Add a line for all orders */
 INSERT INTO order_line (order_id, book_id, price)
 WITH book_rows AS (
@@ -44333,7 +44487,10 @@ SELECT
 FROM order_rows o
 INNER JOIN book_rows b ON o.rn = b.rn
 ORDER BY RANDOM();
+```
 
+
+```{sql Populate order_line table part 2}
 /* Add lines to some orders */
 INSERT INTO order_line (order_id, book_id, price)
 WITH book_rows AS (
@@ -44355,7 +44512,10 @@ FROM order_rows o
 INNER JOIN book_rows b ON o.rn = b.rn
 ORDER BY RANDOM()
 LIMIT 4000;
+```
 
+
+```{sql Populate order_line table part 3}
 INSERT INTO order_line (order_id, book_id, price)
 WITH book_rows AS (
 	SELECT
@@ -44376,7 +44536,10 @@ FROM order_rows o
 INNER JOIN book_rows b ON o.rn = b.rn
 ORDER BY RANDOM()
 LIMIT 2000;
+```
 
+
+```{sql Populate order_line table part 4}
 INSERT INTO order_line (order_id, book_id, price)
 WITH book_rows AS (
 	SELECT
@@ -44397,7 +44560,10 @@ FROM order_rows o
 INNER JOIN book_rows b ON o.rn = b.rn
 ORDER BY RANDOM()
 LIMIT 1000;
+```
 
+
+```{sql Populate order_line table part 5}
 INSERT INTO order_line (order_id, book_id, price)
 WITH book_rows AS (
 	SELECT
@@ -44418,7 +44584,10 @@ FROM order_rows o
 INNER JOIN book_rows b ON o.rn = b.rn
 ORDER BY RANDOM()
 LIMIT 500;
+```
 
+
+```{sql Populate order_line table part 6}
 INSERT INTO order_line (order_id, book_id, price)
 WITH book_rows AS (
 	SELECT
@@ -44439,7 +44608,10 @@ FROM order_rows o
 INNER JOIN book_rows b ON o.rn = b.rn
 ORDER BY RANDOM()
 LIMIT 300;
+```
 
+
+```{sql Populate order_line table part 7}
 INSERT INTO order_line (order_id, book_id, price)
 WITH book_rows AS (
 	SELECT
@@ -44467,8 +44639,7 @@ LIMIT 50;
 
 ### Populate order_history table
 
-```{sql populate order_history table}
-
+```{sql populate order_history table part 1}
 /* Add order received for all orders older than 12 hours */
 INSERT INTO order_history (order_id, status_id, status_date)
 SELECT 
@@ -44481,7 +44652,10 @@ SELECT
 FROM
 	cust_order o
 WHERE o.order_date < DATE('now','-12 hours');
+```
 
+
+```{sql populate order_history table part 2}
 /*Add Pending Delivery for most of these orders, within 2 days after the previous step, where orders are older than 2 days */
 INSERT INTO order_history (order_id, status_id, status_date)
 SELECT 
@@ -44496,7 +44670,10 @@ FROM
 WHERE o.order_date < DATE('now','-2 days') 
 ORDER BY RANDOM()
 LIMIT 6800;
+```
 
+
+```{sql populate order_history table part 3}
 /*Add Delivery In Progress for orders that have a status of 2 and at least a few days in the past*/
 INSERT INTO order_history (order_id, status_id, status_date)
 SELECT 
@@ -44511,7 +44688,10 @@ WHERE o.status_date < DATE('now','-2 days')
 AND o.status_id = 2
 ORDER BY RANDOM()
 LIMIT 4000;
+```
 
+
+```{sql populate order_history table part 4}
 /* Add Delivered for orders that have a status of 2 and at least a few days in the past */
 INSERT INTO order_history (order_id, status_id, status_date)
 SELECT 
@@ -44526,7 +44706,10 @@ WHERE o.status_date < DATE('now','-6 days')
 AND o.status_id = 3
 ORDER BY RANDOM()
 LIMIT 3500;
+```
 
+
+```{sql populate order_history table part 5}
 /*#Add some Cancelled orders*/
 INSERT INTO order_history (order_id, status_id, status_date)
 SELECT 
@@ -44547,7 +44730,10 @@ AND NOT EXISTS (
 )
 ORDER BY RANDOM()
 LIMIT 300;
+```
 
+
+```{sql populate order_history table part 6}
 /*#Add some Returned orders*/
 INSERT INTO order_history (order_id, status_id, status_date)
 SELECT
@@ -44572,3 +44758,21 @@ LIMIT 200;
 
 ```
 
+
+### Saving tables for future use
+
+```{r save tables as csvs for use in other scripts, warning=FALSE, message=FALSE}
+
+# Get a list of all tables in the connection
+tables <- dbListTables(con)
+
+# Loop through each table and write it to a CSV file
+for (table in tables) {
+  # Read the table from the SQL connection
+  data <- dbReadTable(con, table)
+  
+  # Write the table to a CSV file
+  write.csv(data, paste0(table, ".csv"), row.names = FALSE)
+}
+
+```
