@@ -9,8 +9,7 @@ output:
     code_folding: hide
 ---
 
-The concepts outlined by the SQL code below are taken from this LinkedIn learning course, ***"SQL for Data Analysis"*** - https://www.linkedin.com/learning/sql-for-data-analysis
-
+The concepts outlined by the SQL code below are taken from this LinkedIn learning course, ***"SQL for Data Analysis"*** - <https://www.linkedin.com/learning/sql-for-data-analysis>
 
 ```{r setup, include=FALSE}
 rm(list = ls())
@@ -33,11 +32,11 @@ tables <- dbListTables(con)
 print(tables)
 ```
 
-
 ```{r reading in data to the pretend database, warning=FALSE, message=FALSE, include=FALSE}
 # List of table names (should match the original table names)
-tables <- c("country", "ranking_criteria", "ranking_system",
-            "university","university_ranking_year","university_year") # Replace with your actual table names
+tables <- c("author", "book","book_author","book_language","country","cust_order",
+            "customer","customer","customer_address","order_history","order_line",
+            "order_status","publisher","shipping_method","address","address_status") # Replace with your actual table names
 
 # Loop through each table and read it from the CSV file
 for (table in tables) {
@@ -64,13 +63,70 @@ SELECT name FROM sqlite_master WHERE type='table';
 ```
 
 
+```{r gravity bookstore dataset erd png, message=FALSE, warning=FALSE}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+
 ## 1 Working with Dates
+
+Key date and time functions in SQLite -
+
+-   DATE() - While SQLite doesn't have a TIMESTAMP function like in MySQL, this function returns the date in 'YYYY-MM-DD' format.
+
+```{sql Using Date function}
+SELECT DATE('now') AS "Current Date"; -- returns the current date
+```
+
+-   DATETIME() - This function returns the date and time in 'YYYY-MM-DD HH:MM' format.
+
+```{sql Using DateTime function}
+
+SELECT DATETIME('now') AS "Current Date and Time"; -- returns the current date and time
+```
+
+-   YEAR(): SQLite doesn't have a YEAR function, but one can use the STRFTIME function to extract the year from a date.
+
+```{sql STRFTIME function}
+SELECT STRFTIME('%Y', 'now') AS "Current Year"; -- returns the current year
+```
+
+-   TIME(): Returns the time in 'HH:MM' format.
+
+```{sql TIME function}
+SELECT TIME('now') as "Current Time"; -- returns the current time
+```
+
+
+```{sql CURRENT_DATE function }
+SELECT CURRENT_DATE as "Current Date"; -- returns the current date
+
+```
+
+```{sql CURRENT_TIME function }
+SELECT CURRENT_TIME as "Current Time"; -- returns the current time
+
+```
+
+```{sql CURRENT_TIMESTAMP function }
+SELECT CURRENT_TIMESTAMP as "Current Time and Date"; -- returns the current date and time
+
+```
+
+```{sql}
+SELECT order_date as "Order Date" from cust_order;
+
+```
+
+
 
 ```{sql}
 
-
-
-
-
+SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE order_date BETWEEN '2023-11-01'
+and '2024-14-01';
 ```
+
+
+
 
