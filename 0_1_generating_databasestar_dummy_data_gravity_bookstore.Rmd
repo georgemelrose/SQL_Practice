@@ -179,7 +179,7 @@ CREATE TABLE shipping_method (
 ```{sql create customer order table}
 CREATE TABLE cust_order (
     order_id INTEGER PRIMARY KEY,
-    order_date DATETIME,
+    order_date DATE,
     customer_id INTEGER,
     shipping_method_id INTEGER,
     dest_address_id INTEGER,
@@ -215,7 +215,7 @@ CREATE TABLE order_history (
     history_id INTEGER PRIMARY KEY,
     order_id INTEGER,
     status_id INTEGER,
-    status_date DATETIME,
+    status_date DATE,
     CONSTRAINT fk_oh_order FOREIGN KEY (order_id) REFERENCES cust_order (order_id),
     CONSTRAINT fk_oh_status FOREIGN KEY (status_id) REFERENCES order_status (status_id)
 );
