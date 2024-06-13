@@ -115,7 +115,18 @@ SELECT CURRENT_TIMESTAMP as "Current Time and Date"; -- returns the current date
 ```
 
 ```{sql}
+
 SELECT order_date as "Order Date" from cust_order;
+
+```
+
+
+
+
+
+```{sql}
+
+SELECT status_date as "Status Date" from order_history;
 
 ```
 
@@ -124,9 +135,38 @@ SELECT order_date as "Order Date" from cust_order;
 ```{sql}
 
 SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE order_date BETWEEN '2023-11-01'
-and '2024-14-01';
+and '2024-05-01' ORDER BY order_date DESC;
 ```
 
 
 
+
+
+SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE order_date < Now();
+
+The above SQL code isn't possible as there isn't a Now() function in SQLite. 
+
+
+
+```{sql}
+
+SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE order_date < CURRENT_TIMESTAMP;
+
+```
+
+
+```{sql}
+
+SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE order_date > CURRENT_TIMESTAMP;
+
+```
+
+
+SQLite doesn't have a YEAR() function but it does have a TIME() function to use. 
+
+
+```{sql}
+SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE TIME(order_date) > TIME(CURRENT_TIMESTAMP);
+
+```
 
