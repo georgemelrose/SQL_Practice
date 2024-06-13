@@ -34,9 +34,33 @@ print(tables)
 
 ```{r reading in data to the pretend database, warning=FALSE, message=FALSE, include=FALSE}
 # List of table names (should match the original table names)
-tables <- c("author", "book","book_author","book_language","country","cust_order",
-            "customer","customer","customer_address","order_history","order_line",
+tables <- c("author","book_author","book_language","country",
+            "customer","customer","customer_address","order_line",
             "order_status","publisher","shipping_method","address","address_status") # Replace with your actual table names
+
+book <- read_csv("book.csv")
+
+book$publication_date <- as.character(book$publication_date)
+  
+# Write the table to the new SQL connection
+dbWriteTable(con, "book", book, overwrite = TRUE)
+
+cust_order <- read_csv("cust_order.csv")
+
+cust_order$order_date <- as.character(cust_order$order_date)
+  
+# Write the table to the new SQL connection
+dbWriteTable(con, "cust_order", cust_order, overwrite = TRUE)
+  
+
+order_history <- read_csv("order_history.csv")
+
+order_history$status_date <- as.character(order_history$status_date)
+  
+# Write the table to the new SQL connection
+dbWriteTable(con, "order_history", order_history, overwrite = TRUE)
+  
+  
 
 # Loop through each table and read it from the CSV file
 for (table in tables) {
@@ -47,8 +71,30 @@ for (table in tables) {
   dbWriteTable(con, table, data, overwrite = TRUE)
 }
 
+
+
 rm(data)
+
 ```
+
+```{sql}
+
+select * from book
+
+```
+
+```{sql}
+
+select * from book
+
+```
+
+```{sql }
+select * from book_language
+```
+
+
+
 
 ```{r Print the tables currently in the database, warning=FALSE, message=FALSE, include=FALSE}
 # List the tables present in the database connected through 'con'
@@ -62,12 +108,10 @@ print(tables)
 SELECT name FROM sqlite_master WHERE type='table';
 ```
 
-
 ```{r gravity bookstore dataset erd png, message=FALSE, warning=FALSE}
 knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
 
 ```
-
 
 ## 1 Working with Dates
 
@@ -98,7 +142,6 @@ SELECT STRFTIME('%Y', 'now') AS "Current Year"; -- returns the current year
 SELECT TIME('now') as "Current Time"; -- returns the current time
 ```
 
-
 ```{sql CURRENT_DATE function }
 SELECT CURRENT_DATE as "Current Date"; -- returns the current date
 
@@ -116,21 +159,9 @@ SELECT CURRENT_TIMESTAMP as "Current Time and Date"; -- returns the current date
 
 ```{sql}
 
-SELECT order_date as "Order Date" from cust_order;
-
-```
-
-
-
-
-
-```{sql}
-
 SELECT status_date as "Status Date" from order_history;
 
 ```
-
-
 
 ```{sql}
 
@@ -138,15 +169,9 @@ SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order 
 and '2024-05-01' ORDER BY order_date DESC;
 ```
 
+SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE order_date \< Now();
 
-
-
-
-SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE order_date < Now();
-
-The above SQL code isn't possible as there isn't a Now() function in SQLite. 
-
-
+The above SQL code isn't possible as there isn't a Now() function in SQLite.
 
 ```{sql}
 
@@ -154,19 +179,51 @@ SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order 
 
 ```
 
-
 ```{sql}
 
 SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE order_date > CURRENT_TIMESTAMP;
 
 ```
 
-
-SQLite doesn't have a YEAR() function but it does have a TIME() function to use. 
-
+SQLite doesn't have a YEAR() function but it does have a TIME() function to use.
 
 ```{sql}
 SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE TIME(order_date) > TIME(CURRENT_TIMESTAMP);
 
+```
+
+## 2 - Common SQL String Functions
+
+The function SUBSTRING() returns a part of a character string SUBSTRING(*string, start, length*)
+
+```{sql using substring}
+
+select title as "Book Title" from book WHERE SUBSTRING(Title,1,2) = 'Ro'
+
+```
+
+The CONCAT(*string1, string2,....,string_n*) function joins two or more strings together
+
+```{sql using concat}
+
+select CONCAT(first_name,' ',last_name) AS "Full Name" from customer
+
+```
+
+The UPPER() and LOWER() functions will return strings as upper case or lower case, respectively.
+
+```{sql using the UPPER function}
+select UPPER(CONCAT(first_name,' ',last_name)) AS "Full Name" from customer
+```
+
+```{sql using the LOWER function}
+select LOWER(CONCAT(first_name,' ',last_name)) AS "Full Name" from customer
+```
+
+
+The REPLACE() function replaces a substring with another substring - REPLACE(*string, old_string, new_string*)
+
+```{sql Using the REPLACE function }
+select REPLACE(language_id, '1', "English") as Language from book where language_id = '1'
 ```
 
