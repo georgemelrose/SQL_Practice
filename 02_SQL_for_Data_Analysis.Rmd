@@ -16,7 +16,7 @@ rm(list = ls())
 
 knitr::opts_chunk$set(echo = TRUE)
 
-pacman::p_load(readr,tidyverse, data.table,DBI,odbc,RSQLite)
+pacman::p_load(readr,tidyverse, data.table,DBI,odbc,RSQLite,packrat)
 
 options(max.print = 1000) 
 getOption("max.print")
@@ -77,19 +77,22 @@ rm(data)
 
 ```
 
-```{sql}
+
+```{r gravity bookstore dataset erd png, message=FALSE, warning=FALSE}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+
+
+```{sql looking at the book table columns}
 
 select * from book
 
 ```
 
-```{sql}
 
-select * from book
-
-```
-
-```{sql }
+```{sql looking at the book_language table columns}
 select * from book_language
 ```
 
@@ -108,12 +111,10 @@ print(tables)
 SELECT name FROM sqlite_master WHERE type='table';
 ```
 
-```{r gravity bookstore dataset erd png, message=FALSE, warning=FALSE}
-knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
 
-```
+## 1 Working with Dates {.tabset .tabset-fade .tabset-pills}
 
-## 1 Working with Dates
+### Date and Time functions in SQLite
 
 Key date and time functions in SQLite -
 
@@ -157,7 +158,10 @@ SELECT CURRENT_TIMESTAMP as "Current Time and Date"; -- returns the current date
 
 ```
 
-```{sql}
+### Manipulating dates in 'Bookstore' Tables
+
+
+```{sql getting status date from }
 
 SELECT status_date as "Status Date" from order_history;
 
@@ -192,7 +196,9 @@ SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order 
 
 ```
 
-## 2 - Common SQL String Functions
+## 2 - Common SQL String Functions {.tabset .tabset-fade .tabset-pills}
+
+### SUBSTRING()
 
 The function SUBSTRING() returns a part of a character string SUBSTRING(*string, start, length*)
 
@@ -202,6 +208,8 @@ select title as "Book Title" from book WHERE SUBSTRING(Title,1,2) = 'Ro'
 
 ```
 
+### CONCAT()
+
 The CONCAT(*string1, string2,....,string_n*) function joins two or more strings together
 
 ```{sql using concat}
@@ -209,6 +217,10 @@ The CONCAT(*string1, string2,....,string_n*) function joins two or more strings 
 select CONCAT(first_name,' ',last_name) AS "Full Name" from customer
 
 ```
+
+
+### UPPER() and LOWER()
+
 
 The UPPER() and LOWER() functions will return strings as upper case or lower case, respectively.
 
@@ -221,9 +233,69 @@ select LOWER(CONCAT(first_name,' ',last_name)) AS "Full Name" from customer
 ```
 
 
+### REPLACE()
+
+
 The REPLACE() function replaces a substring with another substring - REPLACE(*string, old_string, new_string*)
 
 ```{sql Using the REPLACE function }
 select REPLACE(language_id, '1', "English") as Language from book where language_id = '1'
 ```
+
+### Using TRIM, LTRIM, and RTRIM in SQLite
+
+```{sql original titles from book}
+
+select title as "Title" FROM book
+
+```
+
+TRIM: Removes leading and trailing characters (default is space).
+
+```{sql removing trailing white spaces using the trim function of the titles from the book table}
+
+select TRIM(title)  as "Trimmed Title" FROM book
+
+```
+
+
+TRIM with specific characters: Removes specified characters from both ends.
+
+```{sql trimming the characters the from the title of the book table}
+
+SELECT TRIM(title, 'The') AS "Trimmed Title" FROM book;
+
+```
+
+
+LTRIM with specific characters: Removes specified leading characters.
+
+
+```{sql Removing leading characters (default is space)}
+SELECT LTRIM(title, 'What') AS "Trimmed Title" FROM book;
+```
+
+
+```{sql}
+SELECT LTRIM(title, 'The') AS "Trimmed Title" FROM book;
+```
+RTRIM with specific characters: Removes specified trailing characters.
+
+```{sql}
+SELECT RTRIM(title, 's') AS "Trimmed Title" FROM book;
+```
+
+
+
+
+
+
+### Combining different String Functions
+
+```{sql Generating an Address function from the address table}
+
+select UPPER(CONCAT(street_number,' ',street_name,' ',city)) as "Address" from address LIMIT 6
+
+```
+
 
