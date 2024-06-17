@@ -16,7 +16,14 @@ rm(list = ls())
 
 knitr::opts_chunk$set(echo = TRUE)
 
-pacman::p_load(readr,tidyverse, data.table,DBI,odbc,RSQLite,packrat)
+pacman::p_load(readr,tidyverse, data.table,DBI,odbc,RSQLite,packrat,reticulate)
+
+
+use_python("C:/Users/gam55/PycharmProjects/AIhackathon/venv/Scripts/python.exe")
+
+Sys.setenv(PATH = paste("C:/Users/gam55/PycharmProjects/AIhackathon/venv/Scripts/python.exe", Sys.getenv("PATH"), sep = ";"))
+
+py_run_string("print('Hello from Python')")
 
 options(max.print = 1000) 
 getOption("max.print")
@@ -298,4 +305,61 @@ select UPPER(CONCAT(street_number,' ',street_name,' ',city)) as "Address" from a
 
 ```
 
+### Create Read Update Delete (CRUD) Functions
+
+```{sql checking the publisher table}
+select * from Publisher
+```
+
+
+```{sql Creating new rows in the publisher table}
+
+INSERT INTO Publisher (publisher_id, publisher_name) VALUES ('1001', 'UoG Press')
+```
+
+```{sql Checking insert from previous chunk worked}
+
+select * from Publisher WHERE publisher_name == "UoG Press"
+```
+
+```{sql Updating table information}
+
+UPDATE Publisher SET publisher_id = '1002' WHERE publisher_name == "UoG Press"
+```
+
+```{sql Checking update from previous chunk worked}
+
+select * from Publisher WHERE publisher_name == "UoG Press"
+```
+
+
+```{sql deleting rows from a table}
+
+DELETE FROM Publisher WHERE publisher_id = '1002'
+
+```
+
+```{sql Checking delete from previous chunk worked}
+
+select * from Publisher WHERE publisher_name == "UoG Press"
+
+```
+
+
+## 3 - Visualising SQL Results
+
+```{python Import necessary libraries}
+
+import pandas as pd
+
+import sqlalchemy as sa
+
+import plotly.express as px
+
+import plotly.graph_objects as go
+
+from sqlalchemy.engine import create_engine
+
+
+```
 
