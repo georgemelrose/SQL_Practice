@@ -16,20 +16,15 @@ rm(list = ls())
 
 knitr::opts_chunk$set(echo = TRUE)
 
-pacman::p_load(readr,tidyverse, data.table,DBI,odbc,RSQLite,packrat,reticulate)
-
-
-use_python("C:/Users/gam55/PycharmProjects/AIhackathon/venv/Scripts/python.exe")
-
-Sys.setenv(PATH = paste("C:/Users/gam55/PycharmProjects/AIhackathon/venv/Scripts/python.exe", Sys.getenv("PATH"), sep = ";"))
-
-py_run_string("print('Hello from Python')")
+pacman::p_load(readr,tidyverse, data.table,DBI,odbc,RSQLite,plotly,dygraphs,xts)
 
 options(max.print = 1000) 
 getOption("max.print")
 
 con <- dbConnect(SQLite(), dbname = ":memory:")
 knitr::opts_chunk$set(connection = "con")
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
 
 
 # List the tables present in the database connected through 'con'
@@ -84,13 +79,10 @@ rm(data)
 
 ```
 
-
 ```{r gravity bookstore dataset erd png, message=FALSE, warning=FALSE}
 knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
 
 ```
-
-
 
 ```{sql looking at the book table columns}
 
@@ -98,13 +90,9 @@ select * from book
 
 ```
 
-
 ```{sql looking at the book_language table columns}
 select * from book_language
 ```
-
-
-
 
 ```{r Print the tables currently in the database, warning=FALSE, message=FALSE, include=FALSE}
 # List the tables present in the database connected through 'con'
@@ -117,7 +105,6 @@ print(tables)
 ```{sql list all the tables from the database, include=FALSE}
 SELECT name FROM sqlite_master WHERE type='table';
 ```
-
 
 ## 1 Working with Dates {.tabset .tabset-fade .tabset-pills}
 
@@ -166,7 +153,6 @@ SELECT CURRENT_TIMESTAMP as "Current Time and Date"; -- returns the current date
 ```
 
 ### Manipulating dates in 'Bookstore' Tables
-
 
 ```{sql getting status date from }
 
@@ -225,9 +211,7 @@ select CONCAT(first_name,' ',last_name) AS "Full Name" from customer
 
 ```
 
-
 ### UPPER() and LOWER()
-
 
 The UPPER() and LOWER() functions will return strings as upper case or lower case, respectively.
 
@@ -239,9 +223,7 @@ select UPPER(CONCAT(first_name,' ',last_name)) AS "Full Name" from customer
 select LOWER(CONCAT(first_name,' ',last_name)) AS "Full Name" from customer
 ```
 
-
 ### REPLACE()
-
 
 The REPLACE() function replaces a substring with another substring - REPLACE(*string, old_string, new_string*)
 
@@ -265,7 +247,6 @@ select TRIM(title)  as "Trimmed Title" FROM book
 
 ```
 
-
 TRIM with specific characters: Removes specified characters from both ends.
 
 ```{sql trimming the characters the from the title of the book table}
@@ -274,28 +255,21 @@ SELECT TRIM(title, 'The') AS "Trimmed Title" FROM book;
 
 ```
 
-
 LTRIM with specific characters: Removes specified leading characters.
-
 
 ```{sql Removing leading characters (default is space)}
 SELECT LTRIM(title, 'What') AS "Trimmed Title" FROM book;
 ```
 
-
 ```{sql}
 SELECT LTRIM(title, 'The') AS "Trimmed Title" FROM book;
 ```
+
 RTRIM with specific characters: Removes specified trailing characters.
 
 ```{sql}
 SELECT RTRIM(title, 's') AS "Trimmed Title" FROM book;
 ```
-
-
-
-
-
 
 ### Combining different String Functions
 
@@ -310,7 +284,6 @@ select UPPER(CONCAT(street_number,' ',street_name,' ',city)) as "Address" from a
 ```{sql checking the publisher table}
 select * from Publisher
 ```
-
 
 ```{sql Creating new rows in the publisher table}
 
@@ -332,7 +305,6 @@ UPDATE Publisher SET publisher_id = '1002' WHERE publisher_name == "UoG Press"
 select * from Publisher WHERE publisher_name == "UoG Press"
 ```
 
-
 ```{sql deleting rows from a table}
 
 DELETE FROM Publisher WHERE publisher_id = '1002'
@@ -345,21 +317,162 @@ select * from Publisher WHERE publisher_name == "UoG Press"
 
 ```
 
+## 3 - Visualising Data {.tabset .tabset-fade .tabset-pills}
 
-## 3 - Visualising SQL Results
+### Bar Charts
 
-```{python Import necessary libraries}
+```{r yearly orders bar chart}
 
-import pandas as pd
+#creating a new column to mark each order as a 1#
+cust_order <- cust_order %>%
+  mutate(number_orders = 1)
 
-import sqlalchemy as sa
+#converting the order date column into a date format#
+cust_order$order_date <- as.Date(cust_order$order_date)
 
-import plotly.express as px
+cust_order$order_date <- ymd(cust_order$order_date)
 
-import plotly.graph_objects as go
+#simply bar chart of the no.orders, put into an object to be run through plotly#
+p <- ggplot(cust_order, aes(x = order_date, y = number_orders)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    theme_minimal() +
+    labs(title = " Simple Bar Chart", x = "Order Date", y = "No.Orders") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-from sqlalchemy.engine import create_engine
+
+#display the bar chart#
+p
+```
+
+We can use the ggplotly from the plotly package to make the plot interactive.
+
+```{r using ggplotrly to make an interactive bar chart}
+p <- ggplotly(p)
+
+p
+```
+
+```{r group cust_order data by month}
+
+cust_order_monthly  <- cust_order %>% 
+  select(order_date, number_orders) %>%
+  group_by(month = lubridate::floor_date(`order_date`, 'month'))  %>%
+  summarise("no_orders_monthly" = sum(number_orders))
 
 
+p <- ggplot(cust_order_monthly , aes(x = month, y = no_orders_monthly)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    theme_minimal() +
+    labs(title = "Monthly orders from the 'Cust_order' Table", x = "Order Date", y = "No.Orders") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+p
+
+```
+
+Making the plot interactive -
+
+```{r making the monthly bar chart interactive}
+p <- ggplotly(p)
+
+p
+```
+
+### Dygraphs
+
+<https://rstudio.github.io/dygraphs/> - An extremely useful way of visualising longitudinal data in an interactive, highly-customisable manner.
+
+```{r dygraph of above data}
+
+
+don <- xts(x = cust_order_monthly$no_orders_monthly, order.by = cust_order_monthly$month)
+
+p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Monthly No.Orders from 'cust_order' Table ") %>%
+  dySeries("V1", label = "No.Orders") %>%
+  dyRangeSelector() %>%
+  dyUnzoom() 
+ 
+
+
+p
+```
+
+```{r daily orders dygraph}
+
+#Create 'Unzoom' function#
+
+dyUnzoom <-function(dygraph) {
+  dyPlugin(
+    dygraph = dygraph,
+    name = "Unzoom",
+    path = system.file("plugins/unzoom.js", package = "dygraphs")
+  )
+}
+
+cust_order_daily  <- cust_order %>% 
+  select(order_date, number_orders) %>%
+  group_by(day = lubridate::floor_date(`order_date`, 'day'))  %>%
+  summarise("no_orders_daily" = sum(number_orders))
+
+cust_order_daily$day <- as.POSIXct(cust_order_daily$day)
+
+
+don <- xts(x = cust_order_daily$no_orders_daily, order.by = cust_order_daily$day)
+
+p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders from 'cust_order' Table ") %>%
+  dySeries("V1", label = "No.Orders") %>%
+  dyRangeSelector() %>%
+  dyUnzoom() 
+ 
+
+
+p
+```
+
+The time series can be 'filled' using the dyoptions() argument 'fillgraph' (TRUE/FALSE).
+
+```{r filled in white space below ts}
+p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders from 'cust_order' Table ") %>%
+  dySeries("V1", label = "No.Orders") %>%
+    dyOptions(fillGraph = TRUE, fillAlpha = 0.1) %>%
+  dyRangeSelector() %>%
+  dyUnzoom() 
+ 
+
+p
+```
+
+The function *dyEvent()* allows vertical lines with a label to be added. *dyAnnotation()* generates annotations directly on the time series line. 
+
+```{r filled in white space below ts}
+p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders from 'cust_order' Table ") %>%
+  dySeries("V1", label = "No.Orders") %>%
+    dyOptions(fillGraph = TRUE, fillAlpha = 0.1) %>%
+  dyRangeSelector() %>%
+  dyEvent("2023-08-24", "Andy's Order", labelLoc = "bottom") %>%
+  dyEvent("2023-10-06", "Bob's Order", labelLoc = "bottom") %>%
+  dyAnnotation("2023-09-13", text = "September 241 Offer", tooltip = "September 241 Offer") %>%
+  dyAnnotation("2023-11-13", text = "November Multi-Buy Offer",tooltip = "September 241 Offer" ) %>%
+  dyUnzoom() 
+ 
+
+p
+```
+
+
+The function *dyLimit()* allows line limites to be added.
+
+
+```{r}
+p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders from 'cust_order' Table ") %>%
+  dySeries("V1", label = "No.Orders") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.1) %>%
+  dyRangeSelector() %>%
+  dyLimit(8, color = "blue") %>%
+  dyLimit(40, color = "blue") %>%
+  dyUnzoom() 
+ 
+
+p
 ```
 
