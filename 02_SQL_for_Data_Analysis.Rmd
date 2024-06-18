@@ -451,8 +451,8 @@ p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders
   dyRangeSelector() %>%
   dyEvent("2023-08-24", "Andy's Order", labelLoc = "bottom") %>%
   dyEvent("2023-10-06", "Bob's Order", labelLoc = "bottom") %>%
-  dyAnnotation("2023-09-13", text = "September 241 Offer", tooltip = "September 241 Offer") %>%
-  dyAnnotation("2023-11-13", text = "November Multi-Buy Offer",tooltip = "September 241 Offer" ) %>%
+  dyAnnotation("2023-09-13", text = "Sep.", tooltip = "September 241 Offer") %>%
+  dyAnnotation("2023-11-13", text = "Nov.",tooltip = "November Multibuy Offer" ) %>%
   dyUnzoom() 
  
 
