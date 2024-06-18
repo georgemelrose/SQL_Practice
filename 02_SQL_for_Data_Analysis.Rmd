@@ -442,9 +442,19 @@ p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders
 p
 ```
 
-The function *dyEvent()* allows vertical lines with a label to be added. *dyAnnotation()* generates annotations directly on the time series line. 
+The function *dyEvent()* allows vertical lines with a label to be added. *dyAnnotation()* generates annotations directly on the time series line. Using a custom function, a larger annotation and attached to the x-axis is also possible, *presAnnotation()* .
+*dyshading()* allows whole areas of the graph to be shaded -
+
+
 
 ```{r filled in white space below ts}
+
+presAnnotation <- function(dygraph, x, text) {
+  dygraph %>%
+    dyAnnotation(x, text, attachAtBottom = TRUE, width = 60)
+}
+
+
 p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders from 'cust_order' Table ") %>%
   dySeries("V1", label = "No.Orders") %>%
     dyOptions(fillGraph = TRUE, fillAlpha = 0.1) %>%
@@ -453,6 +463,8 @@ p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders
   dyEvent("2023-10-06", "Bob's Order", labelLoc = "bottom") %>%
   dyAnnotation("2023-09-13", text = "Sep.", tooltip = "September 241 Offer") %>%
   dyAnnotation("2023-11-13", text = "Nov.",tooltip = "November Multibuy Offer" ) %>%
+  presAnnotation("2024-05-29", text = "BHol" ) %>%
+  dyShading(from = "2024-04-01", to = "2024-05-01", color = "#CCEBD6") %>%
   dyUnzoom() 
  
 
@@ -460,7 +472,22 @@ p
 ```
 
 
-The function *dyLimit()* allows line limites to be added.
+The function *dyLimit()* allows line limits to be added.
+
+
+```{r line limits }
+p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders from 'cust_order' Table ") %>%
+  dySeries("V1", label = "No.Orders") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.1) %>%
+  dyRangeSelector() %>%
+  dyLimit(8, color = "blue") %>%
+  dyLimit(40, color = "blue") %>%
+  dyUnzoom() 
+ 
+
+p
+```
+
 
 
 ```{r}
@@ -475,4 +502,3 @@ p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders
 
 p
 ```
-
