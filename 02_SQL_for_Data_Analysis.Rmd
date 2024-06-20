@@ -154,13 +154,13 @@ SELECT CURRENT_TIMESTAMP as "Current Time and Date"; -- returns the current date
 
 ### Manipulating dates in 'Bookstore' Tables
 
-```{sql getting status date from }
+```{sql getting status date from order history table}
 
 SELECT status_date as "Status Date" from order_history;
 
 ```
 
-```{sql}
+```{sql filtering customer id and order by time period}
 
 SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE order_date BETWEEN '2023-11-01'
 and '2024-05-01' ORDER BY order_date DESC;
@@ -170,13 +170,13 @@ SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order 
 
 The above SQL code isn't possible as there isn't a Now() function in SQLite.
 
-```{sql}
+```{sql filtering columsn from cust order where order date is less than current time and date}
 
 SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE order_date < CURRENT_TIMESTAMP;
 
 ```
 
-```{sql}
+```{sql filtering columns from cust order where order date is more than current time and date}
 
 SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE order_date > CURRENT_TIMESTAMP;
 
@@ -184,7 +184,7 @@ SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order 
 
 SQLite doesn't have a YEAR() function but it does have a TIME() function to use.
 
-```{sql}
+```{sql filtering columns from cust order where order date time is more than current date time}
 SELECT customer_id as "Customer ID", order_date as "Order Date" from cust_order WHERE TIME(order_date) > TIME(CURRENT_TIMESTAMP);
 
 ```
@@ -261,13 +261,13 @@ LTRIM with specific characters: Removes specified leading characters.
 SELECT LTRIM(title, 'What') AS "Trimmed Title" FROM book;
 ```
 
-```{sql}
+```{sql removing leading characters - the}
 SELECT LTRIM(title, 'The') AS "Trimmed Title" FROM book;
 ```
 
 RTRIM with specific characters: Removes specified trailing characters.
 
-```{sql}
+```{sql removing specific trailing characters}
 SELECT RTRIM(title, 's') AS "Trimmed Title" FROM book;
 ```
 
@@ -442,12 +442,9 @@ p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders
 p
 ```
 
-The function *dyEvent()* allows vertical lines with a label to be added. *dyAnnotation()* generates annotations directly on the time series line. Using a custom function, a larger annotation and attached to the x-axis is also possible, *presAnnotation()* .
-*dyshading()* allows whole areas of the graph to be shaded -
+The function *dyEvent()* allows vertical lines with a label to be added. *dyAnnotation()* generates annotations directly on the time series line. Using a custom function, a larger annotation and attached to the x-axis is also possible, *presAnnotation()* . *dyshading()* allows whole areas of the graph to be shaded -
 
-
-
-```{r filled in white space below ts}
+```{r annotating and highlighting the dygraph}
 
 presAnnotation <- function(dygraph, x, text) {
   dygraph %>%
@@ -471,9 +468,7 @@ p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders
 p
 ```
 
-
 The function *dyLimit()* allows line limits to be added.
-
 
 ```{r line limits }
 p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders from 'cust_order' Table ") %>%
@@ -488,17 +483,220 @@ p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders
 p
 ```
 
+## 4 - Indexes & Views {.tabset .tabset-fade .tabset-pills}
 
+This section takes inspiration but not much content, from the LinkedIn learning course ***"Intermediate SQL for Data Scientists"*** - <https://www.linkedin.com/learning/intermediate-sql-for-data-scientists>
 
-```{r}
-p <- dygraph(don,xlab = "Order Date", ylab = "No.Orders",main = "Daily No.Orders from 'cust_order' Table ") %>%
-  dySeries("V1", label = "No.Orders") %>%
-  dyOptions(fillGraph = TRUE, fillAlpha = 0.1) %>%
-  dyRangeSelector() %>%
-  dyLimit(8, color = "blue") %>%
-  dyLimit(40, color = "blue") %>%
-  dyUnzoom() 
- 
+```{r gravity bookstore dataset erd png repeated}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
 
-p
 ```
+
+### Indexes
+
+Indexes in SQLite are structures designed to improve the speed of data retrieval. They're similar to indexes in a book, allowing for faster access to rows in a table based on the values of one or more columns.
+
+Types of Indexes -
+
+1.  ***Single-Column Index*** - Created on a single column.
+
+2.  ***Multi-Column Index*** - Created on two or more columns.
+
+3.  ***Unique Index*** - Ensures that all values in the indexed column(s) are unique.
+
+4.  ***Primary Key Index*** - Automatically created when a table has a primary key constraint.
+
+5.  ***Automatic Indexes*** - Sometimes SQLite creates indexes automatically to optimize query performance, particularly for joins.
+
+```{sql creating a single column index}
+
+CREATE INDEX Customer_IDs ON cust_order(customer_id); 
+
+
+```
+
+```{sql creating a multi column index}
+
+CREATE INDEX Customer_Orders ON cust_order(order_id, customer_id);
+
+```
+
+CREATE UNIQUE INDEX unique_countries ON country(country_name);
+
+This SQL code above fails - A unique index does not discard non-unique values or automatically filter out duplicates. Instead, it enforces a constraint that prevents duplicates from being inserted into the table in the first place.
+
+```{sql creating a unique index}
+
+CREATE UNIQUE INDEX unique_status_ids ON order_status(status_id);
+
+```
+
+List all indexes associated with a table -
+
+```{sql looking at all indexes associated with cust_order}
+PRAGMA index_list(cust_order);
+```
+
+Get information about a specific index -
+
+```{sql getting information about the customer_orders index specifically}
+
+PRAGMA index_info(Customer_Orders);
+
+```
+
+Indexes can be dropped using the DROP INDEX statement -
+
+```{sql removing the Cusomter_Order index}
+
+DROP INDEX Customer_Orders;
+
+```
+
+Checking the index deletion has worked -
+
+```{sql checking index deletion has worked}
+PRAGMA index_list(cust_order);
+```
+
+An example with a more complex and intricate query -
+
+```{sql looking at the book table}
+
+select * from book
+
+```
+
+```{sql looking at author names}
+
+select author_name from author where author_name == "Walter Scott"
+
+```
+
+Creating an index of author names.
+
+```{sql creating an index of author names}
+
+CREATE INDEX Author_names ON author(author_name);
+
+```
+
+Now our 'sever' should use that index to optimise the performance of this query.
+
+```{sql filtering Galaxy bokstore data for 1997 to 2000 publications by JK Rowling and Bill Bryson}
+
+SELECT
+    b.title,
+    b.isbn13,
+    b.num_pages,
+    b.publication_date,
+    a.author_name,
+    ol.price
+FROM book b
+INNER JOIN book_author ba ON b.book_id = ba.book_id
+INNER JOIN author a ON ba.author_id = a.author_id
+INNER JOIN order_line ol ON b.book_id = ol.book_id
+INNER JOIN cust_order co ON ol.order_id = co.order_id
+WHERE a.author_name IN ('J.K. Rowling', 'Bill Bryson')
+  AND strftime('%Y', b.publication_date) IN ('1997','1998', '1999','2000')
+ORDER BY ol.price DESC;
+
+
+```
+
+### Views
+
+Views in SQLite are virtual tables that provide a way to represent the results of a query as a table.
+
+Reasons to use Views -
+
+1.  **Simplify Complex Queries** - By encapsulating complex joins and calculations within a view, queries can be simpler and more understandable.
+
+2.  **Enhance Security** - Views can restrict access to specific data by exposing only certain columns or rows to users.
+
+3.  **Provide Abstraction** - Offer a layer of abstraction, allowing changes in the underlying database schema without affecting the end users.
+
+4.  **Improve Maintainability** - Views centralise query logic, making the system easier to maintain and modify.
+
+
+```{sql creating a view of all of Bill Brysons books}
+CREATE VIEW Bryson_Books AS
+SELECT
+    b.title,
+    b.isbn13,
+    b.num_pages,
+    b.publication_date,
+    a.author_name,
+    ol.price
+FROM book b
+INNER JOIN book_author ba ON b.book_id = ba.book_id
+INNER JOIN author a ON ba.author_id = a.author_id
+INNER JOIN order_line ol ON b.book_id = ol.book_id
+INNER JOIN cust_order co ON ol.order_id = co.order_id
+WHERE a.author_name IN ('Bill Bryson');
+
+
+```
+
+```{sql creating a view of all of JK Rowling books}
+CREATE VIEW Rowling_Books AS
+SELECT
+    b.title,
+    b.isbn13,
+    b.num_pages,
+    b.publication_date,
+    a.author_name,
+    ol.price
+FROM book b
+INNER JOIN book_author ba ON b.book_id = ba.book_id
+INNER JOIN author a ON ba.author_id = a.author_id
+INNER JOIN order_line ol ON b.book_id = ol.book_id
+INNER JOIN cust_order co ON ol.order_id = co.order_id
+WHERE a.author_name IN ('J.K. Rowling');
+
+
+```
+
+```{sql creating a view of all of Walter Scotts books}
+CREATE VIEW Walter_Scott_Books AS
+SELECT
+    b.title,
+    b.isbn13,
+    b.num_pages,
+    b.publication_date,
+    a.author_name,
+    ol.price
+FROM book b
+INNER JOIN book_author ba ON b.book_id = ba.book_id
+INNER JOIN author a ON ba.author_id = a.author_id
+INNER JOIN order_line ol ON b.book_id = ol.book_id
+INNER JOIN cust_order co ON ol.order_id = co.order_id
+WHERE a.author_name IN ('Walter Scott');
+
+
+```
+
+
+```{sql looking at all the columns and rows from the Bryson Books view}
+SELECT * FROM Bryson_Books;
+```
+
+```{sql looking at all the columns and rows from the Walter Scott Books view}
+SELECT * FROM Walter_Scott_Books;
+```
+
+Views themselves are not directly updatable, but they can be dropped and recreated - 
+
+```{sql dropping the Bryson books view}
+DROP VIEW IF EXISTS Bryson_Books;
+```
+
+
+```{sql checking what views are present}
+SELECT name FROM sqlite_master WHERE type='view';
+```
+
+```{sql seeing the definition of the Walter Scott view}
+SELECT sql FROM sqlite_master WHERE type='view' AND name='Walter_Scott_Books';
+```
+
