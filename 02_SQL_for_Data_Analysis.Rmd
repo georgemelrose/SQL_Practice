@@ -16,7 +16,16 @@ rm(list = ls())
 
 knitr::opts_chunk$set(echo = TRUE)
 
-pacman::p_load(readr,tidyverse, data.table,DBI,odbc,RSQLite,plotly,dygraphs,xts)
+pacman::p_load(readr,tidyverse, data.table,DBI,odbc,RSQLite,plotly,dygraphs,xts,
+               reticulate)
+
+Sys.setenv(PATH = paste("C:/Users/gam55/PycharmProjects/AIhackathon/venv/Scripts/python.exe", Sys.getenv("PATH"), sep = ";"))
+
+py_run_string("print('Hello from Python')")
+py_install("pandas")
+py_install("sqlalchemy")
+py_install("plotly")
+
 
 options(max.print = 1000) 
 getOption("max.print")
@@ -318,6 +327,30 @@ select * from Publisher WHERE publisher_name == "UoG Press"
 ```
 
 ## 3 - Visualising Data {.tabset .tabset-fade .tabset-pills}
+
+### Python Method from the LinkedIn Learning Course
+
+```{python importing relevant python modules}
+import pandas as pd
+
+import sqlalchemy as sa
+
+import plotly.express as px
+
+import plotly.graph_objects as go
+
+from sqlalchemy.engine import create_engine
+```
+
+
+```{python making a run query command}
+
+def run_query(query):
+    return pd.read_sql(query, con=connection)
+
+df = run_query("SELECT * FROM cust_order",con=connection )
+```
+
 
 ### Bar Charts
 
