@@ -733,3 +733,31 @@ SELECT name FROM sqlite_master WHERE type='view';
 SELECT sql FROM sqlite_master WHERE type='view' AND name='Walter_Scott_Books';
 ```
 
+## 5 -  Statistical aggregate functions  {.tabset .tabset-fade .tabset-pills}
+
+The SUM() function is an aggregate function that calculates the total sum of a numeric column.  The function is commonly used in conjunction with the GROUP BY clause to calculate sums for specific groups of data.
+
+```{r gravity bookstore dataset erd png for section 5}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+
+```{sql using the sum() function}
+SELECT SUM(street_name) as "No.different Street Names", SUM(city) as "No.different Cities"  FROM address;
+```
+
+
+As street_name and city are text columns, sum won't work properly on them. It's best to use COUNT(DISTINCT()). 
+
+```{sql using the sum() function}
+SELECT COUNT(DISTINCT street_name) as "No. of Different Street Names", 
+       COUNT(DISTINCT city) as "No. of Different Cities" 
+FROM address;
+```
+
+
+```{sql }
+
+```
+
