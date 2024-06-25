@@ -342,15 +342,13 @@ import plotly.graph_objects as go
 from sqlalchemy.engine import create_engine
 ```
 
-
 ```{python making a run query command}
-
-def run_query(query):
-    return pd.read_sql(query, con=connection)
-
-df = run_query("SELECT * FROM cust_order",con=connection )
+# 
+# def run_query(query):
+#     return pd.read_sql(query, con=connection)
+# 
+# df = run_query("SELECT * FROM cust_order",con=connection )
 ```
-
 
 ### Bar Charts
 
@@ -651,7 +649,6 @@ Reasons to use Views -
 
 4.  **Improve Maintainability** - Views centralise query logic, making the system easier to maintain and modify.
 
-
 ```{sql creating a view of all of Bill Brysons books}
 CREATE VIEW Bryson_Books AS
 SELECT
@@ -709,7 +706,6 @@ WHERE a.author_name IN ('Walter Scott');
 
 ```
 
-
 ```{sql looking at all the columns and rows from the Bryson Books view}
 SELECT * FROM Bryson_Books;
 ```
@@ -718,12 +714,11 @@ SELECT * FROM Bryson_Books;
 SELECT * FROM Walter_Scott_Books;
 ```
 
-Views themselves are not directly updatable, but they can be dropped and recreated - 
+Views themselves are not directly updatable, but they can be dropped and recreated -
 
 ```{sql dropping the Bryson books view}
 DROP VIEW IF EXISTS Bryson_Books;
 ```
-
 
 ```{sql checking what views are present}
 SELECT name FROM sqlite_master WHERE type='view';
@@ -733,22 +728,22 @@ SELECT name FROM sqlite_master WHERE type='view';
 SELECT sql FROM sqlite_master WHERE type='view' AND name='Walter_Scott_Books';
 ```
 
-## 5 -  Statistical aggregate functions  {.tabset .tabset-fade .tabset-pills}
+## 5 - Statistical aggregate functions {.tabset .tabset-fade .tabset-pills}
 
-The SUM() function is an aggregate function that calculates the total sum of a numeric column.  The function is commonly used in conjunction with the GROUP BY clause to calculate sums for specific groups of data.
+### SUM(), AVG(), ROUND()
+
+The SUM() function is an aggregate function that calculates the total sum of a numeric column. The function is commonly used in conjunction with the GROUP BY clause to calculate sums for specific groups of data.
 
 ```{r gravity bookstore dataset erd png for section 5}
 knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
 
 ```
 
-
-```{sql using the sum() function}
+```{sql using the sum() function incorrectly}
 SELECT SUM(street_name) as "No.different Street Names", SUM(city) as "No.different Cities"  FROM address;
 ```
 
-
-As street_name and city are text columns, sum won't work properly on them. It's best to use COUNT(DISTINCT()). 
+As street_name and city are text columns, sum won't work properly on them. It's best to use COUNT(DISTINCT()).
 
 ```{sql using the sum() function}
 SELECT COUNT(DISTINCT street_name) as "No. of Different Street Names", 
@@ -756,8 +751,174 @@ SELECT COUNT(DISTINCT street_name) as "No. of Different Street Names",
 FROM address;
 ```
 
-
-```{sql }
+```{r gravity bookstore dataset erd png for section 5 repeat}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
 
 ```
 
+```{sql using the sum() function correctly}
+
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Order per Customer" DESC;
+
+```
+
+The AVG() function in SQL is an aggregate function that calculates the average value of a numeric column. It sums up all the values in the column and divides by the number of non-null values, providing the mean value.
+
+```{sql using the sum() and avg() functions}
+
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    AVG(ol.price) AS "Average Order Price per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Order per Customer" DESC;
+
+```
+
+The ROUND() function in SQL is used to round a numeric value to a specified number of decimal places. It takes two arguments: the number to be rounded and the number of decimal places to round to.
+
+```{sql using the sum() and avg() and round() functions}
+
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    ROUND(AVG(ol.price),2) AS "Average Order Price per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Order per Customer" DESC;
+
+```
+
+### Variance
+
+The VARIANCE() function is used to calculate the statistical variance of a set of numeric values, which measures the dispersion of the values from their mean. However, SQLite does not have a built-in VARIANCE() function.
+
+To calculate variance in SQLite, one can use a combination of SQL functions.
+
+-   *Calculating Sample Variance* -
+
+The sample variance estimates the variance from a sample of the population. The formula is - 
+
+\[ \sigma^2 = \frac{\sum (x_i - \bar{x})^2}{n - 1} \]
+
+- (\[\sigma^2\]) is the population variance
+
+- (\[x_i\]) represents each data point 
+
+- (\[\bar{x}\]) is the sample mean
+
+- (\[n - 1\]) is the total number of data points in the population
+
+Used when there's only a sample and need the population variance needs to be estimated. The denominator is \[n - 1\] . \[n - 1\] instead of \[n\] to correct the bias in the estimation of the population variance from a sample (Bessel's correction).
+
+The SQL code - 
+
+SELECT SUM((value - avg_value) * (value - avg_value)) / (COUNT(*) - 1) AS sample_variance
+FROM (
+    SELECT value, AVG(value) AS avg_value
+    FROM table_name
+) AS subquery;
+
+
+-   *Calculating Population Variance* -
+
+
+The population variance measures the dispersion of all data points in a population from the population mean ((\[\mu\])). The formula is - 
+
+\[ \sigma^2 = \frac{\sum (x_i - \mu)^2}{N} \]
+
+- (\[\sigma^2\]) is the population variance
+
+- (\[x_i\]) represents each data point 
+
+- (\[\mu\]) is the mean of the population
+
+- (\[n\]) is the total number of data points in the population
+
+With large datasets, the difference between sample and population variance is minimal since the correction factor \(n - 1\) vs. \(n\) has a smaller impact as the sample size increases.
+
+The SQL code - 
+
+SELECT AVG((value - avg_value) * (value - avg_value)) AS population_variance
+FROM (
+    SELECT value, AVG(value) AS avg_value
+    FROM table_name
+) AS subquery;
+
+
+
+```{sql calculating variance of customers orders}
+
+WITH OrderStats AS (
+    SELECT 
+        c.customer_id,
+        SUM(ol.price) AS "Sum of Orders per Customer",
+        AVG(ol.price) AS "Average Order Price per Customer",
+        COUNT(ol.price) AS "Order Count",
+        CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+    FROM 
+        order_line ol
+    INNER JOIN 
+        cust_order co ON ol.order_id = co.order_id
+    INNER JOIN 
+        customer c ON co.customer_id = c.customer_id
+    GROUP BY 
+        c.customer_id, c.first_name, c.last_name
+)
+SELECT
+    os."Sum of Orders per Customer",
+    ROUND(os."Average Order Price per Customer", 2) AS "Average Order Price per Customer",
+    os."Full Name",
+    ROUND(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / os."Order Count", 2) AS "Order Price Variance"
+FROM
+    order_line ol
+INNER JOIN
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    customer c ON co.customer_id = c.customer_id
+INNER JOIN
+    OrderStats os ON c.customer_id = os.customer_id
+GROUP BY
+    os.customer_id, os."Sum of Orders per Customer", os."Average Order Price per Customer", os."Full Name"
+ORDER BY
+    "Sum of Orders per Customer" DESC;
+
+```
+
+
+### Standard Deviation
+
+QLite does not have a built-in STDDEV() or STDEV() function specifically for calculating standard deviation.
+
+To calculate standard deviation in SQLite, you would typically follow these steps:
+
+    Calculate the Mean: Compute the average value of the dataset.
+    Compute Squared Differences: Calculate the squared difference of each value from the mean.
+    Aggregate and Calculate: Sum up the squared differences, divide by the count of values (for population standard deviation) or by n−1n−1 (for sample standard deviation), and take the square root of the result.
