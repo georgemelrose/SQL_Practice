@@ -824,57 +824,25 @@ To calculate variance in SQLite, one can use a combination of SQL functions.
 
 -   *Calculating Sample Variance* -
 
-The sample variance estimates the variance from a sample of the population. The formula is - 
+The sample variance estimates the variance from a sample of the population. The formula is -
 
-\[ \sigma^2 = \frac{\sum (x_i - \bar{x})^2}{n - 1} \]
+\[ \sigma\^2 = \frac{\sum (x_i - \bar{x})^2}{n - 1} \]
 
-- (\[\sigma^2\]) is the population variance
+-   (\[\sigma\^2\]) is the population variance
 
-- (\[x_i\]) represents each data point 
+-   (\[x_i\]) represents each data point
 
-- (\[\bar{x}\]) is the sample mean
+-   (\[\bar{x}\]) is the sample mean
 
-- (\[n - 1\]) is the total number of data points in the population
+-   (\[n - 1\]) is the total number of data points in the population
 
 Used when there's only a sample and need the population variance needs to be estimated. The denominator is \[n - 1\] . \[n - 1\] instead of \[n\] to correct the bias in the estimation of the population variance from a sample (Bessel's correction).
 
-The SQL code - 
+The SQL code -
 
-SELECT SUM((value - avg_value) * (value - avg_value)) / (COUNT(*) - 1) AS sample_variance
-FROM (
-    SELECT value, AVG(value) AS avg_value
-    FROM table_name
-) AS subquery;
+SELECT SUM((value - avg_value) \* (value - avg_value)) / (COUNT(\*) - 1) AS sample_variance FROM ( SELECT value, AVG(value) AS avg_value FROM table_name ) AS subquery;
 
-
--   *Calculating Population Variance* -
-
-
-The population variance measures the dispersion of all data points in a population from the population mean ((\[\mu\])). The formula is - 
-
-\[ \sigma^2 = \frac{\sum (x_i - \mu)^2}{N} \]
-
-- (\[\sigma^2\]) is the population variance
-
-- (\[x_i\]) represents each data point 
-
-- (\[\mu\]) is the mean of the population
-
-- (\[n\]) is the total number of data points in the population
-
-With large datasets, the difference between sample and population variance is minimal since the correction factor \(n - 1\) vs. \(n\) has a smaller impact as the sample size increases.
-
-The SQL code - 
-
-SELECT AVG((value - avg_value) * (value - avg_value)) AS population_variance
-FROM (
-    SELECT value, AVG(value) AS avg_value
-    FROM table_name
-) AS subquery;
-
-
-
-```{sql calculating variance of customers orders}
+```{sql calculating sample variance of customers orders}
 
 WITH OrderStats AS (
     SELECT 
@@ -896,7 +864,7 @@ SELECT
     os."Sum of Orders per Customer",
     ROUND(os."Average Order Price per Customer", 2) AS "Average Order Price per Customer",
     os."Full Name",
-    ROUND(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / os."Order Count", 2) AS "Order Price Variance"
+    ROUND(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / (os."Order Count" - 1), 2) AS "Order Price Sample Variance"
 FROM
     order_line ol
 INNER JOIN
@@ -912,13 +880,311 @@ ORDER BY
 
 ```
 
+-   *Calculating Population Variance* -
+
+The population variance measures the dispersion of all data points in a population from the population mean ((\[\mu\])). The formula is -
+
+\[ \sigma\^2 = \frac{\sum (x_i - \mu)^2}{N} \]
+
+-   (\[\sigma\^2\]) is the population variance
+
+-   (\[x_i\]) represents each data point
+
+-   (\[\mu\]) is the mean of the population
+
+-   (\[n\]) is the total number of data points in the population
+
+With large datasets, the difference between sample and population variance is minimal since the correction factor (n - 1) vs. (n) has a smaller impact as the sample size increases.
+
+The SQL code -
+
+SELECT AVG((value - avg_value) \* (value - avg_value)) AS population_variance FROM ( SELECT value, AVG(value) AS avg_value FROM table_name ) AS subquery;
+
+```{sql calculating population variance of customers orders}
+
+WITH OrderStats AS (
+    SELECT 
+        c.customer_id,
+        SUM(ol.price) AS "Sum of Orders per Customer",
+        AVG(ol.price) AS "Average Order Price per Customer",
+        COUNT(ol.price) AS "Order Count",
+        CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+    FROM 
+        order_line ol
+    INNER JOIN 
+        cust_order co ON ol.order_id = co.order_id
+    INNER JOIN 
+        customer c ON co.customer_id = c.customer_id
+    GROUP BY 
+        c.customer_id, c.first_name, c.last_name
+)
+SELECT
+    os."Sum of Orders per Customer",
+    ROUND(os."Average Order Price per Customer", 2) AS "Average Order Price per Customer",
+    os."Full Name",
+    ROUND(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / os."Order Count", 2) AS "Order Price Population Variance"
+FROM
+    order_line ol
+INNER JOIN
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    customer c ON co.customer_id = c.customer_id
+INNER JOIN
+    OrderStats os ON c.customer_id = os.customer_id
+GROUP BY
+    os.customer_id, os."Sum of Orders per Customer", os."Average Order Price per Customer", os."Full Name"
+ORDER BY
+    "Sum of Orders per Customer" DESC;
+
+```
 
 ### Standard Deviation
 
-QLite does not have a built-in STDDEV() or STDEV() function specifically for calculating standard deviation.
+Standard deviation measures the dispersion of a dataset relative to its mean, indicating how spread out the data points are. A low standard deviation means the data points are close to the mean, while a high standard deviation indicates they are more spread out.
 
-To calculate standard deviation in SQLite, you would typically follow these steps:
+SQLite does not have a built-in STDDEV() or STDEV() function for calculating standard deviation.
 
-    Calculate the Mean: Compute the average value of the dataset.
-    Compute Squared Differences: Calculate the squared difference of each value from the mean.
-    Aggregate and Calculate: Sum up the squared differences, divide by the count of values (for population standard deviation) or by n−1n−1 (for sample standard deviation), and take the square root of the result.
+These are the steps to calculate standard deviation in SQLite:
+
+1.  Calculate the mean of the dataset.
+
+2.  Compute Squared Differences calculate the squared difference of each value from the mean.
+
+3.  Aggregate and Calculate - Sum up the squared differences, divide by the count of values (for population standard deviation) or by (n - 1) (for sample standard deviation), and take the square root of the result.
+
+The population standard deviation ((\sigma)) is calculated using the formula:
+
+\[ \sigma = \sqrt{\frac{\sum_{i=1}^{N} (x_i - \mu)^2}{N}} \]
+
+where: - (\sigma) is the population standard deviation, - (x_i) represents each data point, - (\mu) is the mean of the population, - (N) is the total number of data points in the population.
+
+The SQL code -
+
+SELECT SQRT(AVG((value - avg_value) \* (value - avg_value))) AS population_stddev FROM ( SELECT value, AVG(value) OVER () AS avg_value FROM table_name ) AS subquery;
+
+```{sql calculating population standard deviation}
+WITH OrderStats AS (
+    SELECT 
+        c.customer_id,
+        SUM(ol.price) AS "Sum of Orders per Customer",
+        AVG(ol.price) AS "Average Order Price per Customer",
+        COUNT(ol.price) AS "Order Count",
+        CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+    FROM 
+        order_line ol
+    INNER JOIN 
+        cust_order co ON ol.order_id = co.order_id
+    INNER JOIN 
+        customer c ON co.customer_id = c.customer_id
+    GROUP BY 
+        c.customer_id, c.first_name, c.last_name
+)
+SELECT
+    os."Sum of Orders per Customer",
+    ROUND(os."Average Order Price per Customer", 2) AS "Average Order Price per Customer",
+    os."Full Name",
+    ROUND(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / os."Order Count", 2) AS "Order Price Population Variance",
+    ROUND(SQRT(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / os."Order Count"), 2) AS "Order Price Standard Deviation"
+FROM
+    order_line ol
+INNER JOIN
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    customer c ON co.customer_id = c.customer_id
+INNER JOIN
+    OrderStats os ON c.customer_id = os.customer_id
+GROUP BY
+    os.customer_id, os."Sum of Orders per Customer", os."Average Order Price per Customer", os."Full Name"
+ORDER BY
+    "Sum of Orders per Customer" DESC;
+
+```
+
+The sample standard deviation ((s)) is calculated using the formula:
+
+\[ s = \sqrt{\frac{\sum_{i=1}^{n} (x_i - \bar{x})^2}{n - 1}} \]
+
+where: - (s) is the sample standard deviation, - (x_i) represents each data point in the sample, - (\bar{x}) is the sample mean, - (n) is the number of data points in the sample.
+
+The SQL code -
+
+SELECT SQRT(SUM((value - avg_value) \* (value - avg_value)) / (COUNT(\*) - 1)) AS sample_stddev FROM ( SELECT value, AVG(value) OVER () AS avg_value FROM table_name ) AS subquery;
+
+```{sql calculating sample variance and standard deviation}
+
+WITH SampledCustomers AS (
+    SELECT 
+        c.customer_id,
+        c.first_name,
+        c.last_name
+    FROM 
+        customer c
+    ORDER BY 
+        RANDOM()
+    LIMIT 50
+),
+OrderStats AS (
+    SELECT 
+        c.customer_id,
+        SUM(ol.price) AS "Sum of Orders per Customer",
+        AVG(ol.price) AS "Average Order Price per Customer",
+        COUNT(ol.price) AS "Order Count",
+        CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+    FROM 
+        order_line ol
+    INNER JOIN 
+        cust_order co ON ol.order_id = co.order_id
+    INNER JOIN 
+        SampledCustomers c ON co.customer_id = c.customer_id
+    GROUP BY 
+        c.customer_id, c.first_name, c.last_name
+)
+SELECT
+    os."Sum of Orders per Customer",
+    ROUND(os."Average Order Price per Customer", 2) AS "Average Order Price per Customer",
+    os."Full Name",
+    ROUND(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / (os."Order Count" - 1), 2) AS "Order Price Sample Variance",
+    ROUND(SQRT(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / (os."Order Count" - 1)), 2) AS "Order Price Sample Standard Deviation"
+FROM
+    order_line ol
+INNER JOIN
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    customer c ON co.customer_id = c.customer_id
+INNER JOIN
+    OrderStats os ON c.customer_id = os.customer_id
+GROUP BY
+    os.customer_id, os."Sum of Orders per Customer", os."Average Order Price per Customer", os."Full Name"
+ORDER BY
+    "Sum of Orders per Customer" DESC;
+
+```
+
+## 6 - WITH() function
+
+WITH(), also known as Common Table Expressions (CTEs), allows for improved readability and reusability of SQL queries. It's particularly useful for breaking down complex queries into simpler, more manageable parts by creating temporary result sets that can be referenced within the main query.
+
+WITH cte_name AS ( -- CTE Query SELECT ... ) SELECT ... FROM cte_name
+
+[**Key Differences**]{.ul}
+
+1.  **Structure and Readability -**
+
+*Subqueries* - Can be less readable, especially when nested.
+
+*WITH()* - Provide a clearer, more structured approach by defining temporary tables with meaningful names.
+
+2.  **Reusability** -
+
+*Subqueries -* Generally not reusable; you need to repeat the subquery if it's used in multiple places.
+
+*WITH()* - Reusable within the main query, reducing redundancy and improving maintainability.
+
+3.  **Debugging and Maintenance** -
+
+*Subqueries -* Harder to debug and maintain due to their nested nature.
+
+*WITH() -* Easier to debug and maintain due to their clear, modular structure.
+
+**When using WITH()**
+
+```{sql getting total amount spent and average order amount using the with clause}
+WITH CustomerOrders AS (
+    SELECT 
+        co.customer_id, 
+        co.order_date,
+        ol.order_id,
+        SUM(ol.price) AS "Total Order Amount"
+    FROM 
+        cust_order co
+    INNER JOIN 
+        order_line ol ON co.order_id = ol.order_id
+    WHERE 
+        co.order_date BETWEEN '2023-11-01' AND '2024-05-01'
+    GROUP BY 
+        co.customer_id, co.order_date, ol.order_id
+)
+SELECT
+    c.customer_id AS "Customer ID",
+    c.order_date AS "Order Date",
+    COUNT(c.order_id) AS "Number of Orders",
+    SUM(c."Total Order Amount") AS "Total Amount Spent",
+    AVG(c."Total Order Amount") AS "Average Order Amount"
+FROM
+    CustomerOrders c
+GROUP BY
+    c.customer_id
+ORDER BY
+    c.order_date DESC;
+```
+
+The part with the WITH inner query -
+
+-   This CTE calculates the total amount spent on each order for every customer within the specified date range.
+
+-   It joins the cust_order and order_line tables and groups the data by customer ID, order date, and order ID to compute the total order amount.
+
+The rest, the outer query -
+
+-   The main query selects from the CustomerOrders CTE.
+
+-   It calculates the number of orders, total amount spent, and average order amount for each customer.
+
+-   The results are grouped by customer ID and ordered by the order date in descending order.
+
+**When not using WITH()**
+
+```{sql getting total amount spent and average order amount without the with clause}
+SELECT 
+    co.customer_id AS "Customer ID",
+    co.order_date AS "Order Date",
+    COUNT(orders_per_customer.order_id) AS "Number of Orders",
+    SUM(orders_per_customer."Total Order Amount") AS "Total Amount Spent",
+    AVG(orders_per_customer."Total Order Amount") AS "Average Order Amount"
+FROM 
+    cust_order co
+INNER JOIN (
+    SELECT 
+        co_inner.customer_id, 
+        co_inner.order_date,
+        ol_inner.order_id,
+        SUM(ol_inner.price) AS "Total Order Amount"
+    FROM 
+        cust_order co_inner
+    INNER JOIN 
+        order_line ol_inner ON co_inner.order_id = ol_inner.order_id
+    WHERE 
+        co_inner.order_date BETWEEN '2023-11-01' AND '2024-05-01'
+    GROUP BY 
+        co_inner.customer_id, co_inner.order_date, ol_inner.order_id
+) AS orders_per_customer ON co.customer_id = orders_per_customer.customer_id AND co.order_date = orders_per_customer.order_date
+WHERE 
+    co.order_date BETWEEN '2023-11-01' AND '2024-05-01'
+GROUP BY 
+    co.customer_id, co.order_date
+ORDER BY 
+    co.order_date DESC;
+
+```
+
+The part with the INNER JOIN inner query -
+
+-   The inner query calculates the total amount spent on each order for every customer within the specified date range.
+
+-   This inner query is essentially the same as the WITH part in the previous example.
+
+The rest, the outer query -
+
+-   The outer query joins the cust_order table with the result of the inner query (orders_per_customer).
+
+-   It calculates the number of orders, total amount spent, and average order amount for each customer, grouped by customer ID and order date.
+
+-   The results are ordered by the order date in descending order.
+
+**The advantages to using WITH()**
+
+-   *Readability* Using the WITH clause (CTE) makes the query more readable.In the non-CTE version, the nested query can be harder to follow.
+
+-   *Maintainability* The CTE version is more maintainable because each part of the query is isolated. If you need to adjust the calculation logic, it's clearer where to make changes.
+
+-   *Length*:\* The non-CTE version tends to be more long-winded, as it requires embedding the subquery directly in the FROM clause, making the overall query longer and potentially more confusing.
