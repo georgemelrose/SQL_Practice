@@ -220,6 +220,16 @@ select CONCAT(first_name,' ',last_name) AS "Full Name" from customer
 
 ```
 
+Double pipes, || , can also be used in place of CONCAT(), in SQLite. 
+
+
+```{sql using concat double pipe}
+
+SELECT first_name || ' ' || last_name AS "Full Name"
+FROM customer;
+```
+
+
 ### UPPER() and LOWER()
 
 The UPPER() and LOWER() functions will return strings as upper case or lower case, respectively.
@@ -279,6 +289,16 @@ RTRIM with specific characters: Removes specified trailing characters.
 ```{sql removing specific trailing characters}
 SELECT RTRIM(title, 's') AS "Trimmed Title" FROM book;
 ```
+
+
+LTRIM and RTRIM can be used in combination with one another - 
+
+```{sql removing specific trailing characters}
+SELECT RTRIM(LTRIM(title, 'The'), 's') AS "Trimmed Title" FROM book;
+```
+
+
+
 
 ### Combining different String Functions
 
@@ -516,7 +536,7 @@ p
 
 ## 4 - Indexes & Views {.tabset .tabset-fade .tabset-pills}
 
-This section takes inspiration but not much content, from the LinkedIn learning course ***"Intermediate SQL for Data Scientists"*** - <https://www.linkedin.com/learning/intermediate-sql-for-data-scientists>
+This section and the following take inspiration but not much content, from the LinkedIn learning course ***"Intermediate SQL for Data Scientists"*** - <https://www.linkedin.com/learning/intermediate-sql-for-data-scientists>
 
 ```{r gravity bookstore dataset erd png repeated}
 knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
@@ -1183,8 +1203,109 @@ The rest, the outer query -
 
 **The advantages to using WITH()**
 
--   *Readability* Using the WITH clause (CTE) makes the query more readable.In the non-CTE version, the nested query can be harder to follow.
+-   *Readability -* Using the WITH clause (CTE) makes the query more readable.In the non-CTE version, the nested query can be harder to follow.
 
--   *Maintainability* The CTE version is more maintainable because each part of the query is isolated. If you need to adjust the calculation logic, it's clearer where to make changes.
+-   *Maintainability -* The CTE version is more maintainable because each part of the query is isolated. If you need to adjust the calculation logic, it's clearer where to make changes.
 
--   *Length*:\* The non-CTE version tends to be more long-winded, as it requires embedding the subquery directly in the FROM clause, making the overall query longer and potentially more confusing.
+-   *Length* - The non-CTE version tends to be more long-winded, as it requires embedding the subquery directly in the FROM clause, making the overall query longer and potentially more confusing.
+
+## 7 - Further Data Manipulation in SQL
+
+### the 'like' operator
+
+```{r gravity bookstore dataset erd png for section 7, message=FALSE, warning=FALSE}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+
+The `LIKE` operator is used for pattern matching within text fields. It allows the use of `%` to represent zero or more characters and `_` to represent a single character. For example, the query `SELECT * FROM customers WHERE name LIKE '%enko';` will return all rows where the `name` column ends with "enko".
+
+Getting all surnames starting with 'Mac' -
+
+```{sql finding all customers whose surname starts with Mac}
+select * from customer where last_name like 'Mac%'
+```
+
+Getting all surnames starting with 'Mc' -
+
+```{sql finding all customers whose surname starts with Mc}
+select * from customer where last_name like 'Mc%'
+```
+
+Getting all surnames ending with 'vich' -
+
+
+```{sql finding all customers whose surname ends in vich}
+select * from customer where last_name like '%vich'
+```
+
+Getting all surnames ending with 'enko' -
+
+```{sql finding all customers whose surname ends in enko}
+select * from customer where last_name like '%enko'
+```
+
+
+Getting all surnames starting or ending with 'man' (lower or upper case) -
+
+```{sql finding all customers whose surname ends in enko}
+select * from customer where last_name like '%man%'
+```
+
+
+Getting all surnames starting or ending with 'man' (lower or upper case) -
+
+```{sql finding all customers whose surname ends in enko}
+select * from customer where last_name like '%man%'
+```
+
+
+Making a new column specifically based on the like condition - 
+
+```{sql getting Ukrainian like names}
+
+SELECT 
+    last_name as "Customer Surname", 
+    CASE 
+        WHEN last_name LIKE '%enko' 
+            OR last_name LIKE '%vich' 
+            OR last_name LIKE '%vych' 
+            OR last_name LIKE '%chuk' 
+            OR last_name LIKE '%chyk' 
+            OR last_name LIKE '%ski' 
+            OR last_name LIKE '%sky' 
+            OR last_name LIKE '%uk' 
+            OR last_name LIKE '%ko' 
+            OR last_name LIKE '%yshyn' 
+            OR last_name LIKE '%iv' THEN 'Yes' 
+        ELSE 'No' 
+    END AS 'Potentially Ukrainian Surname?' 
+FROM customer 
+WHERE last_name LIKE '%enko' 
+    OR last_name LIKE '%vich' 
+    OR last_name LIKE '%vych' 
+    OR last_name LIKE '%chuk' 
+    OR last_name LIKE '%chyk' 
+    OR last_name LIKE '%ski' 
+    OR last_name LIKE '%sky' 
+    OR last_name LIKE '%uk' 
+    OR last_name LIKE '%ko' 
+    OR last_name LIKE '%yshyn' 
+    OR last_name LIKE '%iv';
+
+
+```
+
+Unfortunately, SQLite that's being used here does not support the command *'similar to'* that could be used in PostGreSQL.
+
+If PostGreSQL was being used, the above query could be shortened a lot - 
+
+SELECT 
+    last_name, 
+    CASE 
+        WHEN last_name SIMILAR TO '%(enko|vich|vych|chuk|chyk|ski|sky|uk|ko|yshyn|iv)' THEN 'YES' 
+        ELSE 'NO' 
+    END AS "Ukrainian Surname" 
+FROM customer 
+WHERE last_name SIMILAR TO '%(enko|vich|vych|chuk|chyk|ski|sky|uk|ko|yshyn|iv)';
