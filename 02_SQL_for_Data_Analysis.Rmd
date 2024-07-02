@@ -220,15 +220,13 @@ select CONCAT(first_name,' ',last_name) AS "Full Name" from customer
 
 ```
 
-Double pipes, || , can also be used in place of CONCAT(), in SQLite. 
-
+Double pipes, \|\| , can also be used in place of CONCAT(), in SQLite.
 
 ```{sql using concat double pipe}
 
 SELECT first_name || ' ' || last_name AS "Full Name"
 FROM customer;
 ```
-
 
 ### UPPER() and LOWER()
 
@@ -290,15 +288,11 @@ RTRIM with specific characters: Removes specified trailing characters.
 SELECT RTRIM(title, 's') AS "Trimmed Title" FROM book;
 ```
 
-
-LTRIM and RTRIM can be used in combination with one another - 
+LTRIM and RTRIM can be used in combination with one another -
 
 ```{sql removing specific trailing characters}
 SELECT RTRIM(LTRIM(title, 'The'), 's') AS "Trimmed Title" FROM book;
 ```
-
-
-
 
 ### Combining different String Functions
 
@@ -1218,7 +1212,6 @@ knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
 
 ```
 
-
 The `LIKE` operator is used for pattern matching within text fields. It allows the use of `%` to represent zero or more characters and `_` to represent a single character. For example, the query `SELECT * FROM customers WHERE name LIKE '%enko';` will return all rows where the `name` column ends with "enko".
 
 Getting all surnames starting with 'Mac' -
@@ -1235,7 +1228,6 @@ select * from customer where last_name like 'Mc%'
 
 Getting all surnames ending with 'vich' -
 
-
 ```{sql finding all customers whose surname ends in vich}
 select * from customer where last_name like '%vich'
 ```
@@ -1246,6 +1238,11 @@ Getting all surnames ending with 'enko' -
 select * from customer where last_name like '%enko'
 ```
 
+Getting all surnames starting or ending with 'man' (lower or upper case) -
+
+```{sql finding all customers whose surname ends in enko}
+select * from customer where last_name like '%man%'
+```
 
 Getting all surnames starting or ending with 'man' (lower or upper case) -
 
@@ -1253,15 +1250,7 @@ Getting all surnames starting or ending with 'man' (lower or upper case) -
 select * from customer where last_name like '%man%'
 ```
 
-
-Getting all surnames starting or ending with 'man' (lower or upper case) -
-
-```{sql finding all customers whose surname ends in enko}
-select * from customer where last_name like '%man%'
-```
-
-
-Making a new column specifically based on the like condition - 
+Making a new column specifically based on the like condition -
 
 ```{sql getting Ukrainian like names}
 
@@ -1299,13 +1288,91 @@ WHERE last_name LIKE '%enko'
 
 Unfortunately, SQLite that's being used here does not support the command *'similar to'* that could be used in PostGreSQL.
 
-If PostGreSQL was being used, the above query could be shortened a lot - 
+If PostGreSQL was being used, the above query could be shortened a lot -
 
-SELECT 
-    last_name, 
-    CASE 
-        WHEN last_name SIMILAR TO '%(enko|vich|vych|chuk|chyk|ski|sky|uk|ko|yshyn|iv)' THEN 'YES' 
-        ELSE 'NO' 
-    END AS "Ukrainian Surname" 
-FROM customer 
-WHERE last_name SIMILAR TO '%(enko|vich|vych|chuk|chyk|ski|sky|uk|ko|yshyn|iv)';
+SELECT last_name, CASE WHEN last_name SIMILAR TO '%(enko\|vich\|vych\|chuk\|chyk\|ski\|sky\|uk\|ko\|yshyn\|iv)' THEN 'YES' ELSE 'NO' END AS "Ukrainian Surname" FROM customer WHERE last_name SIMILAR TO '%(enko\|vich\|vych\|chuk\|chyk\|ski\|sky\|uk\|ko\|yshyn\|iv)';
+
+### SOUNDEX
+
+```{r gravity bookstore dataset erd png for section 7 part2, message=FALSE, warning=FALSE}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+SOUNDEX is a phonetic algorithm that indexes words by their sound when pronounced in English. This can be useful for matching words that sound similar but are spelled differently. SQLite has this function.
+
+```{sql testing soundex on George}
+
+SELECT SOUNDEX('George');
+
+```
+
+```{sql finding last names that sound like Smyth}
+
+SELECT last_name AS 'Surnames' 
+FROM customer
+WHERE SOUNDEX(last_name) = SOUNDEX('Smyth');
+
+
+```
+
+```{sql testing soundex with postgresql}
+
+select soundex('Postgres'), soundex('Postgresss'), ('Postgres' = 'Postgresss'),
+soundex('Postgres') = soundex('Postgresss')
+```
+
+A SOUNDEX code consists of a letter followed by three digits, representing the phonetic pattern of the word. Here's how it is constructed:
+
+-   First Letter: The first letter of the word is kept as the first letter of the SOUNDEX code.
+
+-   Digits: The remaining letters are converted to digits based on their phonetic sound:
+
+B, F, P, V → 1
+
+C, G, J, K, Q, S, X, Z → 2
+
+D, T → 3
+
+L → 4
+
+M, N → 5
+
+R → 6
+
+-   Similar Sounds: Adjacent letters that represent the same sound are collapsed into a single digit.
+
+-   Vowels and Certain Letters: A, E, I, O, U, H, W, and Y are ignored unless they are the first letter.
+
+-   Truncation/Zero Padding: The code is truncated to four characters if necessary, or zero-padded to ensure it is four characters long.
+
+-   For example, the SOUNDEX code "P232" is generated from the word "Postgres" as follows:
+
+    'P' is the first letter.
+
+    'o' is ignored.
+
+    's' maps to 2.
+
+    't' maps to 3.
+
+    'g' maps to 2.
+
+    Remaining letters ('r', 'e', 's') are either ignored or do not change the pattern as the code is already four characters long.
+
+Thus, "Postgres" becomes "P232".
+
+
+```{sql Difference between the strings Postgres and Postgresss}
+
+select difference ('Postgres', 'Postgresss') as "Difference between the strings Postgres and Postgresss"
+
+```
+
+The DIFFERENCE() function in SQL compares the SOUNDEX values of two strings and returns an integer value between 0 and 4, indicating the degree of similarity between the two strings. A result of 4 means the strings sound very similar, while a result of 0 means they sound very different. This function is particularly useful for fuzzy matching in text searches.
+
+
+The levenshtein() function calculates the Levenshtein distance between two strings, which is the minimum number of single-character edits (insertions, deletions, or substitutions) required to change one string into the other. It is commonly used to measure the similarity between two strings, with a lower distance indicating greater similarity.
+
+SQLite doesn't have it unfortunately! 
+
