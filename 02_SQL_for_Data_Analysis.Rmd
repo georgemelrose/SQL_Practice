@@ -1362,7 +1362,6 @@ R → 6
 
 Thus, "Postgres" becomes "P232".
 
-
 ```{sql Difference between the strings Postgres and Postgresss}
 
 select difference ('Postgres', 'Postgresss') as "Difference between the strings Postgres and Postgresss"
@@ -1371,8 +1370,300 @@ select difference ('Postgres', 'Postgresss') as "Difference between the strings 
 
 The DIFFERENCE() function in SQL compares the SOUNDEX values of two strings and returns an integer value between 0 and 4, indicating the degree of similarity between the two strings. A result of 4 means the strings sound very similar, while a result of 0 means they sound very different. This function is particularly useful for fuzzy matching in text searches.
 
-
 The levenshtein() function calculates the Levenshtein distance between two strings, which is the minimum number of single-character edits (insertions, deletions, or substitutions) required to change one string into the other. It is commonly used to measure the similarity between two strings, with a lower distance indicating greater similarity.
 
-SQLite doesn't have it unfortunately! 
+SQLite doesn't have it unfortunately!
 
+## 8 - Further Filtering & Aggregation in SQL
+
+```{r gravity bookstore dataset erd png for section 8, message=FALSE, warning=FALSE}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+### The HAVING Clause
+
+```{sql example group by code }
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC;
+
+```
+
+The HAVING clause is used to specify a condition for groups of rows created by the GROUP BY clause, similar to how the WHERE clause is used to specify a condition for individual rows.
+
+```{sql inserting a having clause into group by code}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+HAVING
+    "Sum of Orders per Customer" > 100
+ORDER BY 
+    "Sum of Orders per Customer" DESC;
+
+```
+
+### CUBE
+
+```{r gravity bookstore dataset erd png for section 8 part 2, message=FALSE, warning=FALSE}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+SQLite does not support the CUBE operation directly. The CUBE operation, found in SQL databases like PostgreSQL, SQL Server, and Oracle, is used for generating a result set that represents a multi-dimensional cube for aggregation purposes.
+
+It generates a result set that represents all possible combinations of grouping columns, providing comprehensive aggregate data for every combination.
+
+When you use CUBE, SQL automatically performs aggregations for each combination of the specified dimensions (columns).
+
+However, you can manually create similar results in SQLite using a combination of GROUP BY queries and UNION operations to simulate a CUBE.
+
+```{sql example sql code from several tables}
+
+SELECT 
+    b.title AS "Book Title",
+    a.city AS "Order Destination City",
+    c.country_name AS "Order Destination Country", 
+    ol.price AS "Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id  = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+;
+
+```
+
+To replicate CUBE with the above query, the following steps are done in a query below:
+
+-   Detailed Grouping - Group by Book Title, Order Destination City, and Order Destination Country.
+
+-   Partial Groupings - Group by each pair of dimensions and each individual dimension. *Book Title and Order Destination City*, *Book Title and Order Destination Country*, *Order Destination City and Order Destination Country*, *Book Title only*, *Order Destination City only*, *Order Destination Country only*.
+
+Grand Total: Aggregate without any grouping for the overall total.
+
+```{sql simulating CUBE for the above sql query}
+-- Group by all three dimensions
+SELECT 
+    b.title AS "Book Title",
+    a.city AS "Order Destination City",
+    c.country_name AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+GROUP BY
+    b.title, a.city, c.country_name
+
+UNION ALL
+
+-- Group by Book Title and Order Destination City
+SELECT 
+    b.title AS "Book Title",
+    a.city AS "Order Destination City",
+    NULL AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+GROUP BY
+    b.title, a.city
+
+UNION ALL
+
+-- Group by Book Title and Order Destination Country
+SELECT 
+    b.title AS "Book Title",
+    NULL AS "Order Destination City",
+    c.country_name AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+GROUP BY
+    b.title, c.country_name
+
+UNION ALL
+
+-- Group by Order Destination City and Order Destination Country
+SELECT 
+    NULL AS "Book Title",
+    a.city AS "Order Destination City",
+    c.country_name AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+GROUP BY
+    a.city, c.country_name
+
+UNION ALL
+
+-- Group by Book Title only
+SELECT 
+    b.title AS "Book Title",
+    NULL AS "Order Destination City",
+    NULL AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+GROUP BY
+    b.title
+
+UNION ALL
+
+-- Group by Order Destination City only
+SELECT 
+    NULL AS "Book Title",
+    a.city AS "Order Destination City",
+    NULL AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+GROUP BY
+    a.city
+
+UNION ALL
+
+-- Group by Order Destination Country only
+SELECT 
+    NULL AS "Book Title",
+    NULL AS "Order Destination City",
+    c.country_name AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+GROUP BY
+    c.country_name
+
+UNION ALL
+
+-- Grand total
+SELECT 
+    NULL AS "Book Title",
+    NULL AS "Order Destination City",
+    NULL AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id;
+
+
+```
+
+If CUBE was available, much shorter code could be employed -
+
+SELECT b.title AS "Book Title", a.city AS "Order Destination City", c.country_name AS "Order Destination Country", SUM(ol.price) AS "Total Price" FROM book b INNER JOIN order_line ol ON ol.book_id = b.book_id INNER JOIN cust_order co ON ol.order_id = co.order_id INNER JOIN address a ON co.dest_address_id = a.address_id INNER JOIN country c ON a.country_id = c.country_id GROUP BY CUBE(b.title, a.city, c.country_name);
+
+[***Why use CUBE, what's the point?***]{.ul}
+
+Using the CUBE operator in SQL is valuable for data analysis.
+
+    Comprehensive Aggregation:
+        CUBE provides a complete set of aggregations across all combinations of specified dimensions. This includes subtotals for every combination of the dimensions and a grand total.
+
+    Simplifies Query Writing:
+        Instead of writing multiple GROUP BY queries with UNION ALL, a single query with CUBE handles all required groupings and aggregations.
+
+    Facilitates Data Exploration:
+        By generating all possible subtotals, CUBE allows for easy exploration of data across different levels of granularity.
+
+    Supports OLAP Operations:
+        CUBE is particularly useful in Online Analytical Processing (OLAP) systems, enabling complex analytical queries on data warehouses.
+
+Use Cases and Next Steps After Using CUBE
+
+    Data Reporting:
+        Use the result set from a CUBE operation to create comprehensive reports that show detailed and aggregated information. This is useful for business intelligence tools and dashboards.
+
+    Pivot Tables:
+        The result can be used to create pivot tables in tools like Excel or Tableau, allowing users to interactively explore data across different dimensions.
+
+    Trend Analysis:
+        Analyze trends and patterns by examining the subtotals and grand totals provided by the CUBE output.
+
+    Performance Metrics:
+        Calculate key performance indicators (KPIs) at various levels of detail, providing insights into different aspects of the business or operation.
+
+    Anomaly Detection:
+        Identify anomalies or outliers by comparing aggregated data at different levels of detail.
