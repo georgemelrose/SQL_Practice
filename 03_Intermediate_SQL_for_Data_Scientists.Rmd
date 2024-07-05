@@ -1,0 +1,1224 @@
+---
+title: "Intermediate SQL for Data Scientists"
+author: "George Melrose"
+date: "05/07/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+rm(list = ls())
+
+knitr::opts_chunk$set(echo = TRUE)
+
+pacman::p_load(readr,tidyverse, data.table,DBI,odbc,RSQLite,plotly,dygraphs,xts,
+               reticulate)
+
+
+options(max.print = 1000) 
+getOption("max.print")
+
+con <- dbConnect(SQLite(), dbname = ":memory:")
+knitr::opts_chunk$set(connection = "con")
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+
+
+# List the tables present in the database connected through 'con'
+tables <- dbListTables(con)
+
+# Print the list of tables
+print(tables)
+```
+
+```{r reading in data to the pretend database, warning=FALSE, message=FALSE, include=FALSE}
+# List of table names (should match the original table names)
+tables <- c("author","book_author","book_language","country",
+            "customer","customer","customer_address","order_line",
+            "order_status","publisher","shipping_method","address","address_status") # Replace with your actual table names
+
+book <- read_csv("book.csv")
+
+book$publication_date <- as.character(book$publication_date)
+  
+# Write the table to the new SQL connection
+dbWriteTable(con, "book", book, overwrite = TRUE)
+
+cust_order <- read_csv("cust_order.csv")
+
+cust_order$order_date <- as.character(cust_order$order_date)
+  
+# Write the table to the new SQL connection
+dbWriteTable(con, "cust_order", cust_order, overwrite = TRUE)
+  
+
+order_history <- read_csv("order_history.csv")
+
+order_history$status_date <- as.character(order_history$status_date)
+  
+# Write the table to the new SQL connection
+dbWriteTable(con, "order_history", order_history, overwrite = TRUE)
+  
+  
+
+# Loop through each table and read it from the CSV file
+for (table in tables) {
+  # Read the table from the CSV file
+  data <- read_csv(paste0(table, ".csv"))
+  
+  # Write the table to the new SQL connection
+  dbWriteTable(con, table, data, overwrite = TRUE)
+}
+
+
+
+rm(data)
+
+```
+
+```{r gravity bookstore dataset erd png, message=FALSE, warning=FALSE}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+```{sql looking at the book table columns}
+
+select * from book
+
+```
+
+```{sql looking at the book_language table columns}
+select * from book_language
+```
+
+```{r Print the tables currently in the database, warning=FALSE, message=FALSE, include=FALSE}
+# List the tables present in the database connected through 'con'
+tables <- dbListTables(con)
+
+# Print the list of tables
+print(tables)
+```
+
+```{sql list all the tables from the database, include=FALSE}
+SELECT name FROM sqlite_master WHERE type='table';
+```
+
+## 1 - Indexes & Views {.tabset .tabset-fade .tabset-pills}
+
+This section and the following take inspiration but not much content, from the LinkedIn learning course ***"Intermediate SQL for Data Scientists"*** - <https://www.linkedin.com/learning/intermediate-sql-for-data-scientists>
+
+```{r gravity bookstore dataset erd png repeated}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+### Indexes
+
+Indexes in SQLite are structures designed to improve the speed of data retrieval. They're similar to indexes in a book, allowing for faster access to rows in a table based on the values of one or more columns.
+
+Types of Indexes -
+
+1.  ***Single-Column Index*** - Created on a single column.
+
+2.  ***Multi-Column Index*** - Created on two or more columns.
+
+3.  ***Unique Index*** - Ensures that all values in the indexed column(s) are unique.
+
+4.  ***Primary Key Index*** - Automatically created when a table has a primary key constraint.
+
+5.  ***Automatic Indexes*** - Sometimes SQLite creates indexes automatically to optimize query performance, particularly for joins.
+
+```{sql creating a single column index}
+
+CREATE INDEX Customer_IDs ON cust_order(customer_id); 
+
+
+```
+
+```{sql creating a multi column index}
+
+CREATE INDEX Customer_Orders ON cust_order(order_id, customer_id);
+
+```
+
+CREATE UNIQUE INDEX unique_countries ON country(country_name);
+
+This SQL code above fails - A unique index does not discard non-unique values or automatically filter out duplicates. Instead, it enforces a constraint that prevents duplicates from being inserted into the table in the first place.
+
+```{sql creating a unique index}
+
+CREATE UNIQUE INDEX unique_status_ids ON order_status(status_id);
+
+```
+
+List all indexes associated with a table -
+
+```{sql looking at all indexes associated with cust_order}
+PRAGMA index_list(cust_order);
+```
+
+Get information about a specific index -
+
+```{sql getting information about the customer_orders index specifically}
+
+PRAGMA index_info(Customer_Orders);
+
+```
+
+Indexes can be dropped using the DROP INDEX statement -
+
+```{sql removing the Cusomter_Order index}
+
+DROP INDEX Customer_Orders;
+
+```
+
+Checking the index deletion has worked -
+
+```{sql checking index deletion has worked}
+PRAGMA index_list(cust_order);
+```
+
+An example with a more complex and intricate query -
+
+```{sql looking at the book table}
+
+select * from book
+
+```
+
+```{sql looking at author names}
+
+select author_name from author where author_name == "Walter Scott"
+
+```
+
+Creating an index of author names.
+
+```{sql creating an index of author names}
+
+CREATE INDEX Author_names ON author(author_name);
+
+```
+
+Now our 'sever' should use that index to optimise the performance of this query.
+
+```{sql filtering Galaxy bokstore data for 1997 to 2000 publications by JK Rowling and Bill Bryson}
+
+SELECT
+    b.title,
+    b.isbn13,
+    b.num_pages,
+    b.publication_date,
+    a.author_name,
+    ol.price
+FROM book b
+INNER JOIN book_author ba ON b.book_id = ba.book_id
+INNER JOIN author a ON ba.author_id = a.author_id
+INNER JOIN order_line ol ON b.book_id = ol.book_id
+INNER JOIN cust_order co ON ol.order_id = co.order_id
+WHERE a.author_name IN ('J.K. Rowling', 'Bill Bryson')
+  AND strftime('%Y', b.publication_date) IN ('1997','1998', '1999','2000')
+ORDER BY ol.price DESC;
+
+
+```
+
+### Views
+
+Views in SQLite are virtual tables that provide a way to represent the results of a query as a table.
+
+Reasons to use Views -
+
+1.  **Simplify Complex Queries** - By encapsulating complex joins and calculations within a view, queries can be simpler and more understandable.
+
+2.  **Enhance Security** - Views can restrict access to specific data by exposing only certain columns or rows to users.
+
+3.  **Provide Abstraction** - Offer a layer of abstraction, allowing changes in the underlying database schema without affecting the end users.
+
+4.  **Improve Maintainability** - Views centralise query logic, making the system easier to maintain and modify.
+
+```{sql creating a view of all of Bill Brysons books}
+CREATE VIEW Bryson_Books AS
+SELECT
+    b.title,
+    b.isbn13,
+    b.num_pages,
+    b.publication_date,
+    a.author_name,
+    ol.price
+FROM book b
+INNER JOIN book_author ba ON b.book_id = ba.book_id
+INNER JOIN author a ON ba.author_id = a.author_id
+INNER JOIN order_line ol ON b.book_id = ol.book_id
+INNER JOIN cust_order co ON ol.order_id = co.order_id
+WHERE a.author_name IN ('Bill Bryson');
+
+
+```
+
+```{sql creating a view of all of JK Rowling books}
+CREATE VIEW Rowling_Books AS
+SELECT
+    b.title,
+    b.isbn13,
+    b.num_pages,
+    b.publication_date,
+    a.author_name,
+    ol.price
+FROM book b
+INNER JOIN book_author ba ON b.book_id = ba.book_id
+INNER JOIN author a ON ba.author_id = a.author_id
+INNER JOIN order_line ol ON b.book_id = ol.book_id
+INNER JOIN cust_order co ON ol.order_id = co.order_id
+WHERE a.author_name IN ('J.K. Rowling');
+
+
+```
+
+```{sql creating a view of all of Walter Scotts books}
+CREATE VIEW Walter_Scott_Books AS
+SELECT
+    b.title,
+    b.isbn13,
+    b.num_pages,
+    b.publication_date,
+    a.author_name,
+    ol.price
+FROM book b
+INNER JOIN book_author ba ON b.book_id = ba.book_id
+INNER JOIN author a ON ba.author_id = a.author_id
+INNER JOIN order_line ol ON b.book_id = ol.book_id
+INNER JOIN cust_order co ON ol.order_id = co.order_id
+WHERE a.author_name IN ('Walter Scott');
+
+
+```
+
+```{sql looking at all the columns and rows from the Bryson Books view}
+SELECT * FROM Bryson_Books;
+```
+
+```{sql looking at all the columns and rows from the Walter Scott Books view}
+SELECT * FROM Walter_Scott_Books;
+```
+
+Views themselves are not directly updatable, but they can be dropped and recreated -
+
+```{sql dropping the Bryson books view}
+DROP VIEW IF EXISTS Bryson_Books;
+```
+
+```{sql checking what views are present}
+SELECT name FROM sqlite_master WHERE type='view';
+```
+
+```{sql seeing the definition of the Walter Scott view}
+SELECT sql FROM sqlite_master WHERE type='view' AND name='Walter_Scott_Books';
+```
+
+## 2 - Statistical aggregate functions {.tabset .tabset-fade .tabset-pills}
+
+### SUM(), AVG(), ROUND()
+
+The SUM() function is an aggregate function that calculates the total sum of a numeric column. The function is commonly used in conjunction with the GROUP BY clause to calculate sums for specific groups of data.
+
+```{r gravity bookstore dataset erd png for section 2}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+```{sql using the sum() function incorrectly}
+SELECT SUM(street_name) as "No.different Street Names", SUM(city) as "No.different Cities"  FROM address;
+```
+
+As street_name and city are text columns, sum won't work properly on them. It's best to use COUNT(DISTINCT()).
+
+```{sql using the sum() function}
+SELECT COUNT(DISTINCT street_name) as "No. of Different Street Names", 
+       COUNT(DISTINCT city) as "No. of Different Cities" 
+FROM address;
+```
+
+```{r gravity bookstore dataset erd png for section 2 repeat}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+```{sql using the sum() function correctly}
+
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Order per Customer" DESC;
+
+```
+
+The AVG() function in SQL is an aggregate function that calculates the average value of a numeric column. It sums up all the values in the column and divides by the number of non-null values, providing the mean value.
+
+```{sql using the sum() and avg() functions}
+
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    AVG(ol.price) AS "Average Order Price per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Order per Customer" DESC;
+
+```
+
+The ROUND() function in SQL is used to round a numeric value to a specified number of decimal places. It takes two arguments: the number to be rounded and the number of decimal places to round to.
+
+```{sql using the sum() and avg() and round() functions}
+
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    ROUND(AVG(ol.price),2) AS "Average Order Price per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Order per Customer" DESC;
+
+```
+
+### Variance
+
+The VARIANCE() function is used to calculate the statistical variance of a set of numeric values, which measures the dispersion of the values from their mean. However, SQLite does not have a built-in VARIANCE() function.
+
+To calculate variance in SQLite, one can use a combination of SQL functions.
+
+-   *Calculating Sample Variance* -
+
+The sample variance estimates the variance from a sample of the population. The formula is -
+
+\[ \sigma\^2 = \frac{\sum (x_i - \bar{x})^2}{n - 1} \]
+
+-   (\[\sigma\^2\]) is the population variance
+
+-   (\[x_i\]) represents each data point
+
+-   (\[\bar{x}\]) is the sample mean
+
+-   (\[n - 1\]) is the total number of data points in the population
+
+Used when there's only a sample and need the population variance needs to be estimated. The denominator is \[n - 1\] . \[n - 1\] instead of \[n\] to correct the bias in the estimation of the population variance from a sample (Bessel's correction).
+
+The SQL code -
+
+SELECT SUM((value - avg_value) \* (value - avg_value)) / (COUNT(\*) - 1) AS sample_variance FROM ( SELECT value, AVG(value) AS avg_value FROM table_name ) AS subquery;
+
+```{sql calculating sample variance of customers orders}
+
+WITH OrderStats AS (
+    SELECT 
+        c.customer_id,
+        SUM(ol.price) AS "Sum of Orders per Customer",
+        AVG(ol.price) AS "Average Order Price per Customer",
+        COUNT(ol.price) AS "Order Count",
+        CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+    FROM 
+        order_line ol
+    INNER JOIN 
+        cust_order co ON ol.order_id = co.order_id
+    INNER JOIN 
+        customer c ON co.customer_id = c.customer_id
+    GROUP BY 
+        c.customer_id, c.first_name, c.last_name
+)
+SELECT
+    os."Sum of Orders per Customer",
+    ROUND(os."Average Order Price per Customer", 2) AS "Average Order Price per Customer",
+    os."Full Name",
+    ROUND(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / (os."Order Count" - 1), 2) AS "Order Price Sample Variance"
+FROM
+    order_line ol
+INNER JOIN
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    customer c ON co.customer_id = c.customer_id
+INNER JOIN
+    OrderStats os ON c.customer_id = os.customer_id
+GROUP BY
+    os.customer_id, os."Sum of Orders per Customer", os."Average Order Price per Customer", os."Full Name"
+ORDER BY
+    "Sum of Orders per Customer" DESC;
+
+```
+
+-   *Calculating Population Variance* -
+
+The population variance measures the dispersion of all data points in a population from the population mean ((\[\mu\])). The formula is -
+
+\[ \sigma\^2 = \frac{\sum (x_i - \mu)^2}{N} \]
+
+-   (\[\sigma\^2\]) is the population variance
+
+-   (\[x_i\]) represents each data point
+
+-   (\[\mu\]) is the mean of the population
+
+-   (\[n\]) is the total number of data points in the population
+
+With large datasets, the difference between sample and population variance is minimal since the correction factor (n - 1) vs. (n) has a smaller impact as the sample size increases.
+
+The SQL code -
+
+SELECT AVG((value - avg_value) \* (value - avg_value)) AS population_variance FROM ( SELECT value, AVG(value) AS avg_value FROM table_name ) AS subquery;
+
+```{sql calculating population variance of customers orders}
+
+WITH OrderStats AS (
+    SELECT 
+        c.customer_id,
+        SUM(ol.price) AS "Sum of Orders per Customer",
+        AVG(ol.price) AS "Average Order Price per Customer",
+        COUNT(ol.price) AS "Order Count",
+        CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+    FROM 
+        order_line ol
+    INNER JOIN 
+        cust_order co ON ol.order_id = co.order_id
+    INNER JOIN 
+        customer c ON co.customer_id = c.customer_id
+    GROUP BY 
+        c.customer_id, c.first_name, c.last_name
+)
+SELECT
+    os."Sum of Orders per Customer",
+    ROUND(os."Average Order Price per Customer", 2) AS "Average Order Price per Customer",
+    os."Full Name",
+    ROUND(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / os."Order Count", 2) AS "Order Price Population Variance"
+FROM
+    order_line ol
+INNER JOIN
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    customer c ON co.customer_id = c.customer_id
+INNER JOIN
+    OrderStats os ON c.customer_id = os.customer_id
+GROUP BY
+    os.customer_id, os."Sum of Orders per Customer", os."Average Order Price per Customer", os."Full Name"
+ORDER BY
+    "Sum of Orders per Customer" DESC;
+
+```
+
+### Standard Deviation
+
+Standard deviation measures the dispersion of a dataset relative to its mean, indicating how spread out the data points are. A low standard deviation means the data points are close to the mean, while a high standard deviation indicates they are more spread out.
+
+SQLite does not have a built-in STDDEV() or STDEV() function for calculating standard deviation.
+
+These are the steps to calculate standard deviation in SQLite:
+
+1.  Calculate the mean of the dataset.
+
+2.  Compute Squared Differences calculate the squared difference of each value from the mean.
+
+3.  Aggregate and Calculate - Sum up the squared differences, divide by the count of values (for population standard deviation) or by (n - 1) (for sample standard deviation), and take the square root of the result.
+
+The population standard deviation ((\sigma)) is calculated using the formula:
+
+\[ \sigma = \sqrt{\frac{\sum_{i=1}^{N} (x_i - \mu)^2}{N}} \]
+
+where: - (\sigma) is the population standard deviation, - (x_i) represents each data point, - (\mu) is the mean of the population, - (N) is the total number of data points in the population.
+
+The SQL code -
+
+SELECT SQRT(AVG((value - avg_value) \* (value - avg_value))) AS population_stddev FROM ( SELECT value, AVG(value) OVER () AS avg_value FROM table_name ) AS subquery;
+
+```{sql calculating population standard deviation}
+WITH OrderStats AS (
+    SELECT 
+        c.customer_id,
+        SUM(ol.price) AS "Sum of Orders per Customer",
+        AVG(ol.price) AS "Average Order Price per Customer",
+        COUNT(ol.price) AS "Order Count",
+        CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+    FROM 
+        order_line ol
+    INNER JOIN 
+        cust_order co ON ol.order_id = co.order_id
+    INNER JOIN 
+        customer c ON co.customer_id = c.customer_id
+    GROUP BY 
+        c.customer_id, c.first_name, c.last_name
+)
+SELECT
+    os."Sum of Orders per Customer",
+    ROUND(os."Average Order Price per Customer", 2) AS "Average Order Price per Customer",
+    os."Full Name",
+    ROUND(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / os."Order Count", 2) AS "Order Price Population Variance",
+    ROUND(SQRT(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / os."Order Count"), 2) AS "Order Price Standard Deviation"
+FROM
+    order_line ol
+INNER JOIN
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    customer c ON co.customer_id = c.customer_id
+INNER JOIN
+    OrderStats os ON c.customer_id = os.customer_id
+GROUP BY
+    os.customer_id, os."Sum of Orders per Customer", os."Average Order Price per Customer", os."Full Name"
+ORDER BY
+    "Sum of Orders per Customer" DESC;
+
+```
+
+The sample standard deviation ((s)) is calculated using the formula:
+
+\[ s = \sqrt{\frac{\sum_{i=1}^{n} (x_i - \bar{x})^2}{n - 1}} \]
+
+where: - (s) is the sample standard deviation, - (x_i) represents each data point in the sample, - (\bar{x}) is the sample mean, - (n) is the number of data points in the sample.
+
+The SQL code -
+
+SELECT SQRT(SUM((value - avg_value) \* (value - avg_value)) / (COUNT(\*) - 1)) AS sample_stddev FROM ( SELECT value, AVG(value) OVER () AS avg_value FROM table_name ) AS subquery;
+
+```{sql calculating sample variance and standard deviation}
+
+WITH SampledCustomers AS (
+    SELECT 
+        c.customer_id,
+        c.first_name,
+        c.last_name
+    FROM 
+        customer c
+    ORDER BY 
+        RANDOM()
+    LIMIT 50
+),
+OrderStats AS (
+    SELECT 
+        c.customer_id,
+        SUM(ol.price) AS "Sum of Orders per Customer",
+        AVG(ol.price) AS "Average Order Price per Customer",
+        COUNT(ol.price) AS "Order Count",
+        CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+    FROM 
+        order_line ol
+    INNER JOIN 
+        cust_order co ON ol.order_id = co.order_id
+    INNER JOIN 
+        SampledCustomers c ON co.customer_id = c.customer_id
+    GROUP BY 
+        c.customer_id, c.first_name, c.last_name
+)
+SELECT
+    os."Sum of Orders per Customer",
+    ROUND(os."Average Order Price per Customer", 2) AS "Average Order Price per Customer",
+    os."Full Name",
+    ROUND(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / (os."Order Count" - 1), 2) AS "Order Price Sample Variance",
+    ROUND(SQRT(SUM((ol.price - os."Average Order Price per Customer") * (ol.price - os."Average Order Price per Customer")) / (os."Order Count" - 1)), 2) AS "Order Price Sample Standard Deviation"
+FROM
+    order_line ol
+INNER JOIN
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    customer c ON co.customer_id = c.customer_id
+INNER JOIN
+    OrderStats os ON c.customer_id = os.customer_id
+GROUP BY
+    os.customer_id, os."Sum of Orders per Customer", os."Average Order Price per Customer", os."Full Name"
+ORDER BY
+    "Sum of Orders per Customer" DESC;
+
+```
+
+## 3 - WITH() function
+
+WITH(), also known as Common Table Expressions (CTEs), allows for improved readability and reusability of SQL queries. It's particularly useful for breaking down complex queries into simpler, more manageable parts by creating temporary result sets that can be referenced within the main query.
+
+WITH cte_name AS ( -- CTE Query SELECT ... ) SELECT ... FROM cte_name
+
+[**Key Differences**]{.ul}
+
+1.  **Structure and Readability -**
+
+*Subqueries* - Can be less readable, especially when nested.
+
+*WITH()* - Provide a clearer, more structured approach by defining temporary tables with meaningful names.
+
+2.  **Reusability** -
+
+*Subqueries -* Generally not reusable; you need to repeat the subquery if it's used in multiple places.
+
+*WITH()* - Reusable within the main query, reducing redundancy and improving maintainability.
+
+3.  **Debugging and Maintenance** -
+
+*Subqueries -* Harder to debug and maintain due to their nested nature.
+
+*WITH() -* Easier to debug and maintain due to their clear, modular structure.
+
+**When using WITH()**
+
+```{sql getting total amount spent and average order amount using the with clause}
+WITH CustomerOrders AS (
+    SELECT 
+        co.customer_id, 
+        co.order_date,
+        ol.order_id,
+        SUM(ol.price) AS "Total Order Amount"
+    FROM 
+        cust_order co
+    INNER JOIN 
+        order_line ol ON co.order_id = ol.order_id
+    WHERE 
+        co.order_date BETWEEN '2023-11-01' AND '2024-05-01'
+    GROUP BY 
+        co.customer_id, co.order_date, ol.order_id
+)
+SELECT
+    c.customer_id AS "Customer ID",
+    c.order_date AS "Order Date",
+    COUNT(c.order_id) AS "Number of Orders",
+    SUM(c."Total Order Amount") AS "Total Amount Spent",
+    AVG(c."Total Order Amount") AS "Average Order Amount"
+FROM
+    CustomerOrders c
+GROUP BY
+    c.customer_id
+ORDER BY
+    c.order_date DESC;
+```
+
+The part with the WITH inner query -
+
+-   This CTE calculates the total amount spent on each order for every customer within the specified date range.
+
+-   It joins the cust_order and order_line tables and groups the data by customer ID, order date, and order ID to compute the total order amount.
+
+The rest, the outer query -
+
+-   The main query selects from the CustomerOrders CTE.
+
+-   It calculates the number of orders, total amount spent, and average order amount for each customer.
+
+-   The results are grouped by customer ID and ordered by the order date in descending order.
+
+**When not using WITH()**
+
+```{sql getting total amount spent and average order amount without the with clause}
+SELECT 
+    co.customer_id AS "Customer ID",
+    co.order_date AS "Order Date",
+    COUNT(orders_per_customer.order_id) AS "Number of Orders",
+    SUM(orders_per_customer."Total Order Amount") AS "Total Amount Spent",
+    AVG(orders_per_customer."Total Order Amount") AS "Average Order Amount"
+FROM 
+    cust_order co
+INNER JOIN (
+    SELECT 
+        co_inner.customer_id, 
+        co_inner.order_date,
+        ol_inner.order_id,
+        SUM(ol_inner.price) AS "Total Order Amount"
+    FROM 
+        cust_order co_inner
+    INNER JOIN 
+        order_line ol_inner ON co_inner.order_id = ol_inner.order_id
+    WHERE 
+        co_inner.order_date BETWEEN '2023-11-01' AND '2024-05-01'
+    GROUP BY 
+        co_inner.customer_id, co_inner.order_date, ol_inner.order_id
+) AS orders_per_customer ON co.customer_id = orders_per_customer.customer_id AND co.order_date = orders_per_customer.order_date
+WHERE 
+    co.order_date BETWEEN '2023-11-01' AND '2024-05-01'
+GROUP BY 
+    co.customer_id, co.order_date
+ORDER BY 
+    co.order_date DESC;
+
+```
+
+The part with the INNER JOIN inner query -
+
+-   The inner query calculates the total amount spent on each order for every customer within the specified date range.
+
+-   This inner query is essentially the same as the WITH part in the previous example.
+
+The rest, the outer query -
+
+-   The outer query joins the cust_order table with the result of the inner query (orders_per_customer).
+
+-   It calculates the number of orders, total amount spent, and average order amount for each customer, grouped by customer ID and order date.
+
+-   The results are ordered by the order date in descending order.
+
+**The advantages to using WITH()**
+
+-   *Readability -* Using the WITH clause (CTE) makes the query more readable.In the non-CTE version, the nested query can be harder to follow.
+
+-   *Maintainability -* The CTE version is more maintainable because each part of the query is isolated. If you need to adjust the calculation logic, it's clearer where to make changes.
+
+-   *Length* - The non-CTE version tends to be more long-winded, as it requires embedding the subquery directly in the FROM clause, making the overall query longer and potentially more confusing.
+
+## 4 - Further Data Manipulation in SQL
+
+### the 'like' operator
+
+```{r gravity bookstore dataset erd png for section 4, message=FALSE, warning=FALSE}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+The `LIKE` operator is used for pattern matching within text fields. It allows the use of `%` to represent zero or more characters and `_` to represent a single character. For example, the query `SELECT * FROM customers WHERE name LIKE '%enko';` will return all rows where the `name` column ends with "enko".
+
+Getting all surnames starting with 'Mac' -
+
+```{sql finding all customers whose surname starts with Mac}
+select * from customer where last_name like 'Mac%'
+```
+
+Getting all surnames starting with 'Mc' -
+
+```{sql finding all customers whose surname starts with Mc}
+select * from customer where last_name like 'Mc%'
+```
+
+Getting all surnames ending with 'vich' -
+
+```{sql finding all customers whose surname ends in vich}
+select * from customer where last_name like '%vich'
+```
+
+Getting all surnames ending with 'enko' -
+
+```{sql finding all customers whose surname ends in enko}
+select * from customer where last_name like '%enko'
+```
+
+Getting all surnames starting or ending with 'man' (lower or upper case) -
+
+```{sql finding all customers whose surname is like man}
+select * from customer where last_name like '%man%'
+```
+
+Making a new column specifically based on the like condition -
+
+```{sql getting Ukrainian like names}
+
+SELECT 
+    last_name as "Customer Surname", 
+    CASE 
+        WHEN last_name LIKE '%enko' 
+            OR last_name LIKE '%vich' 
+            OR last_name LIKE '%vych' 
+            OR last_name LIKE '%chuk' 
+            OR last_name LIKE '%chyk' 
+            OR last_name LIKE '%ski' 
+            OR last_name LIKE '%sky' 
+            OR last_name LIKE '%uk' 
+            OR last_name LIKE '%ko' 
+            OR last_name LIKE '%yshyn' 
+            OR last_name LIKE '%iv' THEN 'Yes' 
+        ELSE 'No' 
+    END AS 'Potentially Ukrainian Surname?' 
+FROM customer 
+WHERE last_name LIKE '%enko' 
+    OR last_name LIKE '%vich' 
+    OR last_name LIKE '%vych' 
+    OR last_name LIKE '%chuk' 
+    OR last_name LIKE '%chyk' 
+    OR last_name LIKE '%ski' 
+    OR last_name LIKE '%sky' 
+    OR last_name LIKE '%uk' 
+    OR last_name LIKE '%ko' 
+    OR last_name LIKE '%yshyn' 
+    OR last_name LIKE '%iv';
+
+
+```
+
+Unfortunately, SQLite that's being used here does not support the command *'similar to'* that could be used in PostGreSQL.
+
+If PostGreSQL was being used, the above query could be shortened a lot -
+
+SELECT last_name, CASE WHEN last_name SIMILAR TO '%(enko\|vich\|vych\|chuk\|chyk\|ski\|sky\|uk\|ko\|yshyn\|iv)' THEN 'YES' ELSE 'NO' END AS "Ukrainian Surname" FROM customer WHERE last_name SIMILAR TO '%(enko\|vich\|vych\|chuk\|chyk\|ski\|sky\|uk\|ko\|yshyn\|iv)';
+
+### SOUNDEX
+
+```{r gravity bookstore dataset erd png for section 4 part2, message=FALSE, warning=FALSE}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+SOUNDEX is a phonetic algorithm that indexes words by their sound when pronounced in English. This can be useful for matching words that sound similar but are spelled differently. SQLite has this function.
+
+```{sql testing soundex on George}
+
+SELECT SOUNDEX('George');
+
+```
+
+```{sql finding last names that sound like Smyth}
+
+SELECT last_name AS 'Surnames' 
+FROM customer
+WHERE SOUNDEX(last_name) = SOUNDEX('Smyth');
+
+
+```
+
+```{sql testing soundex with postgresql}
+
+select soundex('Postgres'), soundex('Postgresss'), ('Postgres' = 'Postgresss'),
+soundex('Postgres') = soundex('Postgresss')
+```
+
+A SOUNDEX code consists of a letter followed by three digits, representing the phonetic pattern of the word. Here's how it is constructed:
+
+-   First Letter: The first letter of the word is kept as the first letter of the SOUNDEX code.
+
+-   Digits: The remaining letters are converted to digits based on their phonetic sound:
+
+B, F, P, V → 1
+
+C, G, J, K, Q, S, X, Z → 2
+
+D, T → 3
+
+L → 4
+
+M, N → 5
+
+R → 6
+
+-   Similar Sounds: Adjacent letters that represent the same sound are collapsed into a single digit.
+
+-   Vowels and Certain Letters: A, E, I, O, U, H, W, and Y are ignored unless they are the first letter.
+
+-   Truncation/Zero Padding: The code is truncated to four characters if necessary, or zero-padded to ensure it is four characters long.
+
+-   For example, the SOUNDEX code "P232" is generated from the word "Postgres" as follows:
+
+    'P' is the first letter.
+
+    'o' is ignored.
+
+    's' maps to 2.
+
+    't' maps to 3.
+
+    'g' maps to 2.
+
+    Remaining letters ('r', 'e', 's') are either ignored or do not change the pattern as the code is already four characters long.
+
+Thus, "Postgres" becomes "P232".
+
+```{sql Difference between the strings Postgres and Postgresss}
+
+select difference ('Postgres', 'Postgresss') as "Difference between the strings Postgres and Postgresss"
+
+```
+
+The DIFFERENCE() function in SQL compares the SOUNDEX values of two strings and returns an integer value between 0 and 4, indicating the degree of similarity between the two strings. A result of 4 means the strings sound very similar, while a result of 0 means they sound very different. This function is particularly useful for fuzzy matching in text searches.
+
+The levenshtein() function calculates the Levenshtein distance between two strings, which is the minimum number of single-character edits (insertions, deletions, or substitutions) required to change one string into the other. It is commonly used to measure the similarity between two strings, with a lower distance indicating greater similarity.
+
+SQLite doesn't have it unfortunately!
+
+## 5 - Further Filtering & Aggregation in SQL
+
+```{r gravity bookstore dataset erd png for section 5, message=FALSE, warning=FALSE}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+### The HAVING Clause
+
+```{sql example group by code }
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC;
+
+```
+
+The HAVING clause is used to specify a condition for groups of rows created by the GROUP BY clause, similar to how the WHERE clause is used to specify a condition for individual rows.
+
+```{sql inserting a having clause into group by code}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+HAVING
+    "Sum of Orders per Customer" > 100
+ORDER BY 
+    "Sum of Orders per Customer" DESC;
+
+```
+
+### CUBE
+
+```{r gravity bookstore dataset erd png for section 8 part 2, message=FALSE, warning=FALSE}
+knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
+
+```
+
+SQLite does not support the CUBE operation directly. The CUBE operation, found in SQL databases like PostgreSQL, SQL Server, and Oracle, is used for generating a result set that represents a multi-dimensional cube for aggregation purposes.
+
+It generates a result set that represents all possible combinations of grouping columns, providing comprehensive aggregate data for every combination.
+
+When you use CUBE, SQL automatically performs aggregations for each combination of the specified dimensions (columns).
+
+However, you can manually create similar results in SQLite using a combination of GROUP BY queries and UNION operations to simulate a CUBE.
+
+```{sql example sql code from several tables}
+
+SELECT 
+    b.title AS "Book Title",
+    a.city AS "Order Destination City",
+    c.country_name AS "Order Destination Country", 
+    ol.price AS "Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id  = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+;
+
+```
+
+To replicate CUBE with the above query, the following steps are done in a query below:
+
+-   Detailed Grouping - Group by Book Title, Order Destination City, and Order Destination Country.
+
+-   Partial Groupings - Group by each pair of dimensions and each individual dimension. *Book Title and Order Destination City*, *Book Title and Order Destination Country*, *Order Destination City and Order Destination Country*, *Book Title only*, *Order Destination City only*, *Order Destination Country only*.
+
+Grand Total: Aggregate without any grouping for the overall total.
+
+```{sql simulating CUBE for the above sql query}
+-- Group by all three dimensions
+SELECT 
+    b.title AS "Book Title",
+    a.city AS "Order Destination City",
+    c.country_name AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+GROUP BY
+    b.title, a.city, c.country_name
+
+UNION ALL
+
+-- Group by Book Title and Order Destination City
+SELECT 
+    b.title AS "Book Title",
+    a.city AS "Order Destination City",
+    NULL AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+GROUP BY
+    b.title, a.city
+
+UNION ALL
+
+-- Group by Book Title and Order Destination Country
+SELECT 
+    b.title AS "Book Title",
+    NULL AS "Order Destination City",
+    c.country_name AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+GROUP BY
+    b.title, c.country_name
+
+UNION ALL
+
+-- Group by Order Destination City and Order Destination Country
+SELECT 
+    NULL AS "Book Title",
+    a.city AS "Order Destination City",
+    c.country_name AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+GROUP BY
+    a.city, c.country_name
+
+UNION ALL
+
+-- Group by Book Title only
+SELECT 
+    b.title AS "Book Title",
+    NULL AS "Order Destination City",
+    NULL AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+GROUP BY
+    b.title
+
+UNION ALL
+
+-- Group by Order Destination City only
+SELECT 
+    NULL AS "Book Title",
+    a.city AS "Order Destination City",
+    NULL AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+GROUP BY
+    a.city
+
+UNION ALL
+
+-- Group by Order Destination Country only
+SELECT 
+    NULL AS "Book Title",
+    NULL AS "Order Destination City",
+    c.country_name AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id
+GROUP BY
+    c.country_name
+
+UNION ALL
+
+-- Grand total
+SELECT 
+    NULL AS "Book Title",
+    NULL AS "Order Destination City",
+    NULL AS "Order Destination Country", 
+    SUM(ol.price) AS "Total Price"
+FROM 
+    book b
+INNER JOIN 
+    order_line ol ON ol.book_id = b.book_id
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+INNER JOIN
+    country c ON a.country_id = c.country_id;
+
+
+```
+
+If CUBE was available, much shorter code could be employed -
+
+SELECT b.title AS "Book Title", a.city AS "Order Destination City", c.country_name AS "Order Destination Country", SUM(ol.price) AS "Total Price" FROM book b INNER JOIN order_line ol ON ol.book_id = b.book_id INNER JOIN cust_order co ON ol.order_id = co.order_id INNER JOIN address a ON co.dest_address_id = a.address_id INNER JOIN country c ON a.country_id = c.country_id GROUP BY CUBE(b.title, a.city, c.country_name);
+
+[***Why use CUBE, what's the point?***]{.ul}
+
+Using the CUBE operator in SQL is valuable for data analysis.
+
+-   *Comprehensive Aggregation* - CUBE provides a complete set of aggregations across all combinations of specified dimensions. This includes subtotals for every combination of the dimensions and a grand total.
+
+-   *Simplifies Query Writing* - Instead of writing multiple GROUP BY queries with UNION ALL, a single query with CUBE handles all required groupings and aggregations.
+
+-   *Facilitates Data Exploration* - By generating all possible subtotals, CUBE allows for easy exploration of data across different levels of granularity.
+
+[Real-World Use Cases for CUBE]{.ul}
+
+-   *Data Reporting* - Use the result set from a CUBE operation to create comprehensive reports that show detailed and aggregated information. Useful for business intelligence tools and dashboards.
+
+-   *Pivot Tables* - The result can be used to create pivot tables in tools like Excel.
+
+-   *Trend Analysis* - Analyse trends and patterns by examining the subtotals and grand totals provided by the CUBE output.
+
+-   *Anomaly Detection* - Identify anomalies or outliers by comparing aggregated data at different levels of detail.
