@@ -652,7 +652,7 @@ ORDER BY
 
 ```
 
-## 3 - WITH() function
+## 3 - WITH() function {.tabset .tabset-fade .tabset-pills}
 
 WITH(), also known as Common Table Expressions (CTEs), allows for improved readability and reusability of SQL queries. It's particularly useful for breaking down complex queries into simpler, more manageable parts by creating temporary result sets that can be referenced within the main query.
 
@@ -781,7 +781,7 @@ The rest, the outer query -
 
 -   *Length* - The non-CTE version tends to be more long-winded, as it requires embedding the subquery directly in the FROM clause, making the overall query longer and potentially more confusing.
 
-## 4 - Further Data Manipulation in SQL
+## 4 - Further Data Manipulation in SQL {.tabset .tabset-fade .tabset-pills}
 
 ### the 'like' operator
 
@@ -946,7 +946,7 @@ The levenshtein() function calculates the Levenshtein distance between two strin
 
 SQLite doesn't have it unfortunately!
 
-## 5 - Further Filtering & Aggregation in SQL
+## 5 - Further Filtering & Aggregation in SQL {.tabset .tabset-fade .tabset-pills}
 
 ```{r gravity bookstore dataset erd png for section 5, message=FALSE, warning=FALSE}
 knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
@@ -1226,3 +1226,83 @@ Using the CUBE operator in SQL is valuable for data analysis.
 -   *Trend Analysis* - Analyse trends and patterns by examining the subtotals and grand totals provided by the CUBE output.
 
 -   *Anomaly Detection* - Identify anomalies or outliers by comparing aggregated data at different levels of detail.
+
+## 6 - Windows Functions {.tabset .tabset-fade .tabset-pills}
+
+Window functions in SQL perform calculations across a set of table rows that are somehow related to the current row. Unlike aggregate functions, which return a single value for a group of rows, window functions can return multiple rows for each row in the query, preserving the row's identity. These functions are often used for running totals, moving averages, and other cumulative calculations.
+
+### ROW_NUMBER()
+
+ROW_NUMBER() - Assigns a unique sequential integer to rows within a partition of a result set.
+
+Assigns a unique sequential integer to each row, ordered by "Sum of Orders per Customer" in descending order, useful for ranking albeit with ties (there can't be 2 third placed rows for example).
+
+```{sql generating the row number of sum or orders per customer}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+    ROW_NUMBER() OVER (ORDER BY SUM(ol.price) DESC) AS "Row Number"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC;
+```
+
+
+### RANK()
+
+Assigns a rank to each row, with gaps in the ranking sequence for ties.
+
+Assigns a rank to each customer based on their "Sum of Orders per Customer", allowing for ties where customers with the same sum receive the same rank.
+
+```{sql getting the rank of sum or orders per customer from positions 80 to 90}
+WITH RankedCustomers AS (
+    SELECT 
+        SUM(ol.price) AS "Sum of Orders per Customer",
+        CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+        RANK() OVER (ORDER BY SUM(ol.price) DESC) AS "Rank"
+    FROM 
+        order_line ol
+    INNER JOIN 
+        cust_order co ON ol.order_id = co.order_id
+    INNER JOIN 
+        customer c ON co.customer_id = c.customer_id
+    GROUP BY 
+        c.first_name, c.last_name
+)
+SELECT *
+FROM RankedCustomers
+WHERE "Rank" BETWEEN 80 AND 90
+ORDER BY "Rank";
+
+
+```
+
+
+### DENSE_RANK()
+
+```{sql}
+
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+    DENSE_RANK() OVER (ORDER BY SUM(ol.price) DESC) AS "Dense Rank"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC;
+
+```
+
