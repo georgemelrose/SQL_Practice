@@ -1505,5 +1505,31 @@ LIMIT 5;
 ```
 
 
-### PARTITION
+### PARTITION BY()
+
+A partition is a subset of rows in the result set. When you use a window function with the PARTITION BY clause, the window function is applied to each partition separately. This is useful for performing calculations within each group of rows.
+
+```{sql utilising partition by}
+
+SELECT 
+    a.city,
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+    RANK() OVER (PARTITION BY a.city ORDER BY SUM(ol.price) DESC) AS "Rank"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+INNER JOIN
+    address a ON co.dest_address_id = a.address_id
+GROUP BY 
+    a.city, c.first_name, c.last_name
+ORDER BY 
+    a.city, "Rank";
+
+
+
+```
 
