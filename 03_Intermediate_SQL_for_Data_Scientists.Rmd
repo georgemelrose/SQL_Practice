@@ -1227,7 +1227,7 @@ Using the CUBE operator in SQL is valuable for data analysis.
 
 -   *Anomaly Detection* - Identify anomalies or outliers by comparing aggregated data at different levels of detail.
 
-## 6 - Windows Functions {.tabset .tabset-fade .tabset-pills}
+## 6 - Window Functions {.tabset .tabset-fade .tabset-pills}
 
 Window functions in SQL perform calculations across a set of table rows that are somehow related to the current row. Unlike aggregate functions, which return a single value for a group of rows, window functions can return multiple rows for each row in the query, preserving the row's identity. These functions are often used for running totals, moving averages, and other cumulative calculations.
 
@@ -1287,7 +1287,9 @@ ORDER BY "Rank";
 
 ### DENSE_RANK()
 
-```{sql}
+DENSE_RANK() does not leave gaps and provides consecutive ranking numbers regardless of the number of ties whereas RANK() leaves gaps in the ranking sequence if there are ties.
+
+```{sql using dense rank on orders per customer}
 
 SELECT 
     SUM(ol.price) AS "Sum of Orders per Customer",
@@ -1305,4 +1307,203 @@ ORDER BY
     "Sum of Orders per Customer" DESC;
 
 ```
+
+### NTILE()
+
+Distributes the rows into a specified number of buckets (here, deciles), providing a way to understand distribution across different segments.
+
+```{sql distributing rows into specific deciles using NTILE}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+NTILE(10) OVER (ORDER BY SUM(ol.price) DESC) AS "Quartile"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC;
+```
+
+
+### LEAD()
+
+Provides access to the next value in the query result, useful for comparing each customer's sum with the next customer's sum.
+
+```{sql demonstrating the lead function on customer orders}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+LEAD(SUM(ol.price)) OVER (ORDER BY SUM(ol.price) DESC) AS "Next Customer's Sum"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC
+LIMIT 5;
+```
+
+### LAG()
+
+The converse of LEAD(). LAG() provides access to the previous value in the query result, useful for comparing each customer's sum with the next customer's sum.
+
+```{sql demonstrating the lag function on customer orders}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+LAG(SUM(ol.price)) OVER (ORDER BY SUM(ol.price) DESC) AS "Previous Customer's Sum"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC
+LIMIT 5;
+```
+
+### FIRST_VALUE()
+
+Returns the sum of orders for the top customer in the ordered list as a seperate column, giving a reference point for the highest sum of orders.
+
+```{sql demonstrating the first_value function on customer orders}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+FIRST_VALUE(SUM(ol.price)) OVER (ORDER BY SUM(ol.price) DESC) AS "First Customer Sum"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC
+LIMIT 5;
+```
+
+
+### LAST_VALUE()
+
+Returns the sum of orders for the bottom customer in the ordered list as a seperate column, giving a reference point for the lowest sum of orders.
+
+```{sql demonstrating the last_value function on customer orders}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+LAST_VALUE(SUM(ol.price)) OVER (ORDER BY SUM(ol.price) DESC) AS "Last Customer Sum"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" ASC
+LIMIT 5;
+```
+
+
+
+### SUM(),AVG(),MAX() or MIN() with OVER()
+
+SUM() with OVER() calculates the total sum of all orders across all customers, providing a grand total within the context of each row.
+
+```{sql demonstrating the usage of sum in conjuction with over on customer orders}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+SUM(SUM(ol.price)) OVER () AS "Total Sum of All Customers"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC
+LIMIT 5;
+```
+
+AVG() with OVER() calculates the total sum of all orders across all customers, providing a grand total within the context of each row.
+
+```{sql demonstrating the usage of avg in conjuction with over on customer orders}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+AVG(SUM(ol.price)) OVER () AS "Average Order Sum"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC
+LIMIT 5;
+```
+
+
+MAX() with OVER() returns the maximum sum of orders found in the dataset, providing a reference for the highest order sum among all customers.
+
+```{sql demonstrating the usage of max in conjuction with over on customer orders}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+MAX(SUM(ol.price)) OVER () AS "Max. Sum of Orders"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC
+LIMIT 5;
+```
+
+MIN() with OVER() returns the minimum sum of orders found in the dataset, providing a reference for the highest order sum among all customers.
+
+```{sql demonstrating the usage of min in conjuction with over on customer orders}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name",
+MIN(SUM(ol.price)) OVER () AS "Min. Sum of Orders"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC
+LIMIT 5;
+```
+
+
+### PARTITION
 
