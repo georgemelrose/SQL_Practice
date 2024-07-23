@@ -1613,3 +1613,223 @@ ORDER BY
     a.city, "Sum of Orders per Customer" DESC;
 
 ```
+
+### WITH RECURSIVE
+
+SQLite supports the WITH RECURSIVE clause, which allows you to write recursive CTEs. This feature is useful for querying hierarchical or recursive data, such as workplace hierarchy or family trees.
+
+Some of the explanations below have been lifted from <https://learnsql.com/blog/sql-recursive-cte/>
+
+[**Recap on 'common table expressions', CTEs**]{.ul}
+
+"The CTE (common table expression), also known as the `WITH`
+clause, is an SQL feature that returns a temporary data set that can be used by another query. As it's a temporary result, it's not stored anywhere, but it still can be referenced like you would reference any other table."
+
+"A recursive CTE references itself. It returns the result subset, then it repeatedly (recursively) references itself, and stops when it returns all the results."
+
+The general syntax of a non-recursive CTE -
+
+`WITH` `cte_name AS` `(cte_query_definition)`
+
+ 
+
+`SELECT` `*`
+
+`FROM`   `cte_name;`
+
+"The first part of the syntax is the CTE. It begins with the keyword `WITH`. Then you give your CTE a name. After you follow that by the `AS` keyword, you can define CTE in the parentheses."
+
+"The second part of the syntax is a simple `SELECT` statement.
+It is written immediately after the recursive CTE, without any commas, semicolons, or similar marks. The CTE is used in
+another query just like any other table. This is exactly what the `SELECT` statement does."
+
+[**Recursive CTEs**]{.ul}
+
+A recursive CTE references itself. It returns the result subset, then it repeatedly (recursively) references itself, and stops when it returns all the results.
+
+The syntax for a recursive CTE is not too different from that of a non-recursive CTE -
+
+`WITH` `RECURSIVE cte_name AS` `(`
+
+`cte_query_definition (the anchor member)`
+
+ 
+
+`UNION` `ALL`
+
+ 
+
+`cte_query_definition (the recursive member)`
+
+`)`
+
+ 
+
+ 
+
+`SELECT` `*`
+
+`FROM`   `cte_name;`
+
+"Again, at the beginning of your CTE is the `WITH` clause. However, if you want your CTE to be recursive, then after `WITH` you write the `RECURSIVE` keyword. Then it's business as usual: `AS` is followed by the parentheses with the CTE query definition. This first query definition is called **the anchor member**."
+
+"To connect the anchor member with the **recursive member**, you need to use the `UNION` or `UNION ALL` command. The recursive member is, obviously, the recursive part of CTE that will reference the CTE itself."
+
+[***Finding Hierarchy in a Workplace*** **Example**]{.ul}
+
+The 'Gravity Bookstore' used so far in this document doesn't have any kind of hierarchical data some needs to be created -
+
+```{sql creating an employee table}
+CREATE TABLE employee (
+    employee_id INTEGER PRIMARY KEY,
+    name TEXT,
+    position TEXT,
+    manager_id INTEGER
+);
+```
+
+```{sql insert into employees table}
+INSERT INTO employee (employee_id, name, position, manager_id) VALUES
+(1, 'Alice', 'CEO', NULL),        -- Top-level management
+(2, 'Bob', 'VP of Sales', 1),
+(3, 'Carol', 'VP of Engineering', 1),
+(4, 'Dave', 'Sales Manager', 2),
+(5, 'Eve', 'Sales Executive', 4),
+(6, 'Frank', 'Sales Executive', 4),
+(7, 'Grace', 'Engineering Manager', 3),
+(8, 'Heidi', 'Senior Engineer', 7),
+(9, 'Ivan', 'Junior Engineer', 7),
+(10, 'Judy', 'CTO', 1),
+(11, 'Mallory', 'Sales Associate', 5),
+(12, 'Oscar', 'Sales Associate', 5),
+(13, 'Peggy', 'Engineering Intern', 9),
+(14, 'Sybil', 'Product Manager', 3),
+(15, 'Trent', 'DevOps Engineer', 7),
+(16, 'Victor', 'Lead Architect', 10),
+(17, 'Walter', 'Data Scientist', 16),
+(18, 'Xavier', 'ML Engineer', 17),
+(19, 'Yvonne', 'UX Designer', 14),
+(20, 'Zara', 'Graphic Designer', 19);
+```
+
+```{sql viewing employee table}
+
+select * from employee
+```
+
+```{sql using a with recursive statement to find out the hierarchy of data}
+WITH RECURSIVE company_hierarchy AS (
+  SELECT 
+    employee_id,
+    name,
+    position,
+    manager_id,
+    0 AS hierarchy_level
+  FROM 
+    employee
+  WHERE 
+    manager_id IS NULL  
+  
+  UNION ALL
+   
+  SELECT 
+    e.employee_id,
+    e.name,
+    e.position,
+    e.manager_id,
+    ch.hierarchy_level + 1
+  FROM 
+    employee e, 
+    company_hierarchy ch
+  WHERE 
+    e.manager_id = ch.employee_id
+)
+ 
+SELECT 
+  ch.name AS "Employee name",
+  e.name AS "Boss name",
+  ch.position AS "Employee Position",
+  e.position AS "Boss Position",
+  ch.hierarchy_level AS "Hierarchy Level"
+FROM 
+  company_hierarchy ch
+LEFT JOIN 
+  employee e ON ch.manager_id = e.employee_id
+ORDER BY 
+  ch.hierarchy_level, 
+  ch.manager_id;
+
+
+```
+
+The above is a recursive query, so it starts with `WITH RECURSIVE`. The name of the CTE is `company_hierarchy`. After `AS`, the CTE definition is in the parentheses.
+
+The first `SELECT` statement, ***the anchoring statement***, selects all the **`employee`** table columns where the column `manager_id` is `NULL`. In short, it will select Alice, because only she has a `NULL` value in that column - starting the recursion from the top of the organizational structure. There's also a column `hierarchy_level` with the value of 0. That means the head of the company's level is 0 -- they're on top of the hierarchy.
+
+`UNION ALL` is used to connect this SELECT statement with the second one, ***the recursive member***. In the recursive member, all the columns from the table **`employees`** ares selected and the CTE `company_hierarchy` where the column `boss_id` is equal to the column `id`. Notice the part `hierarchy_level + 1`.This means that with every recursion, the CTE will add 1 to the
+previous hierarchy level, and it will do that until it reaches the end of the hierarchy. Also note that the CTE is treated as any other table. To finish defining the CTE, the brackets are closed.
+
+Finally, there's a third `SELECT` statement, outside of the CTE. It selects the columns that will show employees, their bosses' names, and the hierarchy level. Data is taken from the CTE and the table
+**`employees`**. The CTE and **`employees`** table are joined with a `LEFT JOIN`, since we want all the data from the CTE -- including Alice, who has the `NULL` value in the column `boss_id`.
+
+In a very simplistic way -
+
+***"You use recursive CTEs when you need to make a CTE, then refer to that following CTE, then refer to the that CTE that referred to the first CTE."***
+
+[***Finding Routes Between Cities*** **Example**]{.ul}
+
+```{sql creating a cities_routes  table}
+CREATE TABLE cities_routes (
+    city_from TEXT,
+    city_to TEXT,
+    distance INTEGER
+);
+```
+
+```{sql insert into cities_routes  table}
+INSERT INTO cities_routes (city_from, city_to,distance) VALUES
+('Groningen', 'Heerenveen', 61.4),
+('Groningen', 'Harlingen', 91.6),
+('Harlingen', 'Wieringerwerf', 52.3),
+('Wieringerwerf', 'Hoorn', 26.5),
+('Hoorn', 'Amsterdam', 46.1),
+('Amsterdam', 'Haarlem', 30),
+('Heerenveen', 'Lelystad', 74),
+('Lelystad', 'Amsterdam', 57.2);
+```
+
+```{sql looking at the cities_routes table}
+select * from cities_routes
+```
+
+```{sql using recursive CTEs to find possible routes}
+WITH RECURSIVE possible_route AS (
+    SELECT  cr.city_to,
+            cr.city_from || ' -> ' ||cr.city_to AS route,
+            cr.distance
+      FROM cities_routes cr
+      WHERE cr.city_from = 'Groningen'
+ 
+UNION ALL
+ 
+SELECT  cr.city_to,
+            pr.route || ' -> ' || cr.city_to AS route,
+                CAST((pr.distance + cr.distance) AS DECIMAL(10, 2))
+      FROM possible_route pr
+INNER JOIN cities_routes cr
+            ON cr.city_from = pr.city_to
+)
+ 
+SELECT  pr.route,
+        pr.distance
+FROM possible_route pr
+WHERE pr.city_to = 'Haarlem'
+ORDER BY pr.distance;
+```
+
+In this query, the first `SELECT` statement in the CTE definition will select the columns from the table **`cities_route`** where the departure city is Groningen. There's a new column called route, used to concatenate the cities on the route.
+
+The UNION ALL connects this with ***the recursive member***. This `SELECT` statement selects the arrival city, concatenate the cities on the route, and finally add the distances between these cities to the total of the route between Groningen and Haarlem. The first CTE is joined with the **`cities_route`** table.
+
+Finally, the `SELECT` statement pulls data from the
+CTE. It selects the route and the distance where the arrival city is Haarlem, with the data being ordered by distance in ascending order.
