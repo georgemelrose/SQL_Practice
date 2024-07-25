@@ -204,7 +204,7 @@ CREATE INDEX Author_names ON author(author_name);
 
 ```
 
-Now our 'sever' should use that index to optimise the performance of this query.
+Now our 'server' should use that index to optimise the performance of this query.
 
 ```{sql filtering Galaxy bokstore data for 1997 to 2000 publications by JK Rowling and Bill Bryson}
 
@@ -412,7 +412,9 @@ ORDER BY
 
 ### Variance
 
-The VARIANCE() function is used to calculate the statistical variance of a set of numeric values, which measures the dispersion of the values from their mean. However, SQLite does not have a built-in VARIANCE() function.
+The VARIANCE() function is used to calculate the statistical variance of a set of numeric values. The *variance* defines a measure of the spread dispersion within a set of data.
+
+However, SQLite does not have a built-in VARIANCE() function.
 
 To calculate variance in SQLite, one can use a combination of SQL functions.
 
@@ -420,9 +422,9 @@ To calculate variance in SQLite, one can use a combination of SQL functions.
 
 The sample variance estimates the variance from a sample of the population. The formula is -
 
-\[ \sigma\^2 = \frac{\sum (x_i - \bar{x})^2}{n - 1} \]
+\[ \sigma^2 = \frac{\sum (x_i - \bar{x})^2}{n - 1} \]
 
-\[\sigma\^2\] is the population variance
+\[\sigma^2\] is the population variance
 
 \[x_i\] represents each data point
 
@@ -478,9 +480,9 @@ ORDER BY
 
 The population variance measures the dispersion of all data points in a population from the population mean \[\mu\]. The formula is -
 
-\[ \sigma\^2 = \frac{\sum (x_i - \mu)^2}{N} \]
+\[ \sigma^2 = \frac{\sum (x_i - \mu)^2}{N} \]
 
-\[\sigma\^2\] is the population variance
+\[\sigma^2\] is the population variance
 
 \[x_i\] represents each data point
 
@@ -685,105 +687,63 @@ WITH cte_name AS ( -- CTE Query SELECT ... ) SELECT ... FROM cte_name
 **When using WITH()**
 
 ```{sql getting total amount spent and average order amount using the with clause}
-WITH CustomerOrders AS (
+
+-- Step 1: Calculate the total amount spent by each customer
+WITH CustomerSpending AS (
     SELECT 
-        co.customer_id, 
-        co.order_date,
-        ol.order_id,
-        SUM(ol.price) AS "Total Order Amount"
+        co.customer_id,
+        CONCAT(c.first_name, ' ', c.last_name) AS full_name,
+        SUM(ol.price) AS total_spent
     FROM 
         cust_order co
     INNER JOIN 
         order_line ol ON co.order_id = ol.order_id
-    WHERE 
-        co.order_date BETWEEN '2023-11-01' AND '2024-05-01'
+    INNER JOIN 
+        customer c ON co.customer_id = c.customer_id
     GROUP BY 
-        co.customer_id, co.order_date, ol.order_id
+        co.customer_id, full_name
 )
+
+-- Step 2: Select the top 5 customers and join with book details
 SELECT
-    c.customer_id AS "Customer ID",
-    c.order_date AS "Order Date",
-    COUNT(c.order_id) AS "Number of Orders",
-    SUM(c."Total Order Amount") AS "Total Amount Spent",
-    AVG(c."Total Order Amount") AS "Average Order Amount"
-FROM
-    CustomerOrders c
-GROUP BY
-    c.customer_id
-ORDER BY
-    c.order_date DESC;
+    b.title,
+    ol.price,
+    cs.full_name,
+    cs.total_spent
+FROM 
+    CustomerSpending cs
+INNER JOIN 
+    cust_order co ON cs.customer_id = co.customer_id
+INNER JOIN 
+    order_line ol ON co.order_id = ol.order_id
+INNER JOIN 
+    book b ON ol.book_id = b.book_id
+WHERE 
+    cs.customer_id IN (
+        SELECT customer_id 
+        FROM CustomerSpending 
+        ORDER BY total_spent DESC 
+        LIMIT 5
+    )
+ORDER BY 
+    cs.total_spent DESC;
 ```
 
 The part with the WITH inner query -
 
--   This CTE calculates the total amount spent on each order for every customer within the specified date range.
+-   This CTE calculates the total amount spent on each order for every customer.
 
--   It joins the cust_order and order_line tables and groups the data by customer ID, order date, and order ID to compute the total order amount.
-
-The rest, the outer query -
-
--   The main query selects from the CustomerOrders CTE.
-
--   It calculates the number of orders, total amount spent, and average order amount for each customer.
-
--   The results are grouped by customer ID and ordered by the order date in descending order.
-
-**When not using WITH()**
-
-```{sql getting total amount spent and average order amount without the with clause}
-SELECT 
-    co.customer_id AS "Customer ID",
-    co.order_date AS "Order Date",
-    COUNT(orders_per_customer.order_id) AS "Number of Orders",
-    SUM(orders_per_customer."Total Order Amount") AS "Total Amount Spent",
-    AVG(orders_per_customer."Total Order Amount") AS "Average Order Amount"
-FROM 
-    cust_order co
-INNER JOIN (
-    SELECT 
-        co_inner.customer_id, 
-        co_inner.order_date,
-        ol_inner.order_id,
-        SUM(ol_inner.price) AS "Total Order Amount"
-    FROM 
-        cust_order co_inner
-    INNER JOIN 
-        order_line ol_inner ON co_inner.order_id = ol_inner.order_id
-    WHERE 
-        co_inner.order_date BETWEEN '2023-11-01' AND '2024-05-01'
-    GROUP BY 
-        co_inner.customer_id, co_inner.order_date, ol_inner.order_id
-) AS orders_per_customer ON co.customer_id = orders_per_customer.customer_id AND co.order_date = orders_per_customer.order_date
-WHERE 
-    co.order_date BETWEEN '2023-11-01' AND '2024-05-01'
-GROUP BY 
-    co.customer_id, co.order_date
-ORDER BY 
-    co.order_date DESC;
-
-```
-
-The part with the INNER JOIN inner query -
-
--   The inner query calculates the total amount spent on each order for every customer within the specified date range.
-
--   This inner query is essentially the same as the WITH part in the previous example.
+-   It joins the cust_order,order_line, and customers tables and groups the data by customer ID and full name to compute the total order amount.
 
 The rest, the outer query -
 
--   The outer query joins the cust_order table with the result of the inner query (orders_per_customer).
+-   The main query selects from the CustomerSpending CTE.
 
--   It calculates the number of orders, total amount spent, and average order amount for each customer, grouped by customer ID and order date.
+-   It also gets the book title and price from the book and order line tables respectively, by INNER JOINs. 
+-   A WHERE clause specifies the results should only contains the top 5 spending customers in CustomerSpending. 
 
--   The results are ordered by the order date in descending order.
+- The results are ordered by the top spenders, descending. 
 
-**The advantages to using WITH()**
-
--   *Readability -* Using the WITH clause (CTE) makes the query more readable.In the non-CTE version, the nested query can be harder to follow.
-
--   *Maintainability -* The CTE version is more maintainable because each part of the query is isolated. If you need to adjust the calculation logic, it's clearer where to make changes.
-
--   *Length* - The non-CTE version tends to be more long-winded, as it requires embedding the subquery directly in the FROM clause, making the overall query longer and potentially more confusing.
 
 ------------------------------------------------------------------------
 
@@ -827,6 +787,8 @@ Getting all surnames starting or ending with 'man' (lower or upper case) -
 ```{sql finding all customers whose surname is like man}
 select * from customer where last_name like '%man%'
 ```
+
+### SIMILAR TO
 
 Making a new column specifically based on the like condition -
 
@@ -952,293 +914,10 @@ The levenshtein() function calculates the Levenshtein distance between two strin
 
 SQLite doesn't have it unfortunately!
 
-------------------------------------------------------------------------
-
-## 5 - Further Filtering & Aggregation in SQL {.tabset .tabset-fade .tabset-pills}
-
-```{r gravity bookstore dataset erd png for section 5, message=FALSE, warning=FALSE}
-
-knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
-
-```
-
-### The HAVING Clause
-
-```{sql example group by code }
-SELECT 
-    SUM(ol.price) AS "Sum of Orders per Customer",
-    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
-FROM 
-    order_line ol
-INNER JOIN 
-    cust_order co ON ol.order_id = co.order_id
-INNER JOIN 
-    customer c ON co.customer_id = c.customer_id
-GROUP BY 
-    c.first_name, c.last_name
-ORDER BY 
-    "Sum of Orders per Customer" DESC;
-
-```
-
-The HAVING clause is used to specify a condition for groups of rows created by the GROUP BY clause, similar to how the WHERE clause is used to specify a condition for individual rows.
-
-```{sql inserting a having clause into group by code}
-SELECT 
-    SUM(ol.price) AS "Sum of Orders per Customer",
-    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
-FROM 
-    order_line ol
-INNER JOIN 
-    cust_order co ON ol.order_id = co.order_id
-INNER JOIN 
-    customer c ON co.customer_id = c.customer_id
-GROUP BY 
-    c.first_name, c.last_name
-HAVING
-    "Sum of Orders per Customer" > 600
-ORDER BY 
-    "Sum of Orders per Customer" DESC;
-
-```
-
-### CUBE
-
-```{r gravity bookstore dataset erd png for section 8 part 2, message=FALSE, warning=FALSE}
-knitr::include_graphics("C:/Users/gam55/Downloads/gravity_bookstore_erd.png")
-
-```
-
-SQLite does not support the CUBE operation directly. The CUBE operation, found in SQL databases like PostgreSQL, SQL Server, and Oracle, is used for generating a result set that represents a multi-dimensional cube for aggregation purposes.
-
-It generates a result set that represents all possible combinations of grouping columns, providing comprehensive aggregate data for every combination.
-
-When you use CUBE, SQL automatically performs aggregations for each combination of the specified dimensions (columns).
-
-However, you can manually create similar results in SQLite using a combination of GROUP BY queries and UNION operations to simulate a CUBE.
-
-```{sql example sql code from several tables}
-
-SELECT 
-    b.title AS "Book Title",
-    a.city AS "Order Destination City",
-    c.country_name AS "Order Destination Country", 
-    ol.price AS "Price"
-FROM 
-    book b
-INNER JOIN 
-    order_line ol ON ol.book_id = b.book_id
-INNER JOIN 
-    cust_order co ON ol.order_id  = co.order_id
-INNER JOIN
-    address a ON co.dest_address_id = a.address_id
-INNER JOIN
-    country c ON a.country_id = c.country_id
-;
-
-```
-
-To replicate CUBE with the above query, the following steps are done in a query below:
-
--   Detailed Grouping - Group by Book Title, Order Destination City, and Order Destination Country.
-
--   Partial Groupings - Group by each pair of dimensions and each individual dimension. *Book Title and Order Destination City*, *Book Title and Order Destination Country*, *Order Destination City and Order Destination Country*, *Book Title only*, *Order Destination City only*, *Order Destination Country only*.
-
-Grand Total: Aggregate without any grouping for the overall total.
-
-```{sql simulating CUBE for the above sql query}
--- Group by all three dimensions
-SELECT 
-    b.title AS "Book Title",
-    a.city AS "Order Destination City",
-    c.country_name AS "Order Destination Country", 
-    SUM(ol.price) AS "Total Price"
-FROM 
-    book b
-INNER JOIN 
-    order_line ol ON ol.book_id = b.book_id
-INNER JOIN 
-    cust_order co ON ol.order_id = co.order_id
-INNER JOIN
-    address a ON co.dest_address_id = a.address_id
-INNER JOIN
-    country c ON a.country_id = c.country_id
-GROUP BY
-    b.title, a.city, c.country_name
-
-UNION ALL
-
--- Group by Book Title and Order Destination City
-SELECT 
-    b.title AS "Book Title",
-    a.city AS "Order Destination City",
-    NULL AS "Order Destination Country", 
-    SUM(ol.price) AS "Total Price"
-FROM 
-    book b
-INNER JOIN 
-    order_line ol ON ol.book_id = b.book_id
-INNER JOIN 
-    cust_order co ON ol.order_id = co.order_id
-INNER JOIN
-    address a ON co.dest_address_id = a.address_id
-GROUP BY
-    b.title, a.city
-
-UNION ALL
-
--- Group by Book Title and Order Destination Country
-SELECT 
-    b.title AS "Book Title",
-    NULL AS "Order Destination City",
-    c.country_name AS "Order Destination Country", 
-    SUM(ol.price) AS "Total Price"
-FROM 
-    book b
-INNER JOIN 
-    order_line ol ON ol.book_id = b.book_id
-INNER JOIN 
-    cust_order co ON ol.order_id = co.order_id
-INNER JOIN
-    address a ON co.dest_address_id = a.address_id
-INNER JOIN
-    country c ON a.country_id = c.country_id
-GROUP BY
-    b.title, c.country_name
-
-UNION ALL
-
--- Group by Order Destination City and Order Destination Country
-SELECT 
-    NULL AS "Book Title",
-    a.city AS "Order Destination City",
-    c.country_name AS "Order Destination Country", 
-    SUM(ol.price) AS "Total Price"
-FROM 
-    book b
-INNER JOIN 
-    order_line ol ON ol.book_id = b.book_id
-INNER JOIN 
-    cust_order co ON ol.order_id = co.order_id
-INNER JOIN
-    address a ON co.dest_address_id = a.address_id
-INNER JOIN
-    country c ON a.country_id = c.country_id
-GROUP BY
-    a.city, c.country_name
-
-UNION ALL
-
--- Group by Book Title only
-SELECT 
-    b.title AS "Book Title",
-    NULL AS "Order Destination City",
-    NULL AS "Order Destination Country", 
-    SUM(ol.price) AS "Total Price"
-FROM 
-    book b
-INNER JOIN 
-    order_line ol ON ol.book_id = b.book_id
-INNER JOIN 
-    cust_order co ON ol.order_id = co.order_id
-INNER JOIN
-    address a ON co.dest_address_id = a.address_id
-INNER JOIN
-    country c ON a.country_id = c.country_id
-GROUP BY
-    b.title
-
-UNION ALL
-
--- Group by Order Destination City only
-SELECT 
-    NULL AS "Book Title",
-    a.city AS "Order Destination City",
-    NULL AS "Order Destination Country", 
-    SUM(ol.price) AS "Total Price"
-FROM 
-    book b
-INNER JOIN 
-    order_line ol ON ol.book_id = b.book_id
-INNER JOIN 
-    cust_order co ON ol.order_id = co.order_id
-INNER JOIN
-    address a ON co.dest_address_id = a.address_id
-INNER JOIN
-    country c ON a.country_id = c.country_id
-GROUP BY
-    a.city
-
-UNION ALL
-
--- Group by Order Destination Country only
-SELECT 
-    NULL AS "Book Title",
-    NULL AS "Order Destination City",
-    c.country_name AS "Order Destination Country", 
-    SUM(ol.price) AS "Total Price"
-FROM 
-    book b
-INNER JOIN 
-    order_line ol ON ol.book_id = b.book_id
-INNER JOIN 
-    cust_order co ON ol.order_id = co.order_id
-INNER JOIN
-    address a ON co.dest_address_id = a.address_id
-INNER JOIN
-    country c ON a.country_id = c.country_id
-GROUP BY
-    c.country_name
-
-UNION ALL
-
--- Grand total
-SELECT 
-    NULL AS "Book Title",
-    NULL AS "Order Destination City",
-    NULL AS "Order Destination Country", 
-    SUM(ol.price) AS "Total Price"
-FROM 
-    book b
-INNER JOIN 
-    order_line ol ON ol.book_id = b.book_id
-INNER JOIN 
-    cust_order co ON ol.order_id = co.order_id
-INNER JOIN
-    address a ON co.dest_address_id = a.address_id
-INNER JOIN
-    country c ON a.country_id = c.country_id;
-
-
-```
-
-If CUBE was available, much shorter code could be employed -
-
-SELECT b.title AS "Book Title", a.city AS "Order Destination City", c.country_name AS "Order Destination Country", SUM(ol.price) AS "Total Price" FROM book b INNER JOIN order_line ol ON ol.book_id = b.book_id INNER JOIN cust_order co ON ol.order_id = co.order_id INNER JOIN address a ON co.dest_address_id = a.address_id INNER JOIN country c ON a.country_id = c.country_id GROUP BY CUBE(b.title, a.city, c.country_name);
-
-[***Why use CUBE, what's the point?***]{.ul}
-
-Using the CUBE operator in SQL is valuable for data analysis.
-
--   *Comprehensive Aggregation* - CUBE provides a complete set of aggregations across all combinations of specified dimensions. This includes subtotals for every combination of the dimensions and a grand total.
-
--   *Simplifies Query Writing* - Instead of writing multiple GROUP BY queries with UNION ALL, a single query with CUBE handles all required groupings and aggregations.
-
--   *Facilitates Data Exploration* - By generating all possible subtotals, CUBE allows for easy exploration of data across different levels of granularity.
-
-[Real-World Use Cases for CUBE]{.ul}
-
--   *Data Reporting* - Use the result set from a CUBE operation to create comprehensive reports that show detailed and aggregated information. Useful for business intelligence tools and dashboards.
-
--   *Pivot Tables* - The result can be used to create pivot tables in tools like Excel.
-
--   *Trend Analysis* - Analyse trends and patterns by examining the subtotals and grand totals provided by the CUBE output.
-
--   *Anomaly Detection* - Identify anomalies or outliers by comparing aggregated data at different levels of detail.
 
 ------------------------------------------------------------------------
 
-## 6 - Window Functions {.tabset .tabset-fade .tabset-pills}
+## 5 - Window Functions {.tabset .tabset-fade .tabset-pills}
 
 ```{r gravity bookstore dataset erd png for section 6, message=FALSE, warning=FALSE}
 
@@ -1275,7 +954,7 @@ ORDER BY
 
 Assigns a rank to each row, with gaps in the ranking sequence for ties.
 
-Assigns a rank to each customer based on their "Sum of Orders per Customer", allowing for ties where customers with the same sum receive the same rank.
+Assigns a rank to each customer based on their "Sum of Orders per Customer", allowing for ties where customers with the same sum receive the same rank. No 89th position just two 88 positions.
 
 ```{sql getting the rank of sum or orders per customer from positions 80 to 90}
 WITH RankedCustomers AS (
@@ -1294,7 +973,7 @@ WITH RankedCustomers AS (
 )
 SELECT *
 FROM RankedCustomers
-WHERE "Rank" BETWEEN 80 AND 90
+WHERE "Rank" BETWEEN 85 AND 95
 ORDER BY "Rank";
 
 
@@ -1302,7 +981,7 @@ ORDER BY "Rank";
 
 ### DENSE_RANK()
 
-DENSE_RANK() does not leave gaps and provides consecutive ranking numbers regardless of the number of ties whereas RANK() leaves gaps in the ranking sequence if there are ties.
+DENSE_RANK() does not leave gaps and provides consecutive ranking numbers regardless of the number of ties whereas RANK() leaves gaps in the ranking sequence if there are ties. An 89th position as well as two 88 positions.
 
 ```{sql using dense rank on orders per customer}
 
@@ -1322,7 +1001,7 @@ WITH RankedCustomers AS (
 )
 SELECT *
 FROM RankedCustomers
-WHERE "Dense Rank" BETWEEN 80 AND 90
+WHERE "Dense Rank" BETWEEN 85 AND 95
 ORDER BY "Dense Rank";
 
 
@@ -1622,8 +1301,7 @@ Some of the explanations below have been lifted from <https://learnsql.com/blog/
 
 [**Recap on 'common table expressions', CTEs**]{.ul}
 
-"The CTE (common table expression), also known as the `WITH`
-clause, is an SQL feature that returns a temporary data set that can be used by another query. As it's a temporary result, it's not stored anywhere, but it still can be referenced like you would reference any other table."
+"The CTE (common table expression), also known as the `WITH` clause, is an SQL feature that returns a temporary data set that can be used by another query. As it's a temporary result, it's not stored anywhere, but it still can be referenced like you would reference any other table."
 
 "A recursive CTE references itself. It returns the result subset, then it repeatedly (recursively) references itself, and stops when it returns all the results."
 
@@ -1639,9 +1317,7 @@ The general syntax of a non-recursive CTE -
 
 "The first part of the syntax is the CTE. It begins with the keyword `WITH`. Then you give your CTE a name. After you follow that by the `AS` keyword, you can define CTE in the parentheses."
 
-"The second part of the syntax is a simple `SELECT` statement.
-It is written immediately after the recursive CTE, without any commas, semicolons, or similar marks. The CTE is used in
-another query just like any other table. This is exactly what the `SELECT` statement does."
+"The second part of the syntax is a simple `SELECT` statement. It is written immediately after the recursive CTE, without any commas, semicolons, or similar marks. The CTE is used in another query just like any other table. This is exactly what the `SELECT` statement does."
 
 [**Recursive CTEs**]{.ul}
 
@@ -1766,70 +1442,11 @@ The above is a recursive query, so it starts with `WITH RECURSIVE`. The name of 
 
 The first `SELECT` statement, ***the anchoring statement***, selects all the **`employee`** table columns where the column `manager_id` is `NULL`. In short, it will select Alice, because only she has a `NULL` value in that column - starting the recursion from the top of the organizational structure. There's also a column `hierarchy_level` with the value of 0. That means the head of the company's level is 0 -- they're on top of the hierarchy.
 
-`UNION ALL` is used to connect this SELECT statement with the second one, ***the recursive member***. In the recursive member, all the columns from the table **`employees`** ares selected and the CTE `company_hierarchy` where the column `boss_id` is equal to the column `id`. Notice the part `hierarchy_level + 1`.This means that with every recursion, the CTE will add 1 to the
-previous hierarchy level, and it will do that until it reaches the end of the hierarchy. Also note that the CTE is treated as any other table. To finish defining the CTE, the brackets are closed.
+`UNION ALL` is used to connect this SELECT statement with the second one, ***the recursive member***. In the recursive member, all the columns from the table **`employees`** ares selected and the CTE `company_hierarchy` where the column `boss_id` is equal to the column `id`. Notice the part `hierarchy_level + 1`.This means that with every recursion, the CTE will add 1 to the previous hierarchy level, and it will do that until it reaches the end of the hierarchy. Also note that the CTE is treated as any other table. To finish defining the CTE, the brackets are closed.
 
-Finally, there's a third `SELECT` statement, outside of the CTE. It selects the columns that will show employees, their bosses' names, and the hierarchy level. Data is taken from the CTE and the table
-**`employees`**. The CTE and **`employees`** table are joined with a `LEFT JOIN`, since we want all the data from the CTE -- including Alice, who has the `NULL` value in the column `boss_id`.
+Finally, there's a third `SELECT` statement, outside of the CTE. It selects the columns that will show employees, their bosses' names, and the hierarchy level. Data is taken from the CTE and the table **`employees`**. The CTE and **`employees`** table are joined with a `LEFT JOIN`, since we want all the data from the CTE -- including Alice, who has the `NULL` value in the column `boss_id`.
 
 In a very simplistic way -
 
-***"You use recursive CTEs when you need to make a CTE, then refer to that following CTE, then refer to the that CTE that referred to the first CTE."***
+***"Recursive CTEs are used to handle and query data that refers to itself, like finding all employees who report to a manager in a company hierarchy."***
 
-[***Finding Routes Between Cities*** **Example**]{.ul}
-
-```{sql creating a cities_routes  table}
-CREATE TABLE cities_routes (
-    city_from TEXT,
-    city_to TEXT,
-    distance INTEGER
-);
-```
-
-```{sql insert into cities_routes  table}
-INSERT INTO cities_routes (city_from, city_to,distance) VALUES
-('Groningen', 'Heerenveen', 61.4),
-('Groningen', 'Harlingen', 91.6),
-('Harlingen', 'Wieringerwerf', 52.3),
-('Wieringerwerf', 'Hoorn', 26.5),
-('Hoorn', 'Amsterdam', 46.1),
-('Amsterdam', 'Haarlem', 30),
-('Heerenveen', 'Lelystad', 74),
-('Lelystad', 'Amsterdam', 57.2);
-```
-
-```{sql looking at the cities_routes table}
-select * from cities_routes
-```
-
-```{sql using recursive CTEs to find possible routes}
-WITH RECURSIVE possible_route AS (
-    SELECT  cr.city_to,
-            cr.city_from || ' -> ' ||cr.city_to AS route,
-            cr.distance
-      FROM cities_routes cr
-      WHERE cr.city_from = 'Groningen'
- 
-UNION ALL
- 
-SELECT  cr.city_to,
-            pr.route || ' -> ' || cr.city_to AS route,
-                CAST((pr.distance + cr.distance) AS DECIMAL(10, 2))
-      FROM possible_route pr
-INNER JOIN cities_routes cr
-            ON cr.city_from = pr.city_to
-)
- 
-SELECT  pr.route,
-        pr.distance
-FROM possible_route pr
-WHERE pr.city_to = 'Haarlem'
-ORDER BY pr.distance;
-```
-
-In this query, the first `SELECT` statement in the CTE definition will select the columns from the table **`cities_route`** where the departure city is Groningen. There's a new column called route, used to concatenate the cities on the route.
-
-The UNION ALL connects this with ***the recursive member***. This `SELECT` statement selects the arrival city, concatenate the cities on the route, and finally add the distances between these cities to the total of the route between Groningen and Haarlem. The first CTE is joined with the **`cities_route`** table.
-
-Finally, the `SELECT` statement pulls data from the
-CTE. It selects the route and the distance where the arrival city is Haarlem, with the data being ordered by distance in ascending order.
