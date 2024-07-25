@@ -686,6 +686,8 @@ WITH cte_name AS ( -- CTE Query SELECT ... ) SELECT ... FROM cte_name
 
 **When using WITH()**
 
+Getting all the books of the top 5 spending customers - 
+
 ```{sql getting total amount spent and average order amount using the with clause}
 
 -- Step 1: Calculate the total amount spent by each customer
@@ -704,7 +706,7 @@ WITH CustomerSpending AS (
         co.customer_id, full_name
 )
 
--- Step 2: Select the top 5 customers and join with book details
+-- Step 2: Select the top 5 spending customers and join with book details
 SELECT
     b.title,
     ol.price,
@@ -914,6 +916,44 @@ The levenshtein() function calculates the Levenshtein distance between two strin
 
 SQLite doesn't have it unfortunately!
 
+
+### The HAVING Clause
+
+```{sql example group by code }
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+ORDER BY 
+    "Sum of Orders per Customer" DESC;
+```
+
+The HAVING clause is used to specify a condition for groups of rows created by the GROUP BY clause, similar to how the WHERE clause is used to specify a condition for individual rows.
+
+```{sql inserting a having clause into group by code}
+SELECT 
+    SUM(ol.price) AS "Sum of Orders per Customer",
+    CONCAT(c.first_name, ' ', c.last_name) AS "Full Name"
+FROM 
+    order_line ol
+INNER JOIN 
+    cust_order co ON ol.order_id = co.order_id
+INNER JOIN 
+    customer c ON co.customer_id = c.customer_id
+GROUP BY 
+    c.first_name, c.last_name
+HAVING
+    "Sum of Orders per Customer" > 600
+ORDER BY 
+    "Sum of Orders per Customer" DESC;
+```
 
 ------------------------------------------------------------------------
 
