@@ -1,4 +1,65 @@
-INSERT INTO Runners (runner_id, first_name, last_name, date_of_birth, country, elite_status) VALUES
+-- Create Tables
+CREATE TABLE Runners (
+    runner_id INTEGER PRIMARY KEY,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    date_of_birth DATE,
+    sex TEXT NOT NULL,
+    country TEXT NOT NULL
+);
+
+CREATE TABLE Events (
+    event_id INTEGER PRIMARY KEY,
+    event TEXT NOT NULL,
+    event_date DATE NOT NULL
+);
+
+CREATE TABLE Results (
+    result_id INTEGER PRIMARY KEY,
+    event_id INTEGER NOT NULL,
+    runner_id INTEGER NOT NULL,
+    finish_time TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    sex TEXT NOT NULL, 
+    is_elite TEXT NOT NULL,
+    FOREIGN KEY(event_id) REFERENCES Events(event_id),
+    FOREIGN KEY(runner_id) REFERENCES Runners(runner_id)
+);
+
+CREATE TABLE Sponsors (
+    sponsor_id INTEGER PRIMARY KEY,
+    sponsor_name TEXT NOT NULL
+);
+
+CREATE TABLE Sponsored_Athletes (
+    sponsor_id INTEGER NOT NULL,
+    sponsor_name TEXT NOT NULL,
+    runner_id INTEGER NOT NULL,
+    FOREIGN KEY(sponsor_id) REFERENCES Sponsors(sponsor_id),
+    FOREIGN KEY(runner_id) REFERENCES Runners(runner_id),
+    PRIMARY KEY (sponsor_id, runner_id)
+);
+
+CREATE TABLE Training_Plans (
+    plan_id INTEGER PRIMARY KEY,
+    runner_id INTEGER NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    description TEXT NOT NULL,
+    FOREIGN KEY(runner_id) REFERENCES Runners(runner_id)
+);
+
+CREATE TABLE Training_Plans_Descriptions (
+    plan_id INTEGER PRIMARY KEY,
+    plan_description TEXT NOT NULL,
+    plan_length_weeks INTEGER NOT NULL
+);
+
+-- Insert data into tables
+
+-- Insert Runners table data
+
+INSERT INTO Runners (runner_id, first_name, last_name, date_of_birth, sex, country) VALUES
 (1, 'Jessica', 'Scott', '1976-04-20', 'Male', 'Pitcairn Islands'),
 (2, 'Anthony', 'Anderson', '1934-09-04', 'Female', 'Vietnam'),
 (3, 'Allen', 'Hendricks', '1978-01-18', 'Male', 'Gambia'),
@@ -19,7 +80,7 @@ INSERT INTO Runners (runner_id, first_name, last_name, date_of_birth, country, e
 (18, 'Todd', 'Barry', '1964-04-22', 'Male', 'Nicaragua'),
 (19, 'Kenneth', 'Mcgee', '1937-12-07', 'Female', 'Chad'),
 (20, 'Jonathan', 'Wyatt', '1949-12-17', 'Male', 'Botswana'),
-(21, 'Jennifer', 'Lewis', '1946-08-03', 'Female', 'Lao People's Democratic Republic'),
+(21, 'Jennifer', 'Lewis', '1946-08-03', 'Female', 'Lao Peoples Democratic Republic'),
 (22, 'Michael', 'Jensen', '1937-03-22', 'Male', 'Romania'),
 (23, 'Taylor', 'Miller', '1938-08-16', 'Female', 'Congo'),
 (24, 'Emily', 'Dunn', '2001-07-08', 'Male', 'Poland'),
@@ -442,7 +503,7 @@ INSERT INTO Runners (runner_id, first_name, last_name, date_of_birth, country, e
 (441, 'Tammy', 'Pratt', '1937-06-26', 'Male', 'Venezuela'),
 (442, 'Samuel', 'Williams', '1976-06-29', 'Male', 'Ireland'),
 (443, 'Angela', 'Nguyen', '1937-03-20', 'Male', 'Philippines'),
-(444, 'Teresa', 'Kennedy', '1947-04-18', 'Male', 'Lao People's Democratic Republic'),
+(444, 'Teresa', 'Kennedy', '1947-04-18', 'Male', 'Lao Peoples Democratic Republic'),
 (445, 'Diane', 'Thomas', '1961-10-26', 'Female', 'Martinique'),
 (446, 'James', 'Edwards', '1936-12-24', 'Male', 'Chile'),
 (447, 'Barbara', 'Stevens', '1939-02-15', 'Male', 'British Indian Ocean Territory (Chagos Archipelago)'),
@@ -508,7 +569,7 @@ INSERT INTO Runners (runner_id, first_name, last_name, date_of_birth, country, e
 (507, 'Megan', 'Mccarty', '1962-08-17', 'Male', 'Argentina'),
 (508, 'Isaac', 'Alvarez', '1981-01-15', 'Male', 'Botswana'),
 (509, 'Amy', 'Horn', '2004-07-29', 'Female', 'Andorra'),
-(510, 'Daniel', 'Black', '1996-02-15', 'Female', 'Lao People's Democratic Republic'),
+(510, 'Daniel', 'Black', '1996-02-15', 'Female', 'Lao Peoples Democratic Republic'),
 (511, 'Sheila', 'Howard', '1967-09-05', 'Female', 'Bermuda'),
 (512, 'Samuel', 'Wilson', '1972-08-21', 'Female', 'Cocos (Keeling) Islands'),
 (513, 'Emily', 'Kramer', '1951-04-17', 'Male', 'Anguilla'),
@@ -541,7 +602,7 @@ INSERT INTO Runners (runner_id, first_name, last_name, date_of_birth, country, e
 (540, 'Mikayla', 'Clarke', '1962-12-16', 'Female', 'Slovenia'),
 (541, 'Katie', 'Hernandez', '1959-05-18', 'Male', 'Oman'),
 (542, 'Richard', 'Pennington', '1939-09-16', 'Male', 'Bulgaria'),
-(543, 'Robert', 'Carlson', '1963-04-12', 'Female', 'Cote d'Ivoire'),
+(543, 'Robert', 'Carlson', '1963-04-12', 'Female', 'Cote dIvoire'),
 (544, 'Wesley', 'Anderson', '1944-04-25', 'Male', 'Tunisia'),
 (545, 'Anna', 'Thomas', '2004-04-24', 'Male', 'Kenya'),
 (546, 'Erin', 'George', '1960-07-10', 'Male', 'Ghana'),
@@ -713,7 +774,7 @@ INSERT INTO Runners (runner_id, first_name, last_name, date_of_birth, country, e
 (712, 'Eric', 'Mcdonald', '1984-04-22', 'Male', 'Guinea'),
 (713, 'Mary', 'Preston', '1973-04-10', 'Male', 'Ireland'),
 (714, 'Damon', 'Cameron', '1963-11-26', 'Female', 'Antigua and Barbuda'),
-(715, 'Barry', 'Perez', '1939-08-07', 'Male', 'Cote d'Ivoire'),
+(715, 'Barry', 'Perez', '1939-08-07', 'Male', 'Cote dIvoire'),
 (716, 'Jeffrey', 'Rasmussen', '1942-04-17', 'Female', 'United States Virgin Islands'),
 (717, 'Robert', 'Kirby', '1962-03-01', 'Male', 'Cocos (Keeling) Islands'),
 (718, 'Cindy', 'Sutton', '1970-07-03', 'Female', 'Armenia'),
@@ -882,7 +943,7 @@ INSERT INTO Runners (runner_id, first_name, last_name, date_of_birth, country, e
 (881, 'Veronica', 'Santana', '1955-06-29', 'Male', 'Mozambique'),
 (882, 'James', 'Coleman', '1989-09-09', 'Female', 'Haiti'),
 (883, 'Andrea', 'Thornton', '1980-08-14', 'Male', 'Bangladesh'),
-(884, 'Angela', 'Wagner', '1959-12-20', 'Male', 'Cote d'Ivoire'),
+(884, 'Angela', 'Wagner', '1959-12-20', 'Male', 'Cote dIvoire'),
 (885, 'Christine', 'Martin', '1937-05-27', 'Male', 'San Marino'),
 (886, 'Julie', 'Hughes', '1991-07-04', 'Male', 'Morocco'),
 (887, 'Michael', 'Lee', '1988-02-24', 'Male', 'Montserrat'),
@@ -989,7 +1050,7 @@ INSERT INTO Runners (runner_id, first_name, last_name, date_of_birth, country, e
 (988, 'James', 'Lara', '1991-01-08', 'Male', 'Armenia'),
 (989, 'Samantha', 'Anderson', '1978-08-09', 'Female', 'Bangladesh'),
 (990, 'Lori', 'Robbins', '1946-02-12', 'Male', 'Saint Helena'),
-(991, 'Kenneth', 'Reyes', '1970-01-11', 'Male', 'Lao People's Democratic Republic'),
+(991, 'Kenneth', 'Reyes', '1970-01-11', 'Male', 'Lao Peoples Democratic Republic'),
 (992, 'David', 'Williams', '1985-12-02', 'Female', 'Heard Island and McDonald Islands'),
 (993, 'Teresa', 'Johnson', '1995-04-27', 'Female', 'Cambodia'),
 (994, 'John', 'Martinez', '1951-10-29', 'Male', 'Saint Lucia'),
@@ -999,7 +1060,11 @@ INSERT INTO Runners (runner_id, first_name, last_name, date_of_birth, country, e
 (998, 'Lawrence', 'Romero', '1937-04-05', 'Male', 'Guinea'),
 (999, 'Sierra', 'Bishop', '1975-01-20', 'Female', 'Martinique'),
 (1000, 'Michael', 'Wilson', '1949-01-13', 'Female', 'Wallis and Futuna');
-INSERT INTO Events (event_id, event_year, event_date, location) VALUES
+
+
+-- Insert Events table data
+
+INSERT INTO Events (event_id, event, event_date) VALUES
 (1, 'Boston Marathon', '2012-04-16'),
 (2, 'Boston Marathon', '2013-04-15'),
 (3, 'Boston Marathon', '2014-04-21'),
@@ -1072,7 +1137,12 @@ INSERT INTO Events (event_id, event_year, event_date, location) VALUES
 (70, 'Tokyo Marathon', '2021-03-07'),
 (71, 'Tokyo Marathon', '2022-03-06'),
 (72, 'Tokyo Marathon', '2023-03-05');
-INSERT INTO Results (result_id, event_id, runner_id, finish_time, position, category) VALUES
+
+
+-- Insert Results table data
+
+
+INSERT INTO Results (result_id, event_id, runner_id, finish_time,position, sex, is_elite) VALUES
 (1, 1, 967, '04:15:59', 4336, 'Female', False),
 (2, 2, 835, '04:30:43', 4266, 'Female', False),
 (3, 3, 841, '05:18:39', 3294, 'Male', False),
@@ -13073,6 +13143,10 @@ INSERT INTO Results (result_id, event_id, runner_id, finish_time, position, cate
 (11998, 12, 184, '05:30:02', 1668, 'Male', False),
 (11999, 9, 704, '03:03:26', 2592, 'Male', False),
 (12000, 6, 702, '02:09:07', 2678, 'Male', True);
+
+-- Insert Sponsors table data
+
+
 INSERT INTO Sponsors (sponsor_id, sponsor_name) VALUES
 (1, 'Nike'),
 (2, 'Adidas'),
@@ -13084,6 +13158,11 @@ INSERT INTO Sponsors (sponsor_id, sponsor_name) VALUES
 (8, 'Puma'),
 (9, 'Under Armour'),
 (10, 'Tracksmith');
+
+
+-- Insert training plans table data
+
+
 INSERT INTO Training_Plans (plan_id, runner_id, start_date, end_date, description) VALUES
 (1, 237, '2012-01-23', '2012-04-16', 8),
 (2, 78, '2011-11-28', '2012-04-16', 5),
@@ -13685,6 +13764,10 @@ INSERT INTO Training_Plans (plan_id, runner_id, start_date, end_date, descriptio
 (598, 153, '2012-01-23', '2012-04-16', 2),
 (599, 898, '2011-11-28', '2012-04-16', 5),
 (600, 588, '2011-12-26', '2012-04-16', 1);
+
+-- Insert sponsored athletes table data
+
+
 INSERT INTO Sponsored_Athletes (sponsor_id, sponsor_name, runner_id) VALUES
 (1, 'New Balance', 820),
 (2, 'Hoka', 8775),
@@ -15228,6 +15311,11 @@ INSERT INTO Sponsored_Athletes (sponsor_id, sponsor_name, runner_id) VALUES
 (1540, 'Adidas', 3797),
 (1541, 'Asics', 4298),
 (1542, 'Puma', 10896);
+
+
+-- Insert training plans descriptions table data
+
+
 INSERT INTO Training_Plans_Descriptions (plan_id, plan_description, plan_length_weeks) VALUES
 (1, 'Beginner Marathon Plan: 16-week build-up', 16),
 (2, 'Intermediate Marathon Plan: 12-week build-up', 12),
