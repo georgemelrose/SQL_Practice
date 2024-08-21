@@ -1,0 +1,54 @@
+---
+title: "SQL CoP Problem Sheet 1 - Basic Query Statements"
+author: "George Melrose: gam55@cam.ac.uk (Research Information Office)"
+date: "21/08/2024"
+output: pdf_document
+---
+
+\section{Introduction}
+
+These problems aim to test your basic SQL knowledge, steadily building up in complexity. The questions and solutions are common ones you will come across when querying different datasets. For the purposes of this series of problem sheets, a database of dummy Marathon results data has been generated. More information on the \textbf{Marathon} database is presented below.
+
+The concepts tested in this sheet are covered by the LinkedIn learning course \textbf{SQL Server Fundamentals: Master Basic Query Techniques} - (<https://www.linkedin.com/learning/sql-server-fundamentals-master-basic-query-techniques>) .
+
+\subsection{Useful Prepatory Resources}
+
+In addition to this problem sheet, there are two useful resources you can draw upon to better understand these SQL concepts:
+
+- \textbf{Two RMarkdown documents} - one to generate some dummy 'Universities' data (<https://github.com/georgemelrose/SQL_Practice/blob/main/0_generating_databasestar_dummy_data.Rmd>). This was copied from the excellent SQL learning resource databasestar (<https://github.com/bbrumm/databasestar/tree/main/sample_databases/sample_db_university/sqlite>). 
+
+  The other document is an RMD HTML I generated walking you through basic SQL concepts and how they can be applied   to this databasestar dummy data   (<https://github.com/georgemelrose/SQL_Practice/blob/main/01_Basic_Query_Statements.html>). 
+  
+- \textbf{A video presentation} - a recording of a meeting in which I presented the \textbf{Basic Query Statements} HTML , explaining key SQL concepts - (<https://universityofcambridgecloud.sharepoint.com/sites/AD_Progress/SitePages/Learning-SQL-in-a-New-Format.aspx>). This video can be found on the aforementioned page under the \textbf{SQL and R} title. \textit{Note that this can only be viewed by SQL" Community of Practice Members, email gam55@cam.ac.uk for access}.
+
+\subsection{Marathon Database}
+
+Firstly, the data to be put into the Marathon database was formulated from the following Python script - (<https://github.com/georgemelrose/SQL_Practice/blob/main/Dummy_Marathon_Data/marathon_data_generation.ipynb>).
+
+The \textbf{marathon data generation} python script generates the following tables:
+
+\textbf{1. Runners} - Randomly generate 1000 runners with names common in their locale/country, together with their birth date and sex.
+
+\textbf{2. Events} - The 6 Major World marathons (Berlin, Boston, Chicago,London,New York City, Tokyo), with an event per year from 2012 to 2023. 
+
+\textbf{3. Results} - Gives results for runners in hh:mm:ss format, ensuring there aren't duplicate results for each runner per event. Prevents any results breaking either the male marathon world-record (2:00:35 Eliud Kipchoge 2023) or the female marathon world-record (2:11:53 Brigid Kosgei 2019). Also determines, with a True/False column, if a result is elite by the male standard (below 02:15:00) or the female standard (below 02:30:00).
+
+\textbf{4. Sponsors} - Lists the following 10 major fitness/sports companies that typically act as sponsors to runners - "Nike", "Adidas", "Asics", "Saucony", "Hoka","Brooks", "New Balance", "Puma", "Under Armour", "Tracksmith". 
+
+\textbf{5. Sponsored Athletes} - A table listing the fraction of the elite athletes that have a sponsor.
+
+\textbf{6. Training Plans Descriptions} - The descriptions of 10 different training plans and their respective lengths in weeks. 
+
+\section{Background}
+
+This subsection provides background information, also formatted using LaTeX.
+
+\textbf{Bold text} and \textit{italicized text} can easily be added with LaTeX commands.
+
+Here is an inline equation: (E=mc\^2).
+
+And a displayed equation:
+
+$$
+a^2 + b^2 = c^2
+$$
