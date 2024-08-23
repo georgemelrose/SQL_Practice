@@ -1,7 +1,6 @@
 ---
 title: "SQL CoP Problem Sheet 1 - Basic Query Statements"
 author: "George Melrose: gam55@cam.ac.uk (Research Information Office)"
-date: "21/08/2024"
 output: pdf_document
 ---
 
@@ -38,6 +37,15 @@ The \textbf{marathon data generation} python script generates the following tabl
 \textbf{5. Sponsored Athletes} - A table listing the fraction of the elite athletes that have a sponsor.
 
 \textbf{6. Training Plans Descriptions} - The descriptions of 10 different training plans and their respective lengths in weeks. 
+
+\textbf{7. Training Plans} - The training plans of athletes. 
+
+\subsection{Marathon Database Entity Relationship Diagram}
+
+
+```{r}
+knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
+```
 
 \section{Background}
 
