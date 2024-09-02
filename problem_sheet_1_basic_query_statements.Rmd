@@ -72,8 +72,6 @@ $$
 
 \textbf{select * from \textit{table} limit 5} -  to get the first 5 rows of a particular table. 
 
-\textbf{Solutions} - 
-
 \textbf{Q2.i.} - Obtain the full names and countries of the runners?
 
 \textbf{Solution} - 
@@ -144,7 +142,7 @@ In this solution, all the matching rows that \textit{contain} the son string reg
 
 \textbf{Solution} - 
 
-\textbf{select * from Training_Plans_Descriptions where plan\_length\_weeks between 10 and 12;}
+\textbf{select * from Training\_Plans\_Descriptions where plan\_length\_weeks between 10 and 12;}
 
 The \textbf{between} operator together with the required numerical parameters and the \textbf{and} operator
 
@@ -152,14 +150,27 @@ The \textbf{between} operator together with the required numerical parameters an
 
 \textbf{Solution} - 
 
-\textbf{select * from Training_Plans_Descriptions where plan\_length\_weeks <12;}
+\textbf{select * from Training\_Plans\_Descriptions where plan\_length\_weeks <12;}
 
-The \textbf{<} operator after the \textbf{where} clause fetches results below a certain numerical threshold, 12 in this case. 
+The less than \textbf{<} operator after the \textbf{where} clause fetches results below a certain numerical threshold, 12 in this case. 
 
-\textbf{Q4.ii.} - Gather all training plans that have a length less than 12 weeks?
+\textbf{Q4.iii.} - Gather all training plans that have a length more than 12 weeks?
 
 \textbf{Solution} - 
 
-\textbf{select * from Training_Plans_Descriptions where plan\_length\_weeks <12;}
+\textbf{select * from Training\_Plans\_Descriptions where plan\_length\_weeks >12;}
 
-The \textbf{<} operator after the \textbf{where} clause fetches results below a certain numerical threshold, 12 in this case. 
+The greater than \textbf{>} operator after the \textbf{where} clause fetches results above a certain numerical threshold, 12 in this case. 
+
+\textbf{Q4.iv.} - Gather all training plans that have a length more than or equal to 12 weeks?
+
+\textbf{Solution} - 
+
+\textbf{select * from Training\_Plans\_Descriptions where plan\_length\_weeks >=12;}
+
+The greater than or equals to \textbf{>=} operator after the \textbf{where} clause fetches results above or equal to a certain numerical threshold, 12 in this case. 
+
+\subsection{Filtering on Multiple Conditions}
+
+\textbf{Q1.} - Find all male runners from the United Kingdom born in this century?
+
