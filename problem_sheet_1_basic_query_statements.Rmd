@@ -43,13 +43,11 @@ The \textbf{marathon data generation} python script generates the following tabl
 \subsection{Marathon Database Entity Relationship Diagram}
 
 
-```{r}
+```{r, echo = FALSE}
 knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 ```
 
-\section{Background}
-
-This subsection provides background information, also formatted using LaTeX.
+\section{Basic Query Statment Problems}
 
 \textbf{Bold text} and \textit{italicized text} can easily be added with LaTeX commands.
 
@@ -60,3 +58,108 @@ And a displayed equation:
 $$
 a^2 + b^2 = c^2
 $$
+
+\subsection{Single Table ‘Select’ Statements}
+
+
+\textbf{Q1.} - Get all the tables in the database, inspect their layout, and get the first 5 rows of each table?
+
+\textbf{Solutions} - 
+
+\textbf{.tables} -  to get all the tables. 
+
+\textbf{.schema \textit{table}} -  to get the schema of a particular table.
+
+\textbf{select * from \textit{table} limit 5} -  to get the first 5 rows of a particular table. 
+
+\textbf{Solutions} - 
+
+\textbf{Q2.i.} - Obtain the full names and countries of the runners?
+
+\textbf{Solution} - 
+
+\textbf{select first\_name || '  ' || last\_name as full\_name, country from runners;} The \textbf{||} symbols concatenate the first_name and last_name columns into one. The \textbf{as} operator allows a column to  have a different name displayed in the query result. 
+
+\textbf{Q2.ii.} - Find the top 10 Marathon results by time, male or female?
+
+\textbf{Solution} - 
+
+\textbf{select * from Results order by finish\_time asc limit 10;} The \textbf{order by} operator orders the results by whichever column is specified. The \textbf{asc} operator orders the results in ascending order, from the highest to the lowest time. 
+
+\subsection{Filtering on Single Conditions}
+
+
+\textbf{Q1} - Find the top 20 male marathon results and the top 20 female marathon results?
+
+\textbf{Solution} - 
+
+\textbf{select * from Results where sex= 'Male' order by finish\_time asc limit 20;} 
+
+\textbf{select * from Results where sex= 'Female' order by finish\_time asc limit 20;} 
+
+The \textbf{where} clause filters rows based on specified conditions, in the above cases the different sexes.
+
+\textbf{Q2.i.} - Find all the runners from Lithuania, Latvia, and Estonia?
+
+\textbf{Solution} - 
+
+\textbf{select * from Runners where country in ('Lithuania', 'Latvia','Estonia');} 
+
+Using the \textbf{in} operator, rows fulfilling a list can be found. 
+
+\textbf{Q2.ii.} - Find all the runners \textit{not} from Poland, Czechia, Slovakia or Hungary?
+
+\textbf{Solution} - 
+
+\textbf{select * from Runners where country not in ('Poland','Czechia','Slovakia','Hungary');} 
+
+Using \textbf{not} in conjunction with the \textbf{in} operator, rows not fulfilling a list can be found. 
+
+\textbf{Q3.i.} - Find all the runners whose names begin with 'J'?
+
+\textbf{Solution} - 
+
+\textbf{select * from Runners where first\_name like 'J\%';}
+
+Using \textbf{where} clause in conjunction with the \textbf{like} operator, rows with a first name beginning with J can be found. Note that in string matching, 'string%' find a pattern at the beginning of a string. '%string' means finding a pattern at the end of a string. 
+
+\textbf{Q3.ii.} - Find all the runners whose names don't with 'J'?
+
+\textbf{Solution} - 
+
+\textbf{select * from Runners where first\_name not like 'J\%';}
+
+The answer is exactly the same as in part i. albeit with the \textbf{not} operator to signify everything \textit{not} fulfilling the condition.
+
+
+\textbf{Q3.iii.} - Find all the runners whose surnames contain 'son'?
+
+\textbf{Solution} - 
+
+\textbf{select * from Runners where last\_name  like '\%son\%';}
+
+In this solution, all the matching rows that \textit{contain} the son string regardless where it is in the names are found by wrapping the string in \textbf{\%} signs in the query code. 
+
+\textbf{Q4.i.} - Gather all training plans that have a length between 10 and 12 weeks?
+
+\textbf{Solution} - 
+
+\textbf{select * from Training_Plans_Descriptions where plan\_length\_weeks between 10 and 12;}
+
+The \textbf{between} operator together with the required numerical parameters and the \textbf{and} operator
+
+\textbf{Q4.ii.} - Gather all training plans that have a length less than 12 weeks?
+
+\textbf{Solution} - 
+
+\textbf{select * from Training_Plans_Descriptions where plan\_length\_weeks <12;}
+
+The \textbf{<} operator after the \textbf{where} clause fetches results below a certain numerical threshold, 12 in this case. 
+
+\textbf{Q4.ii.} - Gather all training plans that have a length less than 12 weeks?
+
+\textbf{Solution} - 
+
+\textbf{select * from Training_Plans_Descriptions where plan\_length\_weeks <12;}
+
+The \textbf{<} operator after the \textbf{where} clause fetches results below a certain numerical threshold, 12 in this case. 
