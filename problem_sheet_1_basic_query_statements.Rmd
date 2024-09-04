@@ -172,5 +172,49 @@ The greater than or equals to \textbf{>=} operator after the \textbf{where} clau
 
 \subsection{Filtering on Multiple Conditions}
 
-\textbf{Q1.} - Find all male runners from the United Kingdom born in this century?
+\textbf{Q1.i.} - Find all female runners from the United Kingdom born in the 20th century?
+
+\textbf{Solution} - 
+
+\textbf{select * from Runners where sex = 'Female' and country = 'United Kingdom' and date\_of\_birth > 01-01-2000;}
+
+The greater than  \textbf{>} operator is used, converse to normal logic, to find dates \textit{less than} 1st January 2000. 
+
+\textbf{Q1.ii.} - Find all male runners from Brazil born in 1997?
+
+\textbf{Solution} - 
+
+\textbf{select * from Runners where sex = 'Male' and country = 'Brazil' and date\_of\_birth between '1997-01-01' and '1997-12-31'}
+
+In this solution, despite the date column having the format yyyy-mm-dd we can still whittle the results down to the year. Using the \textbf{between} and \textbf{and} operators, together with the date range we seek, those rows fulfilling the question's conditions can be found. 
+
+\textbf{Q2.} - Find all runners whose names begin with the letters G or J?
+
+\textbf{Solution} - 
+
+\textbf{select first\_name || '  ' || last\_name as full\_name from Runners where first\_name like 'J\%' or first\_name like 'G\%';}
+
+As in the 'Filtering on Single Conditions' section, string matching and the \textbf{where} operator are used to obtain rows fulfilling these multiple conditions. 
+
+\subsection{Inner Joins}
+
+```{r, echo = FALSE, out.width="25cm", out.height="15cm"}
+knitr::include_graphics("C:/Users/gam55/Downloads/joins.png")
+```
+
+
+\textbf{Q1.} - Obtain the full names of all 'elite' runners?
+
+\textbf{Solution} - 
+
+\textbf{select first\_name || '  ' || last\_name as full\_name from Runners inner join Results on Runners.runner\_id = Results.runner\_id where is\_elite = 'True';}
+
+Utilising the \textbf{concatenation operator} \textbf{||}  again, the full name of each runners is obtained. A single inner join with the Results table allows for a filter on the condition of 'is_elite' to be made. 
+
+\textbf{Q2.} - Find the the following information for runners of any of the Boston Marathon events in the database: runner_id; finish_time; sex; is_elite?
+
+\textbf{Solution} - 
+
+\textbf{select runner\_id, finish\_time,sex, is\_elite from Results inner join Events on Events.event\_id = Results.event\_id where event = 'Boston Marathon';}
+
 
