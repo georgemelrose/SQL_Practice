@@ -32,7 +32,7 @@ The \textbf{marathon data generation} python script generates the following tabl
 
 \textbf{3. Results} - Gives results for runners in hh:mm:ss format, ensuring there aren't duplicate results for each runner per event. Prevents any results breaking either the male marathon world-record (2:00:35 Eliud Kipchoge 2023) or the female marathon world-record (2:11:53 Brigid Kosgei 2019). Also determines, with a True/False column, if a result is elite by the male standard (below 02:15:00) or the female standard (below 02:30:00).
 
-\textbf{4. Sponsors} - Lists the following 10 major fitness/sports companies that typically act as sponsors to runners - "Nike", "Adidas", "Asics", "Saucony", "Hoka","Brooks", "New Balance", "Puma", "Under Armour", "Tracksmith". 
+\textbf{4. Sponsors} - Lists the following 10 major companies that typically act as sponsors to runners - "Nike", "Adidas", "Asics", "Saucony", "Hoka","Brooks", "New Balance", "Puma", "Under Armour", "Tracksmith". 
 
 \textbf{5. Sponsored Athletes} - A table listing the fraction of the elite athletes that have a sponsor.
 
@@ -196,7 +196,7 @@ In this solution, despite the date column having the format yyyy-mm-dd we can st
 
 As in the 'Filtering on Single Conditions' section, string matching and the \textbf{where} operator are used to obtain rows fulfilling these multiple conditions. 
 
-\subsection{Inner Joins}
+\subsection{Single Inner Joins}
 
 ```{r, echo = FALSE, out.width="25cm", out.height="15cm"}
 knitr::include_graphics("C:/Users/gam55/Downloads/joins.png")
@@ -217,4 +217,12 @@ Utilising the \textbf{concatenation operator} \textbf{||}  again, the full name 
 
 \textbf{select runner\_id, finish\_time,sex, is\_elite from Results inner join Events on Events.event\_id = Results.event\_id where event = 'Boston Marathon';}
 
+The 4 necessary columns are selected from the Results table, which is tehn joined on to the Events table by the column they have in common - event_id. Filtering specifically down to the Boston Marathon events is done by using a \textbf{where} clause. 
 
+\subsection{Multiple Inner Joins}
+
+\textbf{Q1.} - Obtain the full names of all 'elite' runners as well as their finish times, position, and sex? Additionally, gather the events and event dates when these elite times were made?
+
+\textbf{Solution} - 
+
+\textbf{select first\_name || '  ' || last\_name as full\_name, finish_time,  from Runners inner join Results on Runners.runner\_id = Results.runner\_id where is\_elite = 'True';}
