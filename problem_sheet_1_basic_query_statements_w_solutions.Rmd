@@ -53,39 +53,137 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 
 \textbf{Q1.} - Get all the tables in the database, inspect their layout, and get the first 5 rows of each table?
 
+\textbf{Solutions} - 
+
+\textbf{.tables} -  to get all the tables. 
+
+\textbf{.schema \textit{table}} -  to get the schema of a particular table.
+
+\textbf{select * from \textit{table} limit 5} -  to get the first 5 rows of a particular table. 
+
 \textbf{Q2.i.} - Obtain the full names and countries of the runners?
+
+\textbf{Solution} - 
+
+\textbf{select first\_name || '  ' || last\_name as full\_name, country from runners;} The \textbf{||} symbols concatenate the first_name and last_name columns into one. The \textbf{as} operator allows a column to  have a different name displayed in the query result. 
 
 \textbf{Q2.ii.} - Find the top 10 Marathon results by time, male or female?
 
+\textbf{Solution} - 
+
+\textbf{select * from Results order by finish\_time asc limit 10;} The \textbf{order by} operator orders the results by whichever column is specified. The \textbf{asc} operator orders the results in ascending order, from the highest to the lowest time. 
+
 \subsection{Filtering on Single Conditions}
+
 
 \textbf{Q1} - Find the top 20 male marathon results and the top 20 female marathon results?
 
+\textbf{Solution} - 
+
+\textbf{select * from Results where sex= 'Male' order by finish\_time asc limit 20;} 
+
+\textbf{select * from Results where sex= 'Female' order by finish\_time asc limit 20;} 
+
+The \textbf{where} clause filters rows based on specified conditions, in the above cases the different sexes.
+
 \textbf{Q2.i.} - Find all the runners from Lithuania, Latvia, and Estonia?
+
+\textbf{Solution} - 
+
+\textbf{select * from Runners where country in ('Lithuania', 'Latvia','Estonia');} 
+
+Using the \textbf{in} operator, rows fulfilling a list can be found. 
 
 \textbf{Q2.ii.} - Find all the runners \textit{not} from Poland, Czechia, Slovakia or Hungary?
 
+\textbf{Solution} - 
+
+\textbf{select * from Runners where country not in ('Poland','Czechia','Slovakia','Hungary');} 
+
+Using \textbf{not} in conjunction with the \textbf{in} operator, rows not fulfilling a list can be found. 
+
 \textbf{Q3.i.} - Find all the runners whose names begin with 'J'?
+
+\textbf{Solution} - 
+
+\textbf{select * from Runners where first\_name like 'J\%';}
+
+Using \textbf{where} clause in conjunction with the \textbf{like} operator, rows with a first name beginning with J can be found. Note that in string matching, 'string%' find a pattern at the beginning of a string. '%string' means finding a pattern at the end of a string. 
 
 \textbf{Q3.ii.} - Find all the runners whose names don't begin with 'J'?
 
+\textbf{Solution} - 
+
+\textbf{select * from Runners where first\_name not like 'J\%';}
+
+The answer is exactly the same as in part i. albeit with the \textbf{not} operator to signify everything \textit{not} fulfilling the condition.
+
+
 \textbf{Q3.iii.} - Find all the runners whose surnames contain 'son'?
+
+\textbf{Solution} - 
+
+\textbf{select * from Runners where last\_name  like '\%son\%';}
+
+In this solution, all the matching rows that \textit{contain} the son string regardless where it is in the names are found by wrapping the string in \textbf{\%} signs in the query code. 
 
 \textbf{Q4.i.} - Gather all training plans that have a length between 10 and 12 weeks?
 
+\textbf{Solution} - 
+
+\textbf{select * from Training\_Plans\_Descriptions where plan\_length\_weeks between 10 and 12;}
+
+The \textbf{between} operator together with the required numerical parameters and the \textbf{and} operator
+
 \textbf{Q4.ii.} - Gather all training plans that have a length less than 12 weeks?
+
+\textbf{Solution} - 
+
+\textbf{select * from Training\_Plans\_Descriptions where plan\_length\_weeks <12;}
+
+The less than \textbf{<} operator after the \textbf{where} clause fetches results below a certain numerical threshold, 12 in this case. 
 
 \textbf{Q4.iii.} - Gather all training plans that have a length more than 12 weeks?
 
+\textbf{Solution} - 
+
+\textbf{select * from Training\_Plans\_Descriptions where plan\_length\_weeks >12;}
+
+The greater than \textbf{>} operator after the \textbf{where} clause fetches results above a certain numerical threshold, 12 in this case. 
+
 \textbf{Q4.iv.} - Gather all training plans that have a length more than or equal to 12 weeks?
+
+\textbf{Solution} - 
+
+\textbf{select * from Training\_Plans\_Descriptions where plan\_length\_weeks >=12;}
+
+The greater than or equals to \textbf{>=} operator after the \textbf{where} clause fetches results above or equal to a certain numerical threshold, 12 in this case. 
 
 \subsection{Filtering on Multiple Conditions}
 
 \textbf{Q1.i.} - Find all female runners from the United Kingdom born in the 20th century?
 
+\textbf{Solution} - 
+
+\textbf{select * from Runners where sex = 'Female' and country = 'United Kingdom' and date\_of\_birth > 01-01-2000;}
+
+The greater than  \textbf{>} operator is used, converse to normal logic, to find dates \textit{less than} 1st January 2000. 
+
 \textbf{Q1.ii.} - Find all male runners from Brazil born in 2000?
 
+\textbf{Solution} - 
+
+\textbf{select * from Runners where sex = 'Male' and country = 'Brazil' and date\_of\_birth between '1997-01-01' and '1997-12-31'}
+
+In this solution, despite the date column having the format yyyy-mm-dd we can still whittle the results down to the year. Using the \textbf{between} and \textbf{and} operators, together with the date range we seek, those rows fulfilling the question's conditions can be found. 
+
 \textbf{Q2.} - Find all runners whose names begin with the letters G or J?
+
+\textbf{Solution} - 
+
+\textbf{select first\_name || '  ' || last\_name as full\_name from Runners where first\_name like 'J\%' or first\_name like 'G\%';}
+
+As in the 'Filtering on Single Conditions' section, string matching and the \textbf{where} operator are used to obtain rows fulfilling these multiple conditions. 
 
 \subsection{Single Inner Joins}
 
@@ -96,8 +194,24 @@ knitr::include_graphics("C:/Users/gam55/Downloads/joins.png")
 
 \textbf{Q1.} - Obtain the full names of all 'elite' runners?
 
+\textbf{Solution} - 
+
+\textbf{select first\_name || '  ' || last\_name as full\_name from Runners inner join Results on Runners.runner\_id = Results.runner\_id where is\_elite = 'True';}
+
+Utilising the \textbf{concatenation operator} \textbf{||}  again, the full name of each runners is obtained. A single inner join with the Results table allows for a filter on the condition of 'is_elite' to be made. 
+
 \textbf{Q2.} - Find the the following information for runners of any of the Boston Marathon events in the database: runner_id; finish_time; sex; is_elite?
+
+\textbf{Solution} - 
+
+\textbf{select runner\_id, finish\_time,sex, is\_elite from Results inner join Events on Events.event\_id = Results.event\_id where event = 'Boston Marathon';}
+
+The 4 necessary columns are selected from the Results table, which is then joined on to the Events table by the column they have in common - event_id. Filtering specifically down to the Boston Marathon events is done by using a \textbf{where} clause. 
 
 \subsection{Multiple Inner Joins}
 
 \textbf{Q1.} - Obtain the full names of all 'elite' runners as well as their finish times, position, and sex? Additionally, gather the information on the events when these elite times were made?
+
+\textbf{Solution} - 
+
+\textbf{select first\_name || '  ' || last\_name as full\_name, finish\_time, position,sex  from Runners inner join Results on Runners.runner\_id = Results.runner\_id inner join Events on Results.event\_id = Events.event\_id;}
