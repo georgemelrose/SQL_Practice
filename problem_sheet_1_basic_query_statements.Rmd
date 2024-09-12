@@ -47,9 +47,10 @@ The \textbf{marathon data generation} python script generates the following tabl
 knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 ```
 
+
 \section{Basic Query Statment Problems}
 
-\subsection{Single Table ‘Select’ Statements}
+\subsection{Single Table ‘SELECT’ Statements}
 
 \textbf{Q1.} - Get all the tables in the database, inspect their layout, and get the first 5 rows of each table?
 
@@ -57,13 +58,15 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 
 \textbf{Q2.ii.} - Find the top 10 Marathon results by time, male or female?
 
+
 \subsection{Filtering on Single Conditions}
+
 
 \textbf{Q1} - Find the top 20 male marathon results and the top 20 female marathon results?
 
-\textbf{Q2.i.} - Find all the runners from Lithuania, Latvia, and Estonia?
+\textbf{Q2.i.} - Find all the runners FROM Lithuania, Latvia, and Estonia?
 
-\textbf{Q2.ii.} - Find all the runners \textit{not} from Poland, Czechia, Slovakia or Hungary?
+\textbf{Q2.ii.} - Find all the runners \textit{not} FROM Poland, Czechia, Slovakia or Hungary?
 
 \textbf{Q3.i.} - Find all the runners whose names begin with 'J'?
 
@@ -85,7 +88,7 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 
 \textbf{Q1.ii.} - Find all male runners from Brazil born in 2000?
 
-\textbf{Q2.} - Find all runners whose names begin with the letters G or J?
+\textbf{Q2.} - Find the full names of all runners whose names begin with the letters G or J?
 
 \subsection{Single Inner Joins}
 
@@ -93,11 +96,27 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 knitr::include_graphics("C:/Users/gam55/Downloads/joins.png")
 ```
 
+\textbf{Q1.i.} - Obtain the runner ids of runners with an elite time in the London Marathon(any year)?
 
-\textbf{Q1.} - Obtain the full names of all 'elite' runners?
+\textbf{Q1.ii.} - Obtain the number of runner ids of runners with an elite time in the London Marathon(any year)?.
 
-\textbf{Q2.} - Find the the following information for runners of any of the Boston Marathon events in the database: runner_id; finish_time; sex; is_elite?
+\textbf{Q1.iii.} - Obtain the number of unique runner ids of runners with an elite time in the London Marathon(any year)?
+
+\textbf{Q2.} - Find the the following information for male runners of any of the Boston Marathon events in the database: runner\_id; finish\_time; time\_is\_elite?
 
 \subsection{Multiple Inner Joins}
 
-\textbf{Q1.} - Obtain the full names of all 'elite' runners as well as their finish times, position, and sex? Additionally, gather the information on the events when these elite times were made?
+\textbf{Q1.i.} - Find the full names of runners from the UK who had an elite time in the London Marathon (any year)?
+
+\textbf{Q1.ii.} - Find the number of male and female runners respectively, from the UK,  who had an elite time in the London Marathon (any year)?
+
+\textbf{Q2.} - Find the full names, finish time and countries of sponsored runners from the UK who had an elite time in the Berlin Marathon (any year)?
+
+\subsection{Left Outer Joins}
+
+\textbf{Q1.} - Find the full names,sex, and country of runners sponsored by Nike?
+
+\textbf{Q2.i.} - Find dates and times of results that had a finish time under 02:10:00 in Chicago?
+
+\textbf{Q2.ii.} - Count the number of distinct results that had a finish time under 02:10:00 in Chicago?
+
