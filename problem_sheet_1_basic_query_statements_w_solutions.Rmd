@@ -49,7 +49,7 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 
 \section{Basic Query Statment Problems}
 
-\subsection{Single Table ‘Select’ Statements}
+\subsection{Single Table ‘SELECT’ Statements}
 
 \textbf{Q1.} - Get all the tables in the database, inspect their layout, and get the first 5 rows of each table?
 
@@ -59,19 +59,23 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 
 \textbf{.schema \textit{table}} -  to get the schema of a particular table.
 
-\textbf{select * from \textit{table} limit 5} -  to get the first 5 rows of a particular table. 
+\textbf{SELECT * FROM \textit{table} limit 5} -  to get the first 5 rows of a particular table. 
 
 \textbf{Q2.i.} - Obtain the full names and countries of the runners?
 
 \textbf{Solution} - 
 
-\textbf{select first\_name || '  ' || last\_name as full\_name, country from runners;} The \textbf{||} symbols concatenate the first_name and last_name columns into one. The \textbf{as} operator allows a column to  have a different name displayed in the query result. 
+\textbf{SELECT first\_name || '  ' || last\_name AS full\_name, country FROM runners;} 
+
+The \textbf{||} symbols concatenate the first_name and last_name columns into one. The \textbf{AS} operator allows a column to  have a different name displayed in the query result. 
 
 \textbf{Q2.ii.} - Find the top 10 Marathon results by time, male or female?
 
 \textbf{Solution} - 
 
-\textbf{select * from Results order by finish\_time asc limit 10;} The \textbf{order by} operator orders the results by whichever column is specified. The \textbf{asc} operator orders the results in ascending order, from the highest to the lowest time. 
+\textbf{SELECT * FROM Results ORDER BY finish\_time ASC limit 10;} 
+
+The \textbf{ORDER BY} operator orders the results by whichever column is specified. The \textbf{ASC} operator orders the results in ascending order, from the highest to the lowest time. 
 
 \subsection{Filtering on Single Conditions}
 
@@ -80,17 +84,17 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 
 \textbf{Solution} - 
 
-\textbf{select * from Results where sex= 'Male' order by finish\_time asc limit 20;} 
+\textbf{SELECT * FROM Results WHERE sex= 'Male' ORDER BY finish\_time ASC limit 20;} 
 
-\textbf{select * from Results where sex= 'Female' order by finish\_time asc limit 20;} 
+\textbf{SELECT * FROM Results WHERE sex= 'Female' ORDER BY finish\_time ASC limit 20;} 
 
-The \textbf{where} clause filters rows based on specified conditions, in the above cases the different sexes.
+The \textbf{WHERE} clause filters rows based on specified conditions, in the above cases the different sexes.
 
 \textbf{Q2.i.} - Find all the runners from Lithuania, Latvia, and Estonia?
 
 \textbf{Solution} - 
 
-\textbf{select * from Runners where country in ('Lithuania', 'Latvia','Estonia');} 
+\textbf{SELECT * FROM Runners WHERE country in ('Lithuania', 'Latvia','Estonia');} 
 
 Using the \textbf{in} operator, rows fulfilling a list can be found. 
 
@@ -98,7 +102,7 @@ Using the \textbf{in} operator, rows fulfilling a list can be found.
 
 \textbf{Solution} - 
 
-\textbf{select * from Runners where country not in ('Poland','Czechia','Slovakia','Hungary');} 
+\textbf{SELECT * FROM Runners WHERE country not in ('Poland','Czechia','Slovakia','Hungary');} 
 
 Using \textbf{not} in conjunction with the \textbf{in} operator, rows not fulfilling a list can be found. 
 
@@ -106,15 +110,15 @@ Using \textbf{not} in conjunction with the \textbf{in} operator, rows not fulfil
 
 \textbf{Solution} - 
 
-\textbf{select * from Runners where first\_name like 'J\%';}
+\textbf{SELECT * FROM Runners WHERE first\_name like 'J\%';}
 
-Using \textbf{where} clause in conjunction with the \textbf{like} operator, rows with a first name beginning with J can be found. Note that in string matching, 'string%' find a pattern at the beginning of a string. '%string' means finding a pattern at the end of a string. 
+Using \textbf{WHERE} clause in conjunction with the \textbf{like} operator, rows with a first name beginning with J can be found. Note that in string matching, 'string%' find a pattern at the beginning of a string. '%string' means finding a pattern at the end of a string. 
 
 \textbf{Q3.ii.} - Find all the runners whose names don't begin with 'J'?
 
 \textbf{Solution} - 
 
-\textbf{select * from Runners where first\_name not like 'J\%';}
+\textbf{SELECT * FROM Runners WHERE first\_name not like 'J\%';}
 
 The answer is exactly the same as in part i. albeit with the \textbf{not} operator to signify everything \textit{not} fulfilling the condition.
 
@@ -123,15 +127,15 @@ The answer is exactly the same as in part i. albeit with the \textbf{not} operat
 
 \textbf{Solution} - 
 
-\textbf{select * from Runners where last\_name  like '\%son\%';}
+\textbf{SELECT * FROM Runners WHERE last\_name  like '\%son\%';}
 
-In this solution, all the matching rows that \textit{contain} the son string regardless where it is in the names are found by wrapping the string in \textbf{\%} signs in the query code. 
+In this solution, all the matching rows that \textit{contain} the son string regardless WHERE it is in the names are found by wrapping the string in \textbf{\%} signs in the query code. 
 
 \textbf{Q4.i.} - Gather all training plans that have a length between 10 and 12 weeks?
 
 \textbf{Solution} - 
 
-\textbf{select * from Training\_Plans\_Descriptions where plan\_length\_weeks between 10 and 12;}
+\textbf{SELECT * FROM Training\_Plans\_Descriptions WHERE plan\_length\_weeks between 10 and 12;}
 
 The \textbf{between} operator together with the required numerical parameters and the \textbf{and} operator
 
@@ -139,25 +143,25 @@ The \textbf{between} operator together with the required numerical parameters an
 
 \textbf{Solution} - 
 
-\textbf{select * from Training\_Plans\_Descriptions where plan\_length\_weeks <12;}
+\textbf{SELECT * FROM Training\_Plans\_Descriptions WHERE plan\_length\_weeks <12;}
 
-The less than \textbf{<} operator after the \textbf{where} clause fetches results below a certain numerical threshold, 12 in this case. 
+The less than \textbf{<} operator after the \textbf{WHERE} clause fetches results below a certain numerical threshold, 12 in this case. 
 
 \textbf{Q4.iii.} - Gather all training plans that have a length more than 12 weeks?
 
 \textbf{Solution} - 
 
-\textbf{select * from Training\_Plans\_Descriptions where plan\_length\_weeks >12;}
+\textbf{SELECT * FROM Training\_Plans\_Descriptions WHERE plan\_length\_weeks >12;}
 
-The greater than \textbf{>} operator after the \textbf{where} clause fetches results above a certain numerical threshold, 12 in this case. 
+The greater than \textbf{>} operator after the \textbf{WHERE} clause fetches results above a certain numerical threshold, 12 in this case. 
 
 \textbf{Q4.iv.} - Gather all training plans that have a length more than or equal to 12 weeks?
 
 \textbf{Solution} - 
 
-\textbf{select * from Training\_Plans\_Descriptions where plan\_length\_weeks >=12;}
+\textbf{SELECT * FROM Training\_Plans\_Descriptions WHERE plan\_length\_weeks >=12;}
 
-The greater than or equals to \textbf{>=} operator after the \textbf{where} clause fetches results above or equal to a certain numerical threshold, 12 in this case. 
+The greater than or equals to \textbf{>=} operator after the \textbf{WHERE} clause fetches results above or equal to a certain numerical threshold, 12 in this case. 
 
 \subsection{Filtering on Multiple Conditions}
 
@@ -165,7 +169,7 @@ The greater than or equals to \textbf{>=} operator after the \textbf{where} clau
 
 \textbf{Solution} - 
 
-\textbf{select * from Runners where sex = 'Female' and country = 'United Kingdom' and date\_of\_birth > 01-01-2000;}
+\textbf{SELECT * FROM Runners WHERE sex = 'Female' and country = 'United Kingdom' and date\_of\_birth > 01-01-2000;}
 
 The greater than  \textbf{>} operator is used, converse to normal logic, to find dates \textit{less than} 1st January 2000. 
 
@@ -173,17 +177,17 @@ The greater than  \textbf{>} operator is used, converse to normal logic, to find
 
 \textbf{Solution} - 
 
-\textbf{select * from Runners where sex = 'Male' and country = 'Brazil' and date\_of\_birth between '1997-01-01' and '1997-12-31'}
+\textbf{SELECT * FROM Runners WHERE sex = 'Male' and country = 'Brazil' and date\_of\_birth between '2000-01-01' and '2000-12-31';}
 
 In this solution, despite the date column having the format yyyy-mm-dd we can still whittle the results down to the year. Using the \textbf{between} and \textbf{and} operators, together with the date range we seek, those rows fulfilling the question's conditions can be found. 
 
-\textbf{Q2.} - Find all runners whose names begin with the letters G or J?
+\textbf{Q2.} - Find the full names of all runners whose names begin with the letters G or J?
 
 \textbf{Solution} - 
 
-\textbf{select first\_name || '  ' || last\_name as full\_name from Runners where first\_name like 'J\%' or first\_name like 'G\%';}
+\textbf{SELECT first\_name || '  ' || last\_name AS full\_name FROM Runners WHERE first\_name like 'J\%' or first\_name like 'G\%';}
 
-As in the 'Filtering on Single Conditions' section, string matching and the \textbf{where} operator are used to obtain rows fulfilling these multiple conditions. 
+To get the full names of runners the first_name and last_name columns are combined using the \textbf{||} for string concatenation, with a new column in the query result - \textit{full\_name}.As in the 'Filtering on Single Conditions' section, string matching and the \textbf{WHERE} operator are used to obtain rows fulfilling these multiple conditions. 
 
 \subsection{Single Inner Joins}
 
@@ -196,7 +200,7 @@ knitr::include_graphics("C:/Users/gam55/Downloads/joins.png")
 
 \textbf{Solution} - 
 
-\textbf{select runner_id from Runners inner join Results on Results.event\_id = Events.event\_id where time_is\_elite = 'True' and event = 'London Marathon';}
+\textbf{SELECT runner\_id FROM Results inner join Events on Results.event\_id = Events.event\_id WHERE time\_is\_elite = 'True' and event = 'London Marathon';}
 
 A single inner join with the Results table allows for a filter on the condition of the event being the London marathon as well as on the condition of 'time_is_elite' to be made. 
 
@@ -204,7 +208,7 @@ A single inner join with the Results table allows for a filter on the condition 
 
 \textbf{Solution} - 
 
-\textbf{select count(runner_id) from Runners inner join Results on Results.event\_id = Events.event\_id where time_is\_elite = 'True' and event = 'London Marathon';}
+\textbf{SELECT count(runner\_id) FROM Results inner join Events on Results.event\_id = Events.event\_id WHERE time\_is\_elite = 'True' and event = 'London Marathon';}
 
 Using the \textbf{count()} function, the number of runner ids in the query result are counted.
 
@@ -212,18 +216,18 @@ Using the \textbf{count()} function, the number of runner ids in the query resul
 
 \textbf{Solution} - 
 
-\textbf{select count(distinct runner_id) from Runners inner join Results on Results.event\_id = Events.event\_id where time\_is\_elite = 'True' and event = 'London Marathon';}
+\textbf{SELECT count(distinct runner\_id) FROM Results inner join Events on Results.event\_id = Events.event\_id WHERE time\_is\_elite = 'True' and event = 'London Marathon';}
 
 Using \textbf{distinct} in conjunction with the  \textbf{count()} function, the number of unique runner ids in the query result are counted.
 
 
-\textbf{Q2.} - Find the the following information for male runners of any of the Boston Marathon events in the database: runner_id; finish_time; time_is_elite?
+\textbf{Q2.} - Find the the following information for male runners of any of the Boston Marathon events in the database: runner\_id; finish\_time; time\_is\_elite?
 
 \textbf{Solution} - 
 
-\textbf{select runner\_id, finish\_time,sex, time\_is\_elite from Results inner join Events on Events.event\_id = Results.event\_id where event = 'Boston Marathon' and sex = 'Male';}
+\textbf{SELECT runner\_id, finish\_time,sex, time\_is\_elite FROM Results inner join Events on Events.event\_id = Results.event\_id WHERE event = 'Boston Marathon' and sex = 'Male';}
 
-The 4 necessary columns are selected from the Results table, which is then joined on to the Events table by the column they have in common - event_id. Filtering specifically down to the Boston Marathon events is done by using a \textbf{where} clause. 
+The 4 necessary columns are selected from the Results table, which is then joined on to the Events table by the column they have in common - event\_id. Filtering specifically down to the Boston Marathon events is done by using a \textbf{WHERE} clause. 
 
 \subsection{Multiple Inner Joins}
 
@@ -231,14 +235,50 @@ The 4 necessary columns are selected from the Results table, which is then joine
 
 \textbf{Solution} - 
 
-\textbf{select  first_name || ’ ’ || last_name as full_name from Runners inner join Results on Results.runner\_id = Runners.runner\_id inner join Events on Events.event\_id = Results.event\_id where event = 'London Marathon' and time_is_elite = 'True' and country = 'United Kingdom';}
+\textbf{SELECT  first\_name || ’ ’ || last\_name AS full\_name FROM Runners inner join Results on Results.runner\_id = Runners.runner\_id inner join Events on Events.event\_id = Results.event\_id WHERE event = 'London Marathon' and time\_is\_elite = 'True' and country = 'United Kingdom';}
 
-To obtain the full names of runners the first_name and last_name columns are combined using the \textbf{||} for string concatenation, with a new column in the query result - \textit{full_name}.Two inner joins are made
+To obtain the full names of runners the first_name and last_name columns are combined using the \textbf{||} for string concatenation, with a new column in the query result - \textit{full\_name}.Two inner joins are made. The first joining the Results table on to the Runners table using the common variable, runner\_id.  The second joining the Events table with the Results table using the variable they have in common, event\_id. WHERE clauses for the columns 'event', 'time\_is\_elite' and 'country' ensure the query result is filtered accordingly. 
 
 \textbf{Q1.ii.} - Find the number of male and female runners respectively, from the UK,  who had an elite time in the London Marathon (any year)?
 
 \textbf{Solution} - 
 
-\textbf{select  first_name || ’ ’ || last_name as full_name from Runners inner join Results on Results.runner\_id = Runners.runner\_id inner join Events on Events.event\_id = Results.event\_id where event = 'London Marathon' and time_is_elite = 'True' and country = 'United Kingdom' and Runners.sex = 'Male';}
+\textbf{SELECT  first\_name || ’ ’ || last\_name AS full\_name FROM Runners inner join Results on Results.runner\_id = Runners.runner\_id inner join Events on Events.event\_id = Results.event\_id WHERE event = 'London Marathon' and time\_is\_elite = 'True' and country = 'United Kingdom' and Runners.sex = 'Male';}
 
-\textbf{select  first_name || ’ ’ || last_name as full_name from Runners inner join Results on Results.runner\_id = Runners.runner\_id inner join Events on Events.event\_id = Results.event\_id where event = 'London Marathon' and time_is_elite = 'True' and country = 'United Kingdom' and Runners.sex = 'Female';}
+\textbf{SELECT  first\_name || ’ ’ || last\_name AS full\_name FROM Runners inner join Results on Results.runner\_id = Runners.runner\_id inner join Events on Events.event\_id = Results.event\_id WHERE event = 'London Marathon' and time\_is\_elite = 'True' and country = 'United Kingdom' and Runners.sex = 'Female';}
+
+Adding the WHERE clause for 'sex' is obtains the answer. Additionally, the table name needs to be specified as the 'sex' column is present in both the Runners and Results tables. 
+
+\textbf{Q2.} - Find the full names, finish time and countries of sponsored runners from the UK who had an elite time in the Berlin Marathon (any year)?
+
+\textbf{Solution} - 
+
+\textbf{SELECT  r.first\_name || ’ ’ || r.last\_name AS full\_name,r.country, sa.sponsor\_name, re.finish\_time FROM Runners r inner join Sponsored\_Athletes sa on sa.runner\_id = r.runner\_id  inner join Results re on re.runner\_id = r.runner\_id inner join Events e on e.event\_id = re.event\_id WHERE event = 'Berlin Marathon' and time\_is\_elite = 'True';}
+
+As different columns from different tables need to be selected, aliases are essential. Each table is given an alias which then ensure the selection of columns is clear. Inner joins to the different tables aside FROM our starting point of Runners are made - joins to Sponsored_Athletes sa, Results re, and Events e.
+
+\subsection{Left Outer Joins}
+
+\textbf{Q1.} - Find the full names,sex, and country of runners sponsored by Nike?
+
+\textbf{Solution} - 
+
+\textbf{SELECT  r.first\_name || ’ ’ || r.last\_name AS full\_name,r.country, r.sex FROM Runners r LEFT OUTER JOIN Sponsored\_Athletes sa on r.runner\_id = sa.runner\_id WHERE sponsor = 'Nike';}
+
+Using aliases is helpful again, with several tables present in the query. The \textbf{LEFT OUTER JOIN} function gets all relevant results from the 'left' table, Runners, that matches with the key of the 'right' table Sponsored_Athletes. 
+
+\textbf{Q2.i.} - Find dates and times of results that had a finish time under 02:10:00 in Chicago?
+
+\textbf{Solution} - 
+
+\textbf{SELECT  e.event_date, r.finish_time from Events e LEFT OUTER JOIN Results r on e.event_id = r.event_id WHERE STRFTIME('%H:%M:%S',r.finish_time) < 02:10:00 and e.event = 'Chicago Marathon';}
+
+Aliases allow the smooth selection of columns from multiple tables. As the Results finish_time column is in text form, the \textbf{STRFTIME()} function needs to be utilised to convert it into a comparable format. 
+
+\textbf{Q2.ii.} - Count the number of distinct results that had a finish time under 02:10:00 in Chicago?
+
+\textbf{Solution} - 
+
+\textbf{SELECT  COUNT(DISTINCT r.finish_time) from Events e LEFT OUTER JOIN Results r on e.event_id = r.event_id WHERE STRFTIME('%H:%M:%S',r.finish_time) < 02:10:00 and e.event = 'Chicago Marathon';}
+
+As the question does not specify any dates being in the result, they are not selected. COUNT() and DISTINCT are used to obtain the number of distinct results. 
