@@ -64,9 +64,9 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 
 \textbf{Q1} - Find the top 20 male marathon results and the top 20 female marathon results?
 
-\textbf{Q2.i.} - Find all the runners FROM Lithuania, Latvia, and Estonia?
+\textbf{Q2.i.} - Find all the runners from Lithuania, Latvia, and Estonia?
 
-\textbf{Q2.ii.} - Find all the runners \textit{not} FROM Poland, Czechia, Slovakia or Hungary?
+\textbf{Q2.ii.} - Find all the runners \textit{not} from Poland, Czechia, Slovakia or Hungary?
 
 \textbf{Q3.i.} - Find all the runners whose names begin with 'J'?
 
