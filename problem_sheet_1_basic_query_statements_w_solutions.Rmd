@@ -271,7 +271,7 @@ Using aliases is helpful again, with several tables present in the query. The \t
 
 \textbf{Solution} - 
 
-\textbf{SELECT  e.event_date, r.finish_time from Events e LEFT OUTER JOIN Results r on e.event_id = r.event_id WHERE STRFTIME('%H:%M:%S',r.finish_time) < 02:10:00 and e.event = 'Chicago Marathon';}
+\textbf{SELECT  e.event\_date, r.finish\_time from Events e LEFT OUTER JOIN Results r on e.event\_id = r.event\_id WHERE STRFTIME('\%H:\%M:\%S',r.finish\_time) < '02:10:00' and e.event = 'Chicago Marathon';}
 
 Aliases allow the smooth selection of columns from multiple tables. As the Results finish_time column is in text form, the \textbf{STRFTIME()} function needs to be utilised to convert it into a comparable format. 
 
@@ -279,6 +279,24 @@ Aliases allow the smooth selection of columns from multiple tables. As the Resul
 
 \textbf{Solution} - 
 
-\textbf{SELECT  COUNT(DISTINCT r.finish_time) from Events e LEFT OUTER JOIN Results r on e.event_id = r.event_id WHERE STRFTIME('%H:%M:%S',r.finish_time) < 02:10:00 and e.event = 'Chicago Marathon';}
+\textbf{SELECT  COUNT(DISTINCT r.finish\_time) from Events e LEFT OUTER JOIN Results r on e.event\_id = r.event\_id WHERE STRFTIME('\%H:\%M:\%S',r.finish\_time) < 02:10:00 and e.event = 'Chicago Marathon';}
 
 As the question does not specify any dates being in the result, they are not selected. COUNT() and DISTINCT are used to obtain the number of distinct results. 
+
+\subsection{Subqueries}
+
+\textbf{Q1.} - Using a subquery, find the full names, birth dates, and countries of runners who achieved a time below 02:20:00?
+
+\textbf{Solution} - 
+
+\textbf{SELECT r.first\_name || ' ' || r.last\_name AS full\_name, r.country, r.sex FROM Runners r WHERE r.runner\_id IN (SELECT re.runner\_id FROM Results re WHERE STRFTIME('\%H:\%M:\%S', re.finish\_time) < '02:20:00');}
+
+The solution is as follows: aliases of r for the Runners and re for the Results tables respectively to be able to differentiate between columns; concatenate the first_name and last_name columns using the \textbf{||} concatenation operator; insert a subquery by using two \textbf{WHERE} statements, the \textbf{STRFTIME()} function and \textbf{<} operator to get runner IDs that have a time below 2 hours and 20 minutes. 
+
+\textbf{Q2.} - Using a subquery, find all the  runners by full name and sex who are sponsored by Nike or Tracksmith?
+
+\textbf{Solution} - 
+
+\textbf{SELECT r.first\_name || ' ' || r.last\_name AS full\_name, r.country, r.sex FROM Runners r WHERE r.runner\_id IN ( SELECT sa.runner\_id FROM Sponsored\_Athletes sa WHERE sa.sponsor\_name = 'Nike' OR sa.sponsor\_name = 'Tracksmith');}
+
+As with question 1 the \textbf{||} concatenation operator is utilised to obtain the full name in the query result. Aliases are used to distinguish successfully between the two tables. A subquery allows the filtering of runners to just those who 
