@@ -1,6 +1,6 @@
 ---
 title: "SQL CoP Problem Sheet 1 - Basic Query Statements"
-author: "George Melrose: gam55@cam.ac.uk (Research Information Office)"
+author: "George Melrose: george_melrose@yahoo.com, https://github.com/georgemelrose"
 output: pdf_document
 ---
 
@@ -299,4 +299,21 @@ The solution is as follows: aliases of r for the Runners and re for the Results 
 
 \textbf{SELECT r.first\_name || ' ' || r.last\_name AS full\_name, r.country, r.sex FROM Runners r WHERE r.runner\_id IN ( SELECT sa.runner\_id FROM Sponsored\_Athletes sa WHERE sa.sponsor\_name = 'Nike' OR sa.sponsor\_name = 'Tracksmith');}
 
-As with question 1 the \textbf{||} concatenation operator is utilised to obtain the full name in the query result. Aliases are used to distinguish successfully between the two tables. A subquery allows the filtering of runners to just those who 
+As with question 1 the \textbf{||} concatenation operator is utilised to obtain the full name in the query result. Aliases are used to distinguish successfully between the two tables. A subquery allows the filtering of runners to just those who with Nike or Tracksmith as a sponsor, through repeated use of the \textbf{WHERE} operator on the Sponsored_Athletes table. 
+
+\textbf{Q3.} - Using a subquery, find all the male runners ids and their times, when their times were elite in the 2023 Boston Marathon?
+
+\textbf{Solution} - 
+
+\textbf{SELECT r.runner\_id, r.finish\_time FROM Results r WHERE r.sex = 'Male' AND time\_is\_elite = 'True' r.event\_id IN ( SELECT sa.runner\_id FROM Sponsored\_Athletes sa WHERE sa.sponsor\_name = 'Nike' OR sa.sponsor\_name = 'Tracksmith');}
+
+\subsection{Case When Statements}
+
+\textbf{Q1.} - Using a subquery and a case when statement, categorise of the 2023 London Marathon in the following way: >3 hours; 02:30:00 to 3hours; below 02:30:00 ? Proivde the runner's full name, date_of_bith, sex, and country in the query result?
+
+\textbf{Solution} - 
+
+\textbf{SELECT r.first\_name || ' ' || r.last\_name AS full\_name, r.country, r.sex, re.finish_time, CASE WHEN re.finish_time  FROM Runners r
+INNER JOIN Results re ON re.runner_id = r.runner_id WHERE re.event_id IN (SELECT e.event_id FROM Events e WHERE event = 'London Marathon' AND event_date = '2023-04-23')
+
+r.event\_id IN ( SELECT sa.runner\_id FROM Sponsored\_Athletes sa WHERE sa.sponsor\_name = 'Nike' OR sa.sponsor\_name = 'Tracksmith');}
