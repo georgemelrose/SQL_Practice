@@ -1,6 +1,6 @@
 ---
 title: "SQL CoP Problem Sheet 1 - Basic Query Statements"
-author: "George Melrose: gam55@cam.ac.uk (Research Information Office)"
+author: "George Melrose: george_melrose@yahoo.com, https://github.com/georgemelrose"
 output: pdf_document
 ---
 
@@ -120,3 +120,10 @@ knitr::include_graphics("C:/Users/gam55/Downloads/joins.png")
 
 \textbf{Q2.ii.} - Count the number of distinct results that had a finish time under 02:10:00 in Chicago?
 
+\subsection{Subqueries}
+
+\textbf{Q1.} - Using a subquery, find the full names, birth dates, and countries of runners who achieved a time below 02:20:00?
+
+\textbf{Q2.} - Using a subquery, find all the  runners by full name and sex who are sponsored by Nike or Tracksmith?
+
+\textbf{Q3.} - Using a subquery, find all the male runners ids and their times, when their times were elite in the 2023 Boston Marathon?
