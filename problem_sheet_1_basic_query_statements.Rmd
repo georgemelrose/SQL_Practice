@@ -127,3 +127,7 @@ knitr::include_graphics("C:/Users/gam55/Downloads/joins.png")
 \textbf{Q2.} - Using a subquery, find all the  runners by full name and sex who are sponsored by Nike or Tracksmith?
 
 \textbf{Q3.} - Using a subquery, find all the male runners ids and their times, when their times were elite in the 2023 Boston Marathon?
+
+\subsection{Case When Statements}
+
+\textbf{Q1.} - Using a subquery and a case when statement, categorise of the 2023 London Marathon in the following way: >3 hours; 02:30:00 to 3hours; below 02:30:00 ? Provide the runner's full name, date_of_bith, sex, and country in the query result? Order from fatest to slowest?

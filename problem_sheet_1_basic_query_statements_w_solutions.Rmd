@@ -309,11 +309,12 @@ As with question 1 the \textbf{||} concatenation operator is utilised to obtain 
 
 \subsection{Case When Statements}
 
-\textbf{Q1.} - Using a subquery and a case when statement, categorise of the 2023 London Marathon in the following way: >3 hours; 02:30:00 to 3hours; below 02:30:00 ? Proivde the runner's full name, date_of_bith, sex, and country in the query result?
+\textbf{Q1.} - Using a subquery and a case when statement, categorise of the 2023 London Marathon in the following way: >3 hours; 02:30:00 to 3hours; below 02:30:00 ? Provide the runner's full name, date_of_bith, sex, and country in the query result? Order from fatest to slowest?
 
 \textbf{Solution} - 
 
-\textbf{SELECT r.first\_name || ' ' || r.last\_name AS full\_name, r.country, r.sex, re.finish_time, CASE WHEN re.finish_time  FROM Runners r
-INNER JOIN Results re ON re.runner_id = r.runner_id WHERE re.event_id IN (SELECT e.event_id FROM Events e WHERE event = 'London Marathon' AND event_date = '2023-04-23')
+\textbf{SELECT r.first\_name || ' ' || r.last\_name AS full\_name, r.country, r.sex, re.finish\_time, CASE WHEN STRFTIME('\%H:\%M:\%S', re.finish\_time) > '03:00:00' THEN '>3 Hours' WHEN STRFTIME('\%H:\%M:\%S', re.finish\_time) BETWEEN '02:30:00' AND '03:00:00' THEN '2.5 to 3 Hours' WHEN STRFTIME('\%H:\%M:\%S', re.finish\_time) < '02:30:00' THEN '<2.5 Hours' ELSE 'NA' END AS Top_Runners FROM Runners r
+INNER JOIN Results re ON re.runner\_id = r.runner\_id WHERE re.event\_id IN (SELECT e.event\_id FROM Events e WHERE event = 'London Marathon' AND event\_date = '2023-04-23')
+ORDER BY re.finish\_time ASC;}
 
-r.event\_id IN ( SELECT sa.runner\_id FROM Sponsored\_Athletes sa WHERE sa.sponsor\_name = 'Nike' OR sa.sponsor\_name = 'Tracksmith');}
+\textbf{Q2.} - Utilising a route of your own choice, find all runners sponsored by an American Company (any Sponsor that isn't Adidas or Asics or Puma), providing their full name, date of birth, sex, and country in the query result?
