@@ -348,7 +348,7 @@ This solution above does not have any aliases as only 1 table is being used. The
 
 \textbf{Solution} - 
 
-\textbf{SELECT COUNT(*) FROM TABLE_NAME}
+\textbf{SELECT COUNT(*) FROM TABLE\_NAME}
 
 The \textbf{COUNT()} function performs calculations across multiple rows to find a sum or an average.
 
@@ -357,3 +357,37 @@ The \textbf{COUNT()} function performs calculations across multiple rows to find
 \textbf{Solution} - 
 
 \textbf{SELECT COUNT(*) AS "No.Runners", country FROM Runners GROUP BY country;}
+
+The \textbf{COUNT(*)} function is used alongside \textbf{GROUP BY} to achieve the desired result of number of runners per country. 
+
+\textbf{Q3.} - Count how many runners obtained an elite time in any Berlin Marathon event?
+
+\textbf{Solution} - 
+
+\textbf{SELECT COUNT(DISTINCT runner\_id) FROM Results WHERE time\_is\_elite = 'True' AND event\_id IN (SELECT event\_id FROM Events WHERE event = 'Berlin Marathon');}
+
+Using \textbf{COUNT()} and \textbf{DISTINCT()} together as well as a subquery, the number of runners obtaining an elite time in the Berlin Marathon can be found - 840. 
+
+\subsection{Query Processing Order}
+
+The correct sequence of steps for a query is as follows - 
+
+1. \textbf{FROM Clause} - The query starts by identifying the tables from which data will be retrieved. If there are any JOIN operations, they are also processed at this stage to create the base dataset.
+
+2. \textbf{WHERE Clause} - After forming the initial dataset from the FROM clause, the WHERE clause is applied to filter rows based on specified conditions.
+
+3. \textbf{GROUP BY Clause} - The data is then grouped according to the columns specified in the GROUP BY clause.
+
+4. \textbf{HAVING Clause} - The HAVING clause is applied next, which allows filtering groups created by the GROUP BY clause based on aggregate conditions.
+
+5. \textbf{SELECT Clause} - The SELECT clause is then processed to determine which columns or expressions should be included in the final result.
+
+6. \textbf{ORDER BY Clause} - The ORDER BY clause sorts the result set based on the specified columns or expressions.
+
+7. \textbf{LIMIT / OFFSET  Clause} - If present, the LIMIT and OFFSET clauses are applied to restrict the number of rows returned by the query, and to skip a specified number of rows, respectively.
+
+\textbf{Q1.} - Bearing the above in mind, generate a query that the top 10 fastest times of athletes at the 2016 London Marathon, with their full names, dates of birth, sexes, countries, sponsors, and training plans included in the query result?
+
+\textbf{Solution} - 
+
+\textbf{SELECT COUNT(*) FROM TABLE\_NAME}
