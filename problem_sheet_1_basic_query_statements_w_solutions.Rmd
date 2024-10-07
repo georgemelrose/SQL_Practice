@@ -370,7 +370,7 @@ Using \textbf{COUNT()} and \textbf{DISTINCT()} together as well as a subquery, t
 
 \subsection{Query Processing Order}
 
-The correct sequence of steps for a query is as follows - 
+A SQL query is processed in the following order (not necessarily written in this order) - 
 
 1. \textbf{FROM Clause} - The query starts by identifying the tables from which data will be retrieved. If there are any JOIN operations, they are also processed at this stage to create the base dataset.
 
@@ -390,4 +390,18 @@ The correct sequence of steps for a query is as follows -
 
 \textbf{Solution} - 
 
-\textbf{SELECT COUNT(*) FROM TABLE\_NAME}
+\textbf{SELECT re.finish_time, r.first\_name || ' ' || r.last\_name AS full\_name, r.date\_of\_birth, r.sex, r.country, tpd.plan\_description FROM Runners r INNER JOIN Results re ON re.runner\_id = r.runner\_id INNER JOIN  Training_Plans tp ON tp.runner\_id = re.runner\_id INNER JOIN Training_Plans_Descriptions tpd ON tpd.plan\_id  = tp.plan\_id 
+INNER JOIN Events e ON e.event_id = re.event_id WHERE 
+event = 'London Marathon' AND event\_date = '2016-04-24'
+ORDER BY re.finish_time ASC LIMIT 10;}
+
+
+WHERE tp.event\_id IN (SELECT e.event\_id FROM Events e WHERE event = 'London Marathon' AND event\_date = '2016-04-24') ORDER BY re.finish_time ASC LIMIT 10;}
+
+Firstly, usage of aliases is crucial for a succinct and readable query in this case as 5 different tables are being read. The first_name and last_name columns from Runners are concatenated again as they have been in multiple queries in other sections.
+
+Three INNER JOINs are done to join Runners to Results, Results to Training_Plans, Training_Plans to Training_Plans_Descriptions. 
+
+
+
+\textbf{Q1.} - Bearing the above in mind, generate a query that the top 10 fastest times of athletes at the 2016 London Marathon, with their full names, dates of birth, sexes, countries, sponsors, and training plans included in the query result?

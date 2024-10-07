@@ -1,11 +1,13 @@
 ---
 title: "1 - Basic Query Statements"
 author: "George Melrose"
-date: "2024-05-20"
+date: '2024-05-20'
 output:
-   html_document:
-    toc: true
-    toc_float: true
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+    toc_float: yes
     code_folding: hide
 ---
 
@@ -303,7 +305,7 @@ WHERE university_name = 'Imperial College London' OR university_name = 'Universi
 
 ### Multiple Joins
 
-```{sql}
+```{sql multiple joins}
 
 SELECT *
 FROM university u
