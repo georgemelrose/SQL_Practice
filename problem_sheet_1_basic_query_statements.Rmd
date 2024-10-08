@@ -38,7 +38,7 @@ The \textbf{marathon data generation} python script generates the following tabl
 
 \textbf{6. Training Plans Descriptions} - The descriptions of 10 different training plans and their respective lengths in weeks. 
 
-\textbf{7. Training Plans} - The training plans of athletes. 
+\textbf{7. Training Plans} - The training plans of athletes. Only 72% of runner-event combinations have an associated training plan. 
 
 \subsection{Marathon Database Entity Relationship Diagram}
 
@@ -135,3 +135,31 @@ knitr::include_graphics("C:/Users/gam55/Downloads/joins.png")
 \textbf{Q2.} - Utilising a case when statement, categorise all runners by which country their Sponsor is from (Adidas & Puma - Germany) (Asics - Japan) (Nike, Saucony, Hoka, Brooks, New Balance,Under Armour, Tracksmith), providing their full name, date of birth, sex, and country in the query result?
 
 \textbf{Q3.} - Using a case when statement, generate the following categories for the different generations present amongst the runners: Silent Generation; Boomers; Gen X, Millennials; Gen Z; Gen Alpha? Include their full name, country, sex, and date of birth?
+
+\subsection{Aggregate Functions}
+
+\textbf{Q1.} - Count how many rows there are in each table, using an aggregate function?
+
+\textbf{Q2.} - Count how many runners are present per country in the Runners table?
+
+\textbf{Q3.} - Count how many runners obtained an elite time in any Berlin Marathon event?
+
+\subsection{Query Processing Order}
+
+A SQL query is processed in the following order (not necessarily written in this order) - 
+
+1. \textbf{FROM Clause} - The query starts by identifying the tables from which data will be retrieved. If there are any JOIN operations, they are also processed at this stage to create the base dataset.
+
+2. \textbf{WHERE Clause} - After forming the initial dataset from the FROM clause, the WHERE clause is applied to filter rows based on specified conditions.
+
+3. \textbf{GROUP BY Clause} - The data is then grouped according to the columns specified in the GROUP BY clause.
+
+4. \textbf{HAVING Clause} - The HAVING clause is applied next, which allows filtering groups created by the GROUP BY clause based on aggregate conditions.
+
+5. \textbf{SELECT Clause} - The SELECT clause is then processed to determine which columns or expressions should be included in the final result.
+
+6. \textbf{ORDER BY Clause} - The ORDER BY clause sorts the result set based on the specified columns or expressions.
+
+7. \textbf{LIMIT / OFFSET  Clause} - If present, the LIMIT and OFFSET clauses are applied to restrict the number of rows returned by the query, and to skip a specified number of rows, respectively.
+
+\textbf{Q1.} - Bearing the above in mind, generate a query that the top 10 fastest times of athletes at the 2016 London Marathon, with their full names, dates of birth, sexes, countries, sponsors, and training plans included in the query result?

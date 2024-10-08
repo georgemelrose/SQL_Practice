@@ -38,7 +38,7 @@ The \textbf{marathon data generation} python script generates the following tabl
 
 \textbf{6. Training Plans Descriptions} - The descriptions of 10 different training plans and their respective lengths in weeks. 
 
-\textbf{7. Training Plans} - The training plans of athletes. 
+\textbf{7. Training Plans} - The training plans of athletes. Only 72% of runner-event combinations have an associated training plan. 
 
 \subsection{Marathon Database Entity Relationship Diagram}
 
@@ -390,18 +390,16 @@ A SQL query is processed in the following order (not necessarily written in this
 
 \textbf{Solution} - 
 
-\textbf{SELECT re.finish_time, r.first\_name || ' ' || r.last\_name AS full\_name, r.date\_of\_birth, r.sex, r.country, tpd.plan\_description FROM Runners r INNER JOIN Results re ON re.runner\_id = r.runner\_id INNER JOIN  Training_Plans tp ON tp.runner\_id = re.runner\_id INNER JOIN Training_Plans_Descriptions tpd ON tpd.plan\_id  = tp.plan\_id 
-INNER JOIN Events e ON e.event_id = re.event_id WHERE 
-event = 'London Marathon' AND event\_date = '2016-04-24'
-ORDER BY re.finish_time ASC LIMIT 10;}
-
-
-WHERE tp.event\_id IN (SELECT e.event\_id FROM Events e WHERE event = 'London Marathon' AND event\_date = '2016-04-24') ORDER BY re.finish_time ASC LIMIT 10;}
+\textbf{SELECT re.finish\_time, r.first\_name || ' ' || r.last\_name AS full\_name, r.date\_of\_birth,r.sex, r.country, tpd.plan\_description FROM Runners r INNER JOIN Results re ON re.runner\_id = r.runner\_id INNER JOIN Training\_Plans tp ON tp.runner\_id = r.runner\_id AND tp.event\_id = re.event\_id INNER JOIN Training\_Plans\_Descriptions tpd ON tpd.plan\_id = tp.plan\_id INNER JOIN Events e ON e.event\_id = re.event\_id WHERE e.event = 'London Marathon' AND e.event\_date = '2016-04-24' ORDER BY re.finish\_time ASC LIMIT 10;}
 
 Firstly, usage of aliases is crucial for a succinct and readable query in this case as 5 different tables are being read. The first_name and last_name columns from Runners are concatenated again as they have been in multiple queries in other sections.
 
-Three INNER JOINs are done to join Runners to Results, Results to Training_Plans, Training_Plans to Training_Plans_Descriptions. 
+Four INNER JOINs are done to join Runners to Results, Results to Training_Plans, Training_Plans to Training_Plans_Descriptions, and Events to Results. Specifically, the INNER JOIN on 'Training_Plans' is on \textit{two} variables - runner_id and event_id. 
 
+This is to ensure that the Training_Plans entry corresponds to the specific event the runner participated in (the 2016 London Marathon), avoiding any accidental mismatches with other events.
 
+The Training_Plans table has a unique association of runners and events, so joining on both runner_id and event_id ensures the correct training plan is retrieved for that particular event.
 
-\textbf{Q1.} - Bearing the above in mind, generate a query that the top 10 fastest times of athletes at the 2016 London Marathon, with their full names, dates of birth, sexes, countries, sponsors, and training plans included in the query result?
+A WHERE clause towards the end of the query ensures that the scope of the query result is only the 2016 London Marathon. The ORDER BY and ASC operators order the results from fastest to slowest and then LIMIT 10 limits the query result to 10 rows. 
+
+\textbf{Q2.} - Bearing the above in mind, generate a query that the top 10 fastest times of athletes at the 2016 London Marathon, with their full names, dates of birth, sexes, countries, sponsors, and training plans included in the query result?
