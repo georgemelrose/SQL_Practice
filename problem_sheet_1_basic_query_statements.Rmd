@@ -163,3 +163,7 @@ A SQL query is processed in the following order (not necessarily written in this
 7. \textbf{LIMIT / OFFSET  Clause} - If present, the LIMIT and OFFSET clauses are applied to restrict the number of rows returned by the query, and to skip a specified number of rows, respectively.
 
 \textbf{Q1.} - Bearing the above in mind, generate a query that the top 10 fastest times of athletes at the 2016 London Marathon, with their full names, dates of birth, sexes, countries, sponsors, and training plans included in the query result?
+
+\textbf{Q2.} - For the top 10 fastest times recorded in all of the database, obtain the runners' full names, respective times and training plans, sponsors if they have them?
+
+\textbf{Q3.} - Retrieve the top 10 male runners who have participated in the highest number of events. For each runner, provide their full name, total number of events they participated in, and their sponsors if they have any?

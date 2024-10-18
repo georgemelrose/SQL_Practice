@@ -208,17 +208,17 @@ A single inner join with the Results table allows for a filter on the condition 
 
 \textbf{Solution} - 
 
-\textbf{SELECT count(runner\_id) FROM Results inner join Events on Results.event\_id = Events.event\_id WHERE time\_is\_elite = 'True' and event = 'London Marathon';}
+\textbf{SELECT COUNT(runner\_id) FROM Results inner join Events on Results.event\_id = Events.event\_id WHERE time\_is\_elite = 'True' and event = 'London Marathon';}
 
-Using the \textbf{count()} function, the number of runner ids in the query result are counted.
+Using the \textbf{COUNT()} function, the number of runner ids in the query result are counted.
 
 \textbf{Q1.iii.} - Obtain the number of unique runner ids of runners with an elite time in the London Marathon(any year)?
 
 \textbf{Solution} - 
 
-\textbf{SELECT count(distinct runner\_id) FROM Results inner join Events on Results.event\_id = Events.event\_id WHERE time\_is\_elite = 'True' and event = 'London Marathon';}
+\textbf{SELECT COUNT(distinct runner\_id) FROM Results inner join Events on Results.event\_id = Events.event\_id WHERE time\_is\_elite = 'True' and event = 'London Marathon';}
 
-Using \textbf{distinct} in conjunction with the  \textbf{count()} function, the number of unique runner ids in the query result are counted.
+Using \textbf{distinct} in conjunction with the  \textbf{COUNT()} function, the number of unique runner ids in the query result are counted.
 
 
 \textbf{Q2.} - Find the the following information for male runners of any of the Boston Marathon events in the database: runner\_id; finish\_time; time\_is\_elite?
@@ -402,4 +402,54 @@ The Training_Plans table has a unique association of runners and events, so join
 
 A WHERE clause towards the end of the query ensures that the scope of the query result is only the 2016 London Marathon. The ORDER BY and ASC operators order the results from fastest to slowest and then LIMIT 10 limits the query result to 10 rows. 
 
-\textbf{Q2.} - Bearing the above in mind, generate a query that the top 10 fastest times of athletes at the 2016 London Marathon, with their full names, dates of birth, sexes, countries, sponsors, and training plans included in the query result?
+\textbf{Q2.} - For the top 10 fastest times recorded in all of the database, obtain the runners' full names, respective times and training plans, sponsors if they have them?
+
+\textbf{Solution} - 
+
+\textbf{SELECT re.finish\_time, r.first\_name || ' ' || r.last\_name AS full\_name, tpd.plan\_description, s.sponsor\_name FROM Runners r INNER JOIN Results re ON re.runner\_id = r.runner\_id INNER JOIN Training\_Plans tp ON tp.runner\_id = r.runner\_id AND tp.event\_id = re.event\_id INNER JOIN Training\_Plans\_Descriptions tpd ON tpd.plan\_id = tp.plan\_id LEFT JOIN Sponsors s ON s.runner\_id = r.runner\_id ORDER BY re.finish\_time ASC LIMIT 10;}
+
+The query utilizes aliases (r, re, tp, tpd, and s) for tables to keep the SQL statement concise and readable, especially given the number of JOINs across five tables.
+
+The query retrieves the following details: 
+
+* re.finish_time -  The runner's recorded finish time.
+
+* r.first_name || ' ' || r.last_name AS full_name: Concatenates the runner's first and last names to form a complete name.
+
+* tpd.plan_description: Provides the description of the training plan that the runner followed.
+
+* s.sponsor_name: Displays the name of the sponsor, if the runner has one.
+
+There are several JOINs:
+
+* INNER JOIN Results re to Runners r by runner_id.
+
+* INNER JOIN Training_Plans tp to Results re by runner_id and event_id to ensure that the training plan corresponds specifically to the event in which the runner participated, preventing incorrect associations.
+
+* INNER JOIN Training_Plans_Descriptions tpd to Training_Plans tp by plan_id.
+
+* LEFT JOIN Sponsors s to Runners r by runner_id.
+
+ORDER BY re.finish_time ASC arranges the results by the fastest finish times and LIMIT 10 restricts the output to the top 10 fastest runners. 
+
+\textbf{Q3.} - Retrieve the top 10 male runners who have participated in the highest number of events. For each runner, provide their full name, total number of events they participated in, and their sponsors if they have any?
+
+\textbf{Solution} - 
+
+\textbf{SELECT r.first\_name || ' ' || r.last\_name AS full\_name, COUNT(re.event\_id) AS total\_events, s.sponsor\_name FROM Runners r INNER JOIN Results re ON re.runner\_id = r.runner\_id LEFT JOIN Sponsored\_Athletes s ON s.runner\_id = r.runner\_id WHERE r.sex = 'Male' GROUP BY r.runner\_id, r.first\_name, r.last\_name, s.sponsor\_name ORDER BY total\_events DESC LIMIT 10;}
+
+The query uses aliases (r, re, s) to keep it concise and readable, especially given the multiple JOINs across different tables. The query retrieves: 
+
+* r.first_name || ' ' || r.last_name AS full_name. The concatenated full name of each male runner.
+
+* COUNT(re.event_id) AS total_events -  The total number of events each runner has participated in.
+
+* s.sponsor_name -  The sponsor name, if the runner has one.
+
+There are two JOINs:
+
+* INNER JOIN Results (re) to Runners (r) - Connects runners to the events they participated in using runner_id. This allows the query to count how many events each runner has taken part in.
+
+* LEFT JOIN Sponsors (s) to Runners (r) - The LEFT JOIN ensures that sponsor information is included for each runner, while still listing runners who may not have sponsors.
+
+WHERE r.sex = 'M' limits the results to male runners only. GROUP BY ensures that event counts are correctly calculated per runner. ORDER BY total_events DESC arranges the results so that runners with the most event participation appear first. Restricts the output to the top 10 most active male runners.
