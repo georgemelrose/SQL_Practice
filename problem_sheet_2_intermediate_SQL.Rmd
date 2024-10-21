@@ -60,3 +60,50 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 \textbf{Solution} - 
 
 \textbf{CREATE UNIQUE INDEX idx\_events\_event\_id ON Events(event\_id);}
+
+\textbf{Q3.} - Create a composite index on the runner_id and event_id columns in the Training_Plans table to improve performance for queries that frequently search for a specific runner's training plan for an event?
+
+\textbf{Solution} - 
+
+\textbf{CREATE INDEX idx\_training\_plans\_runner\_event ON Training\_Plans(runner\_id, event\_id);}
+
+
+\textbf{Q4.} - Add a unique index on the first_name, last_name, and date_of_birth columns in the Runners table to ensure no duplicate runner profiles are entered, even if runners have similar names?
+
+\textbf{Solution} - 
+
+\textbf{CREATE UNIQUE INDEX idx\_runners\_name\_dob ON Runners(first\_name, last\_name, date\_of\_birth);}
+
+\textbf{Q5.} - Give the code to see all the indexes present?
+
+\textbf{Solution} - 
+
+\textbf{SELECT name FROM sqlite\_master WHERE type = 'index';}
+
+\textbf{Q5.} - Give the command to see all the indexes associated with a particular table, for example 'Runners'?
+
+\textbf{Solution} - 
+
+\textbf{PRAGMA index\_list('Runners');}
+
+\subsection{Views}
+
+\textbf{Q1.} - Create a view of all male runners from the Baltic States? Also write code to display all the records from this view? \textbf{Hint -} most of the code is already present in problem sheet 1.
+
+\textbf{Solution} - 
+
+\textbf{CREATE VIEW Baltic_Men AS SELECT * FROM Runners WHERE country in (’Lithuania’, ’Latvia’,’Estonia’) AND sex = 'Male';}
+
+\textbf{SELECT * FROM Baltic_Men;}
+
+\textbf{Q1.} - Create a view of all male runners from the Baltic States? Also write code to display all the records from this view? \textbf{Hint -} most of the code is already present in problem sheet 1.
+
+\textbf{Solution} - Create a view and display its' records, of all the Nike sponsored runners?
+
+\textbf{Solution} - 
+
+\textbf{CREATE VIEW Nike_Runners AS SELECT r.first_name || ’ ’ || r.last_name AS full_name,r.country, r.sex FROM Runners r
+LEFT OUTER JOIN Sponsored_Athletes sa on r.runner_id = sa.runner_id WHERE sponsor
+= ’Nike’;}
+
+\textbf{SELECT * FROM Nike_Runners;}
