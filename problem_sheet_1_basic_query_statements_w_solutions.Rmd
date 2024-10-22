@@ -1,5 +1,5 @@
 ---
-title: "SQL CoP Problem Sheet 1 - Basic Query Statements"
+title: "SQL CoP Problem Sheet 1 - Basic Query Statements (With Solutions)"
 author: "George Melrose: george_melrose@yahoo.com, https://github.com/georgemelrose"
 output: pdf_document
 ---
