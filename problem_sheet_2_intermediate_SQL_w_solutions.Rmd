@@ -55,11 +55,15 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 
 \textbf{CREATE INDEX idx\_results\_runner\_id ON Results(runner\_id);}
 
+The \textbf{CREATE INDEX} command creates an index, given a name by the user, and is based off of a specified column(s).
+
 \textbf{Q2.} - Construct a unique index on the event_id column of the Events table to ensure no duplicate event entries exist?
 
 \textbf{Solution} - 
 
 \textbf{CREATE UNIQUE INDEX idx\_events\_event\_id ON Events(event\_id);}
+
+A unique index is created by using the \textbf{CREATE UNIQUE INDEX} command on the event_id column from Events - the primary key for that table. 
 
 \textbf{Q3.} - Create a composite index on the runner_id and event_id columns in the Training_Plans table to improve performance for queries that frequently search for a specific runner's training plan for an event?
 
@@ -67,6 +71,7 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 
 \textbf{CREATE INDEX idx\_training\_plans\_runner\_event ON Training\_Plans(runner\_id, event\_id);}
 
+To create a \textit{composite index}, one  
 
 \textbf{Q4.} - Add a unique index on the first_name, last_name, and date_of_birth columns in the Runners table to ensure no duplicate runner profiles are entered, even if runners have similar names?
 
@@ -106,11 +111,11 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 
 \textbf{SELECT * FROM Nike\_Runners;}
 
-\textbf{Q2.} - Create a view and display its' records, of the full names, finish times, and countries of UK runners who had an elite time in the Berlin Marathon (any year)? View all records from this view and 
+\textbf{Q3.} - Create a view and display its' records, of the full names, finish times, and countries of UK runners who had an elite time in the Berlin Marathon (any year)? View all records from this view and write a query to highlight just the middle 5 rows, having arranged them from fastest to slowest time?
 
 \textbf{Solution} - 
 
-\textbf{CREATE VIEW Elite\_Berlin\_Brits AS SELECT  r.first\_name || ’ ’ || r.last\_name AS full\_name,r.country, re.finish\_time FROM Runners inner join Results re on re.runner\_id = r.runner\_id inner join Events e on e.event\_id = re.event\_id WHERE event = 'Berlin Marathon' and time\_is\_elite = 'True';}
+\textbf{CREATE VIEW Elite\_Berlin\_Brits AS SELECT  r.first\_name || ’ ’ || r.last\_name AS full\_name,r.country, re.finish\_time FROM Runners INNER JOIN Results re ON re.runner\_id = r.runner\_id INNER JOIN Events e ON e.event\_id = re.event\_id WHERE event = 'Berlin Marathon' AND time\_is\_elite = 'True' AND country = 'United Kingdom';}
 
 \textbf{SELECT * FROM Elite\_Berlin\_Brits;}
 
@@ -118,8 +123,18 @@ First, determine the total no.rows in the view -
 
 \textbf{SELECT COUNT(*) AS total\_rows FROM Elite\_Berlin\_Brits;}
 
-Secondly, manually calculate the offset based on the total rows to determine where to start retrieving the middle 5 rows.
+Then as there are 15 rows, display only the middle 5 in the results query by using \textbf{LIMIT 5 OFFSET 5}.
 
-\textbf{SELECT * FROM your\_view LIMIT 5 OFFSET (total\_rows / 2) - 2;}
+\textbf{SELECT * FROM Elite\_Berlin\_Brits ORDER BY finish\_time ASC LIMIT 5 OFFSET 5;}
 
+\textbf{Q4.} - Generate SQL code to "drop" a view, see all the views present, and see the SQL code from the view from question 3? 
 
+\textbf{DROP VIEW IF EXISTS Nike\_Runners;}
+
+\textbf{SELECT name FROM sqlite_master WHERE type='view';}
+
+\textbf{SELECT sql FROM sqlite_master WHERE type='view' AND name = 'Elite\_Berlin\_Brits' ;}
+
+\subsection{Statistical Aggregate Functions}
+
+\textbf{Q1.} - Count the number of distinct ? 
