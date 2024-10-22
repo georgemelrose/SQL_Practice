@@ -92,27 +92,27 @@ knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 
 \textbf{Solution} - 
 
-\textbf{CREATE VIEW Baltic_Men AS SELECT * FROM Runners WHERE country in (’Lithuania’, ’Latvia’,’Estonia’) AND sex = 'Male';}
+\textbf{CREATE VIEW Baltic\_Men AS SELECT * FROM Runners WHERE country in (’Lithuania’, ’Latvia’,’Estonia’) AND sex = 'Male';}
 
-\textbf{SELECT * FROM Baltic_Men;}
+\textbf{SELECT * FROM Baltic\_Men;}
 
-\textbf{DROP VIEW IF EXISTS table_name;}
+\textbf{DROP VIEW IF EXISTS table\_name;}
 
 \textbf{Q2.} - Create a view and display its' records, of all the Nike sponsored runners?
 
 \textbf{Solution} - 
 
-\textbf{CREATE VIEW Nike_Runners AS SELECT r.first_name || ’ ’ || r.last_name AS full_name,r.country, r.sex FROM Runners r LEFT OUTER JOIN Sponsored_Athletes sa on r.runner_id = sa.runner_id WHERE sponsor_name = ’Nike’;}
+\textbf{CREATE VIEW Nike\_Runners AS SELECT r.first\_name || ’ ’ || r.last\_name AS full\_name,r.country, r.sex FROM Runners r LEFT OUTER JOIN Sponsored\_Athletes sa on r.runner\_id = sa.runner\_id WHERE sponsor\_name = ’Nike’;}
 
-\textbf{SELECT * FROM Nike_Runners;}
+\textbf{SELECT * FROM Nike\_Runners;}
 
 \textbf{Q2.} - Create a view and display its' records, of the full names, finish times, and countries of UK runners who had an elite time in the Berlin Marathon (any year)? View all records from this view and 
 
 \textbf{Solution} - 
 
-\textbf{CREATE VIEW Elite_Berlin_Brits AS SELECT  r.first\_name || ’ ’ || r.last\_name AS full\_name,r.country, re.finish\_time FROM Runners inner join Results re on re.runner\_id = r.runner\_id inner join Events e on e.event\_id = re.event\_id WHERE event = 'Berlin Marathon' and time\_is\_elite = 'True';}
+\textbf{CREATE VIEW Elite\_Berlin\_Brits AS SELECT  r.first\_name || ’ ’ || r.last\_name AS full\_name,r.country, re.finish\_time FROM Runners inner join Results re on re.runner\_id = r.runner\_id inner join Events e on e.event\_id = re.event\_id WHERE event = 'Berlin Marathon' and time\_is\_elite = 'True';}
 
-\textbf{SELECT * FROM Elite_Berlin_Brits;}
+\textbf{SELECT * FROM Elite\_Berlin\_Brits;}
 
 First, determine the total no.rows in the view - 
 
