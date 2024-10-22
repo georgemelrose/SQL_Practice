@@ -133,8 +133,10 @@ Then as there are 15 rows, display only the middle 5 in the results query by usi
 
 \textbf{SELECT name FROM sqlite_master WHERE type='view';}
 
-\textbf{SELECT sql FROM sqlite_master WHERE type='view' AND name = 'Elite\_Berlin\_Brits' ;}
+\textbf{SELECT sql FROM sqlite_master WHERE type='view' AND name = 'Elite\_Berlin\_Brits';}
 
 \subsection{Statistical Aggregate Functions}
 
-\textbf{Q1.} - Count the number of distinct ? 
+\textbf{Q1.} - Count the number of distinct runners and runners' countries from the 'Runners' table? 
+
+\textbf{SELECT COUNT(DISTINCT runner_id) FROM Runners}
