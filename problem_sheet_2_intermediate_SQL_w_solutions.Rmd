@@ -139,4 +139,17 @@ Then as there are 15 rows, display only the middle 5 in the results query by usi
 
 \textbf{Q1.} - Count the number of distinct runners and runners' countries from the 'Runners' table? 
 
-\textbf{SELECT COUNT(DISTINCT runner_id) FROM Runners}
+\textbf{SELECT COUNT(DISTINCT runner_id) FROM Runners;}
+
+\textbf{SELECT COUNT(DISTINCT country) FROM Runners;}
+
+Using the \textbf{COUNT()} function in conjunction with the \textbf{DISTINCT()} allows the number of distinct entries in either column to be found. Be careful not to try to arbitrarily use \textbf{SUM()} when finding unique entries in a column - it only works on integer variables!
+
+\textbf{Q2.} - For those runners with a training plan, find out how many weeks they cumulatively trained across all their training plans? Order this by the most weeks trained in total to the least?
+
+\textbf{SELECT r.first\_name || ' ' || r.last\_name AS full\_name, SUM(tpd.plan\_length\_weeks) FROM Runners r INNER JOIN Training\_Plans tp ON r.runner\_id = tp.runner\_id INNER JOIN Training\_Plans\_Descriptions tpd ON tp.plan\_id = tpd.plan\_id GROUP BY r.runner\_id, r.first\_name,r.last\_name ORDER BY SUM(tpd.plan_length_weeks) DESC;}
+
+
+\textbf{Q3.} - For runners with more than one training plan, generate a query result that shows their average training plan length?
+
+\textbf{SELECT r.first\_name || ' ' || r.last\_name AS full\_name, AVG(tpd.plan\_length\_weeks) FROM Runners r INNER JOIN Training\_Plans tp ON r.runner\_id = tp.runner\_id INNER JOIN Training\_Plans\_Descriptions tpd ON tp.plan\_id = tpd.plan\_id GROUP BY r.runner\_id, r.first\_name, r.last\_name HAVING COUNT(tp.plan\_id) > 1;}
