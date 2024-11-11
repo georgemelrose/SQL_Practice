@@ -41,7 +41,7 @@ The \textbf{marathon data generation} python script generates the following tabl
 
 \subsection{Marathon Database Entity Relationship Diagram}
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, out.width = "90%", out.height = "90%"}
 knitr::include_graphics("C:/Users/gam55/Downloads/sqlite/marathon_db_ERD.JPG")
 ```
 
@@ -71,7 +71,7 @@ A unique index is created by using the \textbf{CREATE UNIQUE INDEX} command on t
 
 \textbf{CREATE INDEX idx\_training\_plans\_runner\_event ON Training\_Plans(runner\_id, event\_id);}
 
-To create a \textit{composite index}, one  
+To create a \textit{composite index}, the columns from the relevant table are selected in the \textbf{CREATE INDEX} command. 
 
 \textbf{Q4.} - Add a unique index on the first_name, last_name, and date_of_birth columns in the Runners table to ensure no duplicate runner profiles are entered, even if runners have similar names?
 
@@ -79,17 +79,23 @@ To create a \textit{composite index}, one
 
 \textbf{CREATE UNIQUE INDEX idx\_runners\_name\_dob ON Runners(first\_name, last\_name, date\_of\_birth);}
 
+To prevent duplicate entries in the Runners table, a \textit{unique index} is created on the first_name, last_name, and date_of_birth columns using the \textbf{CREATE UNIQUE INDEX} command. This ensures that no two entries in the table can have the same values for all three columns, even if some names are similar.
+
 \textbf{Q5.} - Give the code to see all the indexes present?
 
 \textbf{Solution} - 
 
 \textbf{SELECT name FROM sqlite\_master WHERE type = 'index';}
 
-\textbf{Q5.} - Give the command to see all the indexes associated with a particular table, for example 'Runners'?
+To view all indexes in the SQLite database, a query is made to the sqlite_master table. This table contains schema information, and by selecting only rows where type is 'index', we can list all indexes currently present.
+
+\textbf{Q6.} - Give the command to see all the indexes associated with a particular table, for example 'Runners'?
 
 \textbf{Solution} - 
 
 \textbf{PRAGMA index\_list('Runners');}
+
+To view all indexes for a specific table in SQLite, the \textbf{PRAGMA index\_list} command is used. This command shows details of all indexes associated with the specified table, in this case, the Runners table.
 
 \subsection{Views}
 
@@ -103,6 +109,10 @@ To create a \textit{composite index}, one
 
 \textbf{DROP VIEW IF EXISTS table\_name;}
 
+The code in the first part of this three-pronged solution is present as a solution on page 3 of Problem Sheet 1 albeit for this question, the additional condition of sex = 'Male' is necessary. 
+
+Now the view 'Baltic Men' can be queried like a regular table, using the SELECT command.The last command,\textbf{DROP VIEW}, deletes the view if needed.
+
 \textbf{Q2.} - Create a view and display its' records, of all the Nike sponsored runners?
 
 \textbf{Solution} - 
@@ -111,11 +121,15 @@ To create a \textit{composite index}, one
 
 \textbf{SELECT * FROM Nike\_Runners;}
 
+To create a view of Nike-sponsored runners, use CREATE VIEW with a SELECT query that joins Runners and Sponsored_Athletes on runner_id, filtering where sponsor_name is 'Nike'.
+
 \textbf{Q3.} - Create a view and display its' records, of the full names, finish times, and countries of UK runners who had an elite time in the Berlin Marathon (any year)? View all records from this view and write a query to highlight just the middle 5 rows, having arranged them from fastest to slowest time?
 
 \textbf{Solution} - 
 
 \textbf{CREATE VIEW Elite\_Berlin\_Brits AS SELECT  r.first\_name || ’ ’ || r.last\_name AS full\_name,r.country, re.finish\_time FROM Runners INNER JOIN Results re ON re.runner\_id = r.runner\_id INNER JOIN Events e ON e.event\_id = re.event\_id WHERE event = 'Berlin Marathon' AND time\_is\_elite = 'True' AND country = 'United Kingdom';}
+
+To create a view of UK runners who had elite times in the Berlin Marathon, use CREATE VIEW with a SELECT query that joins Runners, Results, and Events on runner_id and event_id, filtering by event name, time_is_elite, and country.
 
 \textbf{SELECT * FROM Elite\_Berlin\_Brits;}
 
@@ -128,6 +142,8 @@ Then as there are 15 rows, display only the middle 5 in the results query by usi
 \textbf{SELECT * FROM Elite\_Berlin\_Brits ORDER BY finish\_time ASC LIMIT 5 OFFSET 5;}
 
 \textbf{Q4.} - Generate SQL code to "drop" a view, see all the views present, and see the SQL code from the view from question 3? 
+
+To drop a view, see all views, and retrieve the SQL code for a specific view, use the following commands:
 
 \textbf{DROP VIEW IF EXISTS Nike\_Runners;}
 
@@ -149,9 +165,18 @@ Using the \textbf{COUNT()} function in conjunction with the \textbf{DISTINCT()} 
 
 \textbf{SELECT r.first\_name || ' ' || r.last\_name AS full\_name, SUM(tpd.plan\_length\_weeks) FROM Runners r INNER JOIN Training\_Plans tp ON r.runner\_id = tp.runner\_id INNER JOIN Training\_Plans\_Descriptions tpd ON tp.plan\_id = tpd.plan\_id GROUP BY r.runner\_id, r.first\_name,r.last\_name ORDER BY SUM(tpd.plan\_length\_weeks) DESC;}
 
+To calculate the total weeks trained for each runner with a training plan, use the SUM function to add up the plan_length_weeks values for each runner. The INNER JOIN ensures that only runners with training plans are included, and the GROUP BY groups by each runner's ID and name to calculate a total per runner. The result is ordered from the most to the least total weeks trained.
 
 \textbf{Q3.} - For runners with more than one training plan, generate a query result that shows their average training plan length?
 
 \textbf{SELECT r.first\_name || ' ' || r.last\_name AS full\_name, AVG(tpd.plan\_length\_weeks) FROM Runners r INNER JOIN Training\_Plans tp ON r.runner\_id = tp.runner\_id INNER JOIN Training\_Plans\_Descriptions tpd ON tp.plan\_id = tpd.plan\_id GROUP BY r.runner\_id, r.first\_name, r.last\_name HAVING COUNT(tp.plan\_id) > 1;}
 
+To calculate the average training plan length for runners with more than one training plan, the \textbf{AVG} function is used on plan_length_weeks. The INNER JOIN operations ensure only runners with training plans are included. After grouping by each runner’s ID and name, only those runners with multiple training plans are displayed by adding a HAVING clause.
+
 \textbf{Q4.} - For the query result in the previous question, round the number given for the average training plan length to the nearest week?
+
+\textbf{SELECT r.first\_name || ' ' || r.last\_name AS full\_name, ROUND(AVG(tpd.plan\_length\_weeks)) FROM Runners r INNER JOIN Training\_Plans tp ON r.runner\_id = tp.runner\_id INNER JOIN Training\_Plans\_Descriptions tpd ON tp.plan\_id = tpd.plan\_id GROUP BY r.runner\_id, r.first\_name, r.last\_name HAVING COUNT(tp.plan\_id) > 1;}
+
+To round the average training plan length to the nearest week, the \textbf{ROUND} function is used around the AVG function. This rounds the average value to the nearest whole number.
+
+\subsection{WITH() Function / Common Table Expressions}
